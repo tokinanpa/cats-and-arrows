@@ -1,0 +1,10 @@
+package cats
+
+version = 0.1
+authors = "Kiana Sheibani"
+brief = "A generalized category/arrow hierarchy"
+license = "MIT"
+readme = "README.md"
+
+sourcedir = "src"
+depends = profunctors
