@@ -12,6 +12,6 @@ buildIdris' {
 
   meta = {
     description = "A categorical foundation for a new effect system, written in Idris2";
-    license = lib.licenses.mit;
+    license = lib.licenses.lgpl3Plus;
   };
 }

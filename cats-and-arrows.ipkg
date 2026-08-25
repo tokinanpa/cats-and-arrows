@@ -3,7 +3,7 @@ package cats-and-arrows
 version = 0.1.0
 authors = "Kiana Sheibani"
 brief = "A categorical foundation for a new effect system"
-license = "MIT"
+license = "LGPL-3.0-or-later"
 readme = "README.md"
 
 sourcedir = "src"
