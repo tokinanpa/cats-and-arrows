@@ -1,6 +1,6 @@
 package cats-and-arrows
 
-version = 0.1
+version = 0.1.0
 authors = "Kiana Sheibani"
 brief = "A categorical foundation for a new effect system"
 license = "MIT"
@@ -8,4 +8,42 @@ readme = "README.md"
 
 sourcedir = "src"
 langversion >= 0.7.0
-depends = profunctors
+depends = linear,
+          profunctors
+
+modules = Control.Category,
+          Control.Category.Bimonoidal,
+          Control.Category.Braided,
+          Control.Category.Cartesian,
+          Control.Category.Closed,
+          Control.Category.Cocartesian,
+          Control.Category.Core,
+          Control.Category.Functor,
+          Control.Category.Monad,
+          Control.Category.NatTrans,
+          Control.Category.Promonad,
+          Control.Category.Records,
+          Control.Category.Semigroupoid,
+          Control.Category.Traced,
+          Control.Category.Records.Bimonoidal,
+          Control.Category.Records.Braided,
+          Control.Category.Records.Cartesian,
+          Control.Category.Records.Category,
+          Control.Category.Records.Closed,
+          Control.Category.Records.Cocartesian,
+          Control.Category.Records.Functor,
+          Control.Category.Records.Monad,
+          Control.Category.Records.Monoidal,
+          Control.Category.Records.NatTrans,
+          Control.Category.Records.Semigroupoid,
+          Control.Category.Records.Traced,
+          Control.Category.Instances.Cat,
+          Control.Category.Instances.FunCat,
+          Control.Category.Instances.Kleisli,
+          Control.Category.Instances.Linear,
+          Control.Category.Instances.One,
+          Control.Category.Instances.Op,
+          Control.Category.Instances.Prod,
+          Control.Category.Instances.Type,
+          Control.Category.Instances.Zero,
+          Control.Arrow
