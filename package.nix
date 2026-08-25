@@ -7,11 +7,11 @@
 }:
 
 buildIdris' {
-  ipkgName = "cats";
+  ipkgName = "cats-and-arrows";
   src = ./.;
 
   meta = {
-    description = "A generalized category/arrow hierarchy for Idris2";
+    description = "A categorical foundation for a new effect system, written in Idris2";
     license = lib.licenses.mit;
   };
 }

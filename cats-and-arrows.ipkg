@@ -1,10 +1,11 @@
-package cats
+package cats-and-arrows
 
 version = 0.1
 authors = "Kiana Sheibani"
-brief = "A generalized category/arrow hierarchy"
+brief = "A categorical foundation for a new effect system"
 license = "MIT"
 readme = "README.md"
 
 sourcedir = "src"
+langversion >= 0.7.0
 depends = profunctors
