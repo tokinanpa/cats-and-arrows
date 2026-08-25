@@ -4,9 +4,6 @@
 module Control.Category.Instances.FunCat
 
 import Control.Category
-import Control.Category.Semigroupoid
-import Control.Category.Traced
-import Control.Category.Bimonoidal
 import Control.Category.Instances.One
 import Control.Category.Instances.Prod
 import Control.Category.Records

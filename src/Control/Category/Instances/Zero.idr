@@ -3,9 +3,6 @@
 module Control.Category.Instances.Zero
 
 import Control.Category
-import Control.Category.Semigroupoid
-import Control.Category.Traced
-import Control.Category.Bimonoidal
 import Control.Category.Records
 
 %default total

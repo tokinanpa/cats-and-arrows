@@ -1,7 +1,6 @@
 module Control.Category.Records.Semigroupoid
 
 import Control.Category
-import Control.Category.Semigroupoid
 
 %default total
 %prefix_record_projections off

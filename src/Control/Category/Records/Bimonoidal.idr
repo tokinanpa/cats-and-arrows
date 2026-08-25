@@ -1,7 +1,6 @@
 module Control.Category.Records.Bimonoidal
 
 import Control.Category
-import Control.Category.Bimonoidal
 import Control.Category.Records.Category
 import Control.Category.Records.Functor
 import Control.Category.Records.Monoidal

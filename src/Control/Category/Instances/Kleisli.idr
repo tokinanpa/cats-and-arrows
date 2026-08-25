@@ -4,10 +4,6 @@
 module Control.Category.Instances.Kleisli
 
 import Control.Category
-import Control.Category.Semigroupoid
-import Control.Category.Traced
-import Control.Category.Bimonoidal
-import Control.Category.Promonad
 import Control.Category.Records
 
 %default total

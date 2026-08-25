@@ -1,7 +1,6 @@
 module Control.Category.Records.Traced
 
 import Control.Category
-import Control.Category.Traced
 import Control.Category.Records.Category
 import Control.Category.Records.Functor
 import Control.Category.Records.Monoidal

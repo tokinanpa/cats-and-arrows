@@ -4,8 +4,6 @@
 module Control.Category.Instances.Type
 
 import Control.Category
-import Control.Category.Semigroupoid
-import Control.Category.Bimonoidal
 import Control.Category.Records
 
 %default total

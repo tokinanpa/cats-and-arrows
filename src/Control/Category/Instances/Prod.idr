@@ -2,7 +2,6 @@
 module Control.Category.Instances.Prod
 
 import Control.Category
-import Control.Category.Semigroupoid
 import Control.Category.Records
 import Data.Morphisms
 

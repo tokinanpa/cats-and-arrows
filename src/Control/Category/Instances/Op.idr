@@ -3,8 +3,6 @@
 module Control.Category.Instances.Op
 
 import Control.Category
-import Control.Category.Semigroupoid
-import Control.Category.Traced
 import Control.Category.Records
 
 %default total

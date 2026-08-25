@@ -1,6 +1,6 @@
 module Control.Category.Semigroupoid
 
-import Control.Category
+import Control.Category.Core
 import Data.Morphisms
 import Data.Profunctor.Types
 
@@ -44,7 +44,7 @@ namespace Semigroupoid
   ||| Convert a category into a semigroupoid.
   public export
   [FromCategory] Category cat => Semigroupoid cat where
-    (.) = Category.(.)
+    (.) = Core.(.)
 
 
 public export

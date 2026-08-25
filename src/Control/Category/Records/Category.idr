@@ -1,7 +1,6 @@
 module Control.Category.Records.Category
 
 import Control.Category
-import Control.Category.Semigroupoid
 import Control.Category.Records.Semigroupoid
 
 %default total

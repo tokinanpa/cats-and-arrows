@@ -4,8 +4,6 @@
 module Control.Category.Instances.Linear
 
 import Control.Category
-import Control.Category.Semigroupoid
-import Control.Category.Bimonoidal
 import Control.Category.Records
 import Control.Category.Instances.Type
 import Data.Linear
