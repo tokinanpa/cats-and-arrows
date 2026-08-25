@@ -93,15 +93,15 @@ public export %hint
 KleisliPreBimonoidal : PreBimonoidal cat add mul z i =>
                        (StrongMonad cat add m, StrongMonad cat mul m) =>
                        PreBimonoidal (Kleisli cat m) add mul z i
-KleisliPreBimonoidal @{_} @{(c@(MkStrongMonad @{con} {}),_)} =
-  MkBimonoidal (MkKleisli $ unit @{con} . distribl)
-               (MkKleisli $ unit @{con} . distribl')
-               (MkKleisli $ unit @{con} . distribr)
-               (MkKleisli $ unit @{con} . distribr')
-               (MkKleisli $ unit @{con} . absorbl)
-               (MkKleisli $ unit @{con} . absorbl')
-               (MkKleisli $ unit @{con} . absorbr)
-               (MkKleisli $ unit @{con} . absorbr')
+KleisliPreBimonoidal @{_} @{(c@(MkStrongMonad @{impl} {}),_)} =
+  MkBimonoidal (MkKleisli $ unit @{impl} . distribl)
+               (MkKleisli $ unit @{impl} . distribl')
+               (MkKleisli $ unit @{impl} . distribr)
+               (MkKleisli $ unit @{impl} . distribr')
+               (MkKleisli $ unit @{impl} . absorbl)
+               (MkKleisli $ unit @{impl} . absorbl')
+               (MkKleisli $ unit @{impl} . absorbr)
+               (MkKleisli $ unit @{impl} . absorbr')
 
 
 ------------------------------------------------------------
@@ -116,7 +116,7 @@ namespace CategoryR
 namespace FunctorR
   public export
   KleisliInj : {cat,m : _} -> FunctorR cat (Kleisli cat m)
-  KleisliInj {cat=MkCategoryR{}} {m=MkMonadR{}} = MkFunctorR Prelude.id {con = KleisliInj}
+  KleisliInj {cat=MkCategoryR{}} {m=MkMonadR{}} = MkFunctorR Prelude.id {impl = KleisliInj}
 
 namespace MonoidalR
   public export

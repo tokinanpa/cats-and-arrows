@@ -23,11 +23,11 @@ FunProd : {cat' : _} -> (ten : cat'.obj -> cat'.obj -> cat'.obj) -> CatEndoBifun
             (f,g : FunctorR cat cat') -> FunctorR cat cat'
 FunProd {cat'=cat'@(MkCategoryR{})} ten f@(MkFunctorR _) g@(MkFunctorR _) =
   MkFunctorR (\x => ten (f.fun x) (g.fun x))
-    {con = MkCatFunctor $ \x => bimap (f.map x) (g.map x)}
+    {impl = MkCatFunctor $ \x => bimap (f.map x) (g.map x)}
 
 public export
 FunUnit : {cat' : _} -> (i : cat'.obj) -> FunctorR cat cat'
-FunUnit i = MkFunctorR (const i) {con = Const @{cat'.con}}
+FunUnit i = MkFunctorR (const i) {impl = Const @{cat'.impl}}
 
 
 ------------------------------------------------------------
@@ -152,32 +152,32 @@ namespace MonoidalR
   FunCat : (cat : CategoryR) -> (cat' : MonoidalR) -> MonoidalR
   FunCat cat cat'@(MkMonoidalR {}) =
     MkMonoidalR (FunCat cat cat'.categoryR) (FunProd cat'.tensor) (FunUnit cat'.unit)
-      {con = MonoidalFunCat}
+      {impl = MonoidalFunCat}
 
 namespace BraidedR
   public export
   FunCat : (cat : CategoryR) -> (cat' : BraidedR) -> BraidedR
   FunCat cat cat'@(MkBraidedR {}) =
     MkBraidedR (FunCat cat cat'.categoryR) (FunProd cat'.tensor) (FunUnit cat'.unit)
-      {con = BraidedFunCat}
+      {impl = BraidedFunCat}
 
 namespace CartesianR
   public export
   FunCat : (cat : CategoryR) -> (cat' : CartesianR) -> CartesianR
   FunCat cat cat'@(MkCartesianR {}) =
     MkCartesianR (FunCat cat cat'.categoryR) (FunProd cat'.tensor) (FunUnit cat'.unit)
-      {con = CartesianFunCat}
+      {impl = CartesianFunCat}
 
 namespace CocartesianR
   public export
   FunCat : (cat : CategoryR) -> (cat' : CocartesianR) -> CocartesianR
   FunCat cat cat'@(MkCocartesianR {}) =
     MkCocartesianR (FunCat cat cat'.categoryR) (FunProd cat'.tensor) (FunUnit cat'.unit)
-      {con = CocartesianFunCat}
+      {impl = CocartesianFunCat}
 
 namespace TracedR
   public export
   FunCat : (cat : CategoryR) -> (cat' : TracedR) -> TracedR
   FunCat cat cat'@(MkTracedR {}) =
     MkTracedR (FunCat cat cat'.categoryR) (FunProd cat'.tensor) (FunUnit cat'.unit)
-      {con = TracedFunCat}
+      {impl = TracedFunCat}

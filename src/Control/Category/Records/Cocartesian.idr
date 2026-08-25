@@ -22,7 +22,7 @@ record CocartesianR where
   hom : Hom obj
   tensor : obj -> obj -> obj
   unit : obj
-  {auto con : Cocartesian hom tensor unit}
+  {auto impl : Cocartesian hom tensor unit}
 
 ||| See `PreMonoidal`.
 public export
@@ -99,7 +99,7 @@ namespace CocartesianR
   public export %inline
   (.braidedR) : (rec : CocartesianR) -> BraidedR
   (.braidedR) (MkCocartesianR {} {hom,tensor,unit}) =
-    MkBraidedR {hom,tensor,unit,con = FromCocartesian}
+    MkBraidedR {hom,tensor,unit,impl = FromCocartesian}
 
   ||| The braiding of the category.
   public export %inline
@@ -123,28 +123,28 @@ namespace CocartesianR
   public export %inline
   (.injl) : (rec : CocartesianR) -> forall a,b.
             rec.hom a (rec.tensor a b)
-  (.injl) rec = injl @{rec.con}
+  (.injl) rec = injl @{rec.impl}
 
   ||| The right injection of the coproduct.
   public export %inline
   (.injr) : (rec : CocartesianR) -> forall a,b.
             rec.hom b (rec.tensor a b)
-  (.injr) rec = injr @{rec.con}
+  (.injr) rec = injr @{rec.impl}
 
   ||| The universal property of the coproduct.
   public export %inline
   (.coprod) : (rec : CocartesianR) -> forall a,a',b.
             rec.hom a b -> rec.hom a' b -> rec.hom (rec.tensor a a') b
-  (.coprod) rec = coprod @{rec.con}
+  (.coprod) rec = coprod @{rec.impl}
 
   ||| The join of the universal monoid structure.
   public export %inline
   (.merge) : (rec : CocartesianR) -> forall a.
              rec.hom (rec.tensor a a) a
-  (.merge) rec = merge @{rec.con}
+  (.merge) rec = merge @{rec.impl}
 
   ||| The unit of the universal monoid structure.
   public export %inline
   (.intro) : (rec : CocartesianR) -> forall a.
              rec.hom rec.unit a
-  (.intro) rec = intro @{rec.con}
+  (.intro) rec = intro @{rec.impl}

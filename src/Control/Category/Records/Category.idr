@@ -16,13 +16,13 @@ record CategoryR where
   constructor MkCategoryR
   {obj : Type}
   hom : Hom obj
-  {auto con : Category hom}
+  {auto impl : Category hom}
 
 namespace CategoryR
   ||| Convert this into a `SemigroupoidR`.
   public export %inline
   (.semigroupoidR) : (rec : CategoryR) -> SemigroupoidR
-  (.semigroupoidR) (MkCategoryR {} {hom}) = MkSemigroupoidR hom {con = FromCategory}
+  (.semigroupoidR) (MkCategoryR {} {hom}) = MkSemigroupoidR hom {impl = FromCategory}
 
 
   ||| Convert this into a `CategoryR`.
@@ -33,10 +33,10 @@ namespace CategoryR
   ||| The identity morphism of an object `a`.
   public export %inline
   (.id) : (rec : CategoryR) -> forall a. rec.hom a a
-  (.id) rec = id @{rec.con}
+  (.id) rec = id @{rec.impl}
 
   ||| Binary right-to-left composition of morphisms.
   public export %inline
   (.comp) : (rec : CategoryR) -> forall a,b,c.
             rec.hom b c -> rec.hom a b -> rec.hom a c
-  (.comp) rec = (.) @{rec.con}
+  (.comp) rec = (.) @{rec.impl}

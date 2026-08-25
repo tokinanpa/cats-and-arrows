@@ -25,7 +25,7 @@ record BraidedR where
   hom : Hom obj
   tensor : obj -> obj -> obj
   unit : obj
-  {auto con : Braided hom tensor unit}
+  {auto impl : Braided hom tensor unit}
 
 ||| See `PreMonoidal`.
 public export
@@ -107,17 +107,17 @@ namespace BraidedR
   public export %inline
   (.braid) : (rec : BraidedR) -> forall a,b.
              rec.hom (rec.tensor a b) (rec.tensor b a)
-  (.braid) rec = braid @{rec.con}
+  (.braid) rec = braid @{rec.impl}
 
   ||| The inverse of `(.braid)`, the braiding of the category.
   public export %inline
   (.braid') : (rec : BraidedR) -> forall a,b.
               rec.hom (rec.tensor b a) (rec.tensor a b)
-  (.braid') rec = braid' @{rec.con}
+  (.braid') rec = braid' @{rec.impl}
 
   ||| Invert the braiding of the monoidal category. If the braiding is
   ||| symmetric, this does nothing.
   public export
   (.flipBraid) : (rec : BraidedR) -> BraidedR
   (.flipBraid) (MkBraidedR hom ten i) =
-    MkBraidedR hom ten i {con = FlipBraid}
+    MkBraidedR hom ten i {impl = FlipBraid}

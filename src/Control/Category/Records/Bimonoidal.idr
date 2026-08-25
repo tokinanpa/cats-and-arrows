@@ -22,7 +22,7 @@ record BimonoidalR where
   hom : Hom obj
   add, mul : obj -> obj -> obj
   zero, one : obj
-  {auto con : Bimonoidal hom add mul zero one}
+  {auto impl : Bimonoidal hom add mul zero one}
 
 ||| See `PreMonoidal`.
 public export
@@ -77,45 +77,45 @@ namespace BimonoidalR
   public export %inline
   (.distribl) : (rec : BimonoidalR) -> forall a,b,c.
                 rec.hom (rec.mul a (rec.add b c)) (rec.add (rec.mul a b) (rec.mul a c))
-  (.distribl) rec = distribl @{rec.con}
+  (.distribl) rec = distribl @{rec.impl}
 
   ||| The inverse of `(.distribl)`, the left distributor.
   public export %inline
   (.distribl') : (rec : BimonoidalR) -> forall a,b,c.
                  rec.hom (rec.add (rec.mul a b) (rec.mul a c)) (rec.mul a (rec.add b c))
-  (.distribl') rec = distribl' @{rec.con}
+  (.distribl') rec = distribl' @{rec.impl}
 
   ||| The right distributor.
   public export %inline
   (.distribr) : (rec : BimonoidalR) -> forall a,b,c.
                 rec.hom (rec.mul (rec.add a b) c) (rec.add (rec.mul a c) (rec.mul b c))
-  (.distribr) rec = distribr @{rec.con}
+  (.distribr) rec = distribr @{rec.impl}
 
   ||| The inverse of `(.distribr)`, the right distributor.
   public export %inline
   (.distribr') : (rec : BimonoidalR) -> forall a,b,c.
                  rec.hom (rec.add (rec.mul a c) (rec.mul b c)) (rec.mul (rec.add a b) c)
-  (.distribr') rec = distribr' @{rec.con}
+  (.distribr') rec = distribr' @{rec.impl}
 
   ||| The left absorbor.
   public export %inline
   (.absorbl) : (rec : BimonoidalR) -> forall a. rec.hom (rec.mul a rec.zero) rec.zero
-  (.absorbl) rec = absorbl @{rec.con}
+  (.absorbl) rec = absorbl @{rec.impl}
 
   ||| The inverse of `(.absorbl)`, the left absorbor.
   public export %inline
   (.absorbl') : (rec : BimonoidalR) -> forall a. rec.hom rec.zero (rec.mul a rec.zero)
-  (.absorbl') rec = absorbl' @{rec.con}
+  (.absorbl') rec = absorbl' @{rec.impl}
 
   ||| The right absorbor.
   public export %inline
   (.absorbr) : (rec : BimonoidalR) -> forall a. rec.hom (rec.mul rec.zero a) rec.zero
-  (.absorbr) rec = absorbr @{rec.con}
+  (.absorbr) rec = absorbr @{rec.impl}
 
   ||| The inverse of `(.absorbr)`, the right absorbor.
   public export %inline
   (.absorbr') : (rec : BimonoidalR) -> forall a. rec.hom rec.zero (rec.mul rec.zero a)
-  (.absorbr') rec = absorbr' @{rec.con}
+  (.absorbr') rec = absorbr' @{rec.impl}
 
 
 ||| A rig category is a bimonoidal category whose additive structure
@@ -128,7 +128,7 @@ record RigCategoryR where
   hom : Hom obj
   add, mul : obj -> obj -> obj
   zero, one : obj
-  {auto con : RigCategory hom add mul zero one}
+  {auto impl : RigCategory hom add mul zero one}
 
 ||| See `PreMonoidal`.
 public export
@@ -237,7 +237,7 @@ record SymRigCategoryR where
   hom : Hom obj
   add, mul : obj -> obj -> obj
   zero, one : obj
-  {auto con : SymRigCategory hom add mul zero one}
+  {auto impl : SymRigCategory hom add mul zero one}
 
 public export
 PreSymRigCategoryR : Type
@@ -349,7 +349,7 @@ record DistributiveR where
   hom : Hom obj
   add, mul : obj -> obj -> obj
   zero, one : obj
-  {auto con : Distributive hom add mul zero one}
+  {auto impl : Distributive hom add mul zero one}
 
 public export
 PreDistributiveR : Type

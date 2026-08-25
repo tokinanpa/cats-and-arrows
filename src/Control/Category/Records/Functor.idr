@@ -14,7 +14,7 @@ public export
 record FunctorR (cat,cat' : CategoryR) where
   constructor MkFunctorR
   fun : cat.obj -> cat'.obj
-  {auto con : CatFunctor cat.hom cat'.hom fun}
+  {auto impl : CatFunctor cat.hom cat'.hom fun}
 
 ||| A type synonym for an *endofunctor*, a functor from a category to
 ||| itself.
@@ -33,7 +33,7 @@ namespace FunctorR
   public export %inline
   (.map) : (rec : FunctorR cat cat') -> forall a,b.
            cat.hom a b -> cat'.hom (rec.fun a) (rec.fun b)
-  (.map) rec = map @{rec.con}
+  (.map) rec = map @{rec.impl}
 
 
 ||| A *bifunctor* is a binary functor, i.e. a functor that maps two
@@ -44,7 +44,7 @@ public export
 record BifunctorR (catA,catB,cat' : CategoryR) where
   constructor MkBifunctorR
   fun : catA.obj -> catB.obj -> cat'.obj
-  {auto con : CatBifunctor catA.hom catB.hom cat'.hom fun}
+  {auto impl : CatBifunctor catA.hom catB.hom cat'.hom fun}
 
 ||| See `CatBinoidal`.
 public export
@@ -68,19 +68,19 @@ namespace BifunctorR
   public export %inline
   (.bimap) : (rec : BifunctorR catA catB cat') -> forall a,a',b,b'.
              catA.hom a b -> catB.hom a' b' -> cat'.hom (rec.fun a a') (rec.fun b b')
-  (.bimap) rec = bimap @{rec.con}
+  (.bimap) rec = bimap @{rec.impl}
 
   ||| Apply a morphism to a bifunctor only on the left.
   public export %inline
   (.mapl) : {catB : _} -> (rec : BifunctorR catA catB cat') -> forall a,b,c.
             catA.hom a b -> cat'.hom (rec.fun a c) (rec.fun b c)
-  (.mapl) rec = mapl @{rec.con} @{catB.con}
+  (.mapl) rec = mapl @{rec.impl} @{catB.impl}
 
   ||| Apply a morphism to a bifunctor only on the right.
   public export %inline
   (.mapr) : {catA : _} -> (rec : BifunctorR catA catB cat') -> forall a,b,c.
             catB.hom a b -> cat'.hom (rec.fun c a) (rec.fun c b)
-  (.mapr) rec = mapr @{rec.con} @{catA.con}
+  (.mapr) rec = mapr @{rec.impl} @{catA.impl}
 
   -- Functor Projections
 
@@ -88,12 +88,12 @@ namespace BifunctorR
   public export %inline
   (.left) : {catB : _} -> (rec : BifunctorR catA catB cat') ->
             (l : catB.obj) -> FunctorR catA cat'
-  (.left) {catB=MkCategoryR {}} (MkBifunctorR {} {fun,con}) l =
-    MkFunctorR (`fun` l) {con = Left @{con}}
+  (.left) {catB=MkCategoryR {}} (MkBifunctorR {} {fun,impl}) l =
+    MkFunctorR (`fun` l) {impl = Left @{impl}}
 
   ||| Convert a bifunctor (or binoidal functor) into its right functor.
   public export %inline
   (.right) : {catA : _} -> (rec : BifunctorR catA catB cat') ->
              (l : catA.obj) -> FunctorR catB cat'
-  (.right) {catA=MkCategoryR {}} (MkBifunctorR {} {fun,con}) l =
-    MkFunctorR (l `fun`) {con = Right @{con}}
+  (.right) {catA=MkCategoryR {}} (MkBifunctorR {} {fun,impl}) l =
+    MkFunctorR (l `fun`) {impl = Right @{impl}}

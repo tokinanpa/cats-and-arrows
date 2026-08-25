@@ -17,7 +17,7 @@ public export
 record MonadR (cat : CategoryR) where
   constructor MkMonadR
   fun : cat.obj -> cat.obj
-  {auto con : CatMonad cat.hom fun}
+  {auto impl : CatMonad cat.hom fun}
 
 namespace MonadR
   ||| Convert this into a `FunctorR`.
@@ -39,12 +39,12 @@ namespace MonadR
   ||| The join transformation of the monad.
   public export %inline
   (.join) : (rec : MonadR cat) -> forall a. cat.hom (rec.fun (rec.fun a)) (rec.fun a)
-  (.join) rec = join @{rec.con}
+  (.join) rec = join @{rec.impl}
 
   ||| The unit transformation of the monad.
   public export %inline
   (.unit) : (rec : MonadR cat) -> forall a. cat.hom a (rec.fun a)
-  (.unit) rec = unit @{rec.con}
+  (.unit) rec = unit @{rec.impl}
 
 
 ||| A monad has *tensorial strength* if it is compatible with a
@@ -55,7 +55,7 @@ public export
 record StrongMonadR (cat : MonoidalR) where
   constructor MkStrongMonadR
   fun : cat.obj -> cat.obj
-  {auto con : StrongMonad cat.hom cat.tensor fun}
+  {auto impl : StrongMonad cat.hom cat.tensor fun}
 
 namespace StrongMonadR
   ||| Convert this into a `FunctorR`.
@@ -94,10 +94,10 @@ namespace StrongMonadR
   public export %inline
   (.strongl) : (rec : StrongMonadR cat) ->
                cat.hom (cat.tensor a (rec.fun b)) (rec.fun (cat.tensor a b))
-  (.strongl) rec = strongl @{rec.con}
+  (.strongl) rec = strongl @{rec.impl}
 
   ||| The right tensor strength.
   public export %inline
   (.strongr) : (rec : StrongMonadR cat) ->
                cat.hom (cat.tensor (rec.fun a) b) (rec.fun (cat.tensor a b))
-  (.strongr) rec = strongr @{rec.con}
+  (.strongr) rec = strongr @{rec.impl}

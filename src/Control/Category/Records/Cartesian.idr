@@ -22,7 +22,7 @@ record CartesianR where
   hom : Hom obj
   tensor : obj -> obj -> obj
   unit : obj
-  {auto con : Cartesian hom tensor unit}
+  {auto impl : Cartesian hom tensor unit}
 
 ||| See `PreMonoidal`.
 public export
@@ -99,7 +99,7 @@ namespace CartesianR
   public export %inline
   (.braidedR) : (rec : CartesianR) -> BraidedR
   (.braidedR) (MkCartesianR {} {hom,tensor,unit}) =
-    MkBraidedR {hom,tensor,unit,con = FromCartesian}
+    MkBraidedR {hom,tensor,unit,impl = FromCartesian}
 
   ||| The braiding of the category.
   public export %inline
@@ -123,28 +123,28 @@ namespace CartesianR
   public export %inline
   (.projl) : (rec : CartesianR) -> forall a,b.
              rec.hom (rec.tensor a b) a
-  (.projl) rec = projl @{rec.con}
+  (.projl) rec = projl @{rec.impl}
 
   ||| The right projection of the product.
   public export %inline
   (.projr) : (rec : CartesianR) -> forall a,b.
              rec.hom (rec.tensor a b) b
-  (.projr) rec = projr @{rec.con}
+  (.projr) rec = projr @{rec.impl}
 
   ||| The universal property of the product.
   public export %inline
   (.prod) : (rec : CartesianR) -> forall a,b,b'.
             rec.hom a b -> rec.hom a b' -> rec.hom a (rec.tensor b b')
-  (.prod) rec = prod @{rec.con}
+  (.prod) rec = prod @{rec.impl}
 
   ||| The cojoin of the universal comonoid structure.
   public export %inline
   (.split) : (rec : CartesianR) -> forall a.
              rec.hom a (rec.tensor a a)
-  (.split) rec = split @{rec.con}
+  (.split) rec = split @{rec.impl}
 
   ||| The counit of the universal comonoid structure.
   public export %inline
   (.elim) : (rec : CartesianR) -> forall a.
             rec.hom a rec.unit
-  (.elim) rec = elim @{rec.con}
+  (.elim) rec = elim @{rec.impl}

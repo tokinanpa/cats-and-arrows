@@ -22,7 +22,7 @@ record TracedR where
   hom : Hom obj
   tensor : obj -> obj -> obj
   unit : obj
-  {auto con : Traced hom tensor unit}
+  {auto impl : Traced hom tensor unit}
 
 ||| See `PreMonoidal`.
 public export
@@ -104,13 +104,13 @@ namespace TracedR
   public export %inline
   (.tracel) : (rec : TracedR) -> forall a,b,c.
               rec.hom (rec.tensor a b) (rec.tensor a c) -> rec.hom b c
-  (.tracel) rec = tracel @{rec.con}
+  (.tracel) rec = tracel @{rec.impl}
 
   ||| The right trace.
   public export %inline
   (.tracer) : (rec : TracedR) -> forall a,b,c.
               rec.hom (rec.tensor a c) (rec.tensor b c) -> rec.hom a b
-  (.tracer) rec = tracer @{rec.con}
+  (.tracer) rec = tracer @{rec.impl}
 
   ||| Take the trace of an endomorphism, returning an endomorphism in
   ||| the unit object. Depending on what the unit object is, this may
@@ -122,4 +122,4 @@ namespace TracedR
   public export %inline
   (.trace) : (rec : TracedR) -> forall a.
              rec.hom a a -> rec.hom rec.unit rec.unit
-  (.trace) rec = trace @{rec.con}
+  (.trace) rec = trace @{rec.impl}

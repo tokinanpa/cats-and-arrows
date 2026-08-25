@@ -27,7 +27,7 @@ record ClosedR where
   hom : Hom obj
   tensor, ihom : obj -> obj -> obj
   unit : obj
-  {auto con : Closed hom tensor ihom unit}
+  {auto impl : Closed hom tensor ihom unit}
 
 namespace ClosedR
   ||| Convert this into a `CategoryR`.
@@ -104,25 +104,25 @@ namespace ClosedR
   public export %inline
   (.curry) : (rec : ClosedR) -> forall a,b,c.
              rec.hom (rec.tensor a b) c -> rec.hom a (rec.ihom b c)
-  (.curry) rec = curry @{rec.con}
+  (.curry) rec = curry @{rec.impl}
 
   ||| The uncurrying transformation.
   public export %inline
   (.uncurry) : (rec : ClosedR) -> forall a,b,c.
                rec.hom a (rec.ihom b c) -> rec.hom (rec.tensor a b) c
-  (.uncurry) rec = uncurry @{rec.con}
+  (.uncurry) rec = uncurry @{rec.impl}
 
   ||| The evaluation map.
   public export %inline
   (.eval) : (rec : ClosedR) -> forall a,b.
             rec.hom (rec.tensor (rec.ihom a b) a) b
-  (.eval) rec = eval @{rec.con}
+  (.eval) rec = eval @{rec.impl}
 
   ||| The coevaluation map.
   public export %inline
   (.coeval) : (rec : ClosedR) -> forall a,b.
             rec.hom a (rec.ihom b (rec.tensor a b))
-  (.coeval) rec = coeval @{rec.con}
+  (.coeval) rec = coeval @{rec.impl}
 
 
 ||| A monoidal category that is both cartesian and closed.
@@ -133,7 +133,7 @@ record CartesianClosedR where
   hom : Hom obj
   tensor, ihom : obj -> obj -> obj
   unit : obj
-  {auto con : (Cartesian hom tensor unit, Closed hom tensor ihom unit)}
+  {auto impl : CartesianClosed hom tensor ihom unit}
 
 ||| A shorter synonym for a cartesian closed category (`CartesianClosedR`).
 public export
@@ -210,7 +210,7 @@ namespace CartesianClosedR
   public export %inline
   (.braidedR) : (rec : CartesianClosedR) -> BraidedR
   (.braidedR) (MkCartesianClosedR {} {hom,tensor,unit}) =
-    MkBraidedR {hom,tensor,unit,con = FromCartesian}
+    MkBraidedR {hom,tensor,unit,impl = FromCartesian}
 
   ||| The braiding of the category.
   public export %inline

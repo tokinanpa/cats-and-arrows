@@ -75,4 +75,4 @@ public export
 FunctorProd : (f : FunctorR catF catF') -> (g : FunctorR catG catG') ->
               FunctorR (Prod catF catG) (Prod catF' catG')
 FunctorProd {catF=MkCategoryR {},catF'=MkCategoryR {},catG=MkCategoryR {},catG'=MkCategoryR {}}
-  (MkFunctorR f) (MkFunctorR g) = MkFunctorR (bimap f g) {con = Horizontal}
+  (MkFunctorR f) (MkFunctorR g) = MkFunctorR (bimap f g) {impl = Horizontal}

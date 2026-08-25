@@ -14,7 +14,7 @@ record SemigroupoidR where
   constructor MkSemigroupoidR
   {obj : Type}
   hom : Hom obj
-  {auto con : Semigroupoid hom}
+  {auto impl : Semigroupoid hom}
 
 namespace SemigroupoidR
   ||| Convert this into a `SemigroupoidR`.
@@ -26,4 +26,4 @@ namespace SemigroupoidR
   public export %inline
   (.comp) : (rec : SemigroupoidR) -> forall a,b,c.
             rec.hom b c -> rec.hom a b -> rec.hom a c
-  (.comp) rec = (.) @{rec.con}
+  (.comp) rec = (.) @{rec.impl}

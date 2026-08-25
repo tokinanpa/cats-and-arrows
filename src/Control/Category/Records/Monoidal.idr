@@ -22,7 +22,7 @@ record MonoidalR where
   hom : Hom obj
   tensor : obj -> obj -> obj
   unit : obj
-  {auto con : Monoidal hom tensor unit}
+  {auto impl : Monoidal hom tensor unit}
 
 ||| See `PreMonoidal`.
 public export
@@ -62,34 +62,34 @@ namespace MonoidalR
   public export %inline
   (.assoc) : (rec : MonoidalR) -> forall a,b,c.
              rec.hom (rec.tensor (rec.tensor a b) c) (rec.tensor a (rec.tensor b c))
-  (.assoc) rec = assoc @{rec.con}
+  (.assoc) rec = assoc @{rec.impl}
 
   ||| The right-biased associator. This must be the inverse of `(.assoc)`.
   public export %inline
   (.assoc') : (rec : MonoidalR) -> forall a,b,c.
               rec.hom (rec.tensor a (rec.tensor b c)) (rec.tensor (rec.tensor a b) c)
-  (.assoc') rec = assoc' @{rec.con}
+  (.assoc') rec = assoc' @{rec.impl}
 
   ||| The left unitor.
   public export %inline
   (.unitl) : (rec : MonoidalR) -> forall a.
              rec.hom (rec.tensor rec.unit a) a
-  (.unitl) rec = unitl @{rec.con}
+  (.unitl) rec = unitl @{rec.impl}
 
   ||| The inverse of `(.unitl)`, the left unitor.
   public export %inline
   (.unitl') : (rec : MonoidalR) -> forall a.
               rec.hom a (rec.tensor rec.unit a)
-  (.unitl') rec = unitl' @{rec.con}
+  (.unitl') rec = unitl' @{rec.impl}
 
   ||| The right unitor.
   public export %inline
   (.unitr) : (rec : MonoidalR) -> forall a.
              rec.hom (rec.tensor a rec.unit) a
-  (.unitr) rec = unitr @{rec.con}
+  (.unitr) rec = unitr @{rec.impl}
 
   ||| The inverse of `(.unitr)`, the right unitor.
   public export %inline
   (.unitr') : (rec : MonoidalR) -> forall a.
               rec.hom a (rec.tensor a rec.unit)
-  (.unitr') rec = unitr' @{rec.con}
+  (.unitr') rec = unitr' @{rec.impl}

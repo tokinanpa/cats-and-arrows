@@ -132,7 +132,7 @@ namespace CategoryR
 namespace FunctorR
   public export
   LinearToTyp : FunctorR Linear Typ
-  LinearToTyp = MkFunctorR id {con = MkCatFunctor $ \(MkLinear f),x => f x}
+  LinearToTyp = MkFunctorR id {impl = MkCatFunctor $ \(MkLinear f),x => f x}
 
   public export
   LMaybe : EndofunctorR Linear
