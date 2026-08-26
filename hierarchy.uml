@@ -1,0 +1,130 @@
+@startuml
+hide empty members
+
+object "Semigroupoid cat" as Semigroupoid {
+  (.) : cat b c <U+2192> cat a b <U+2192> cat a c
+}
+object "Category cat" as Category {
+  (.) : cat b c <U+2192> cat a b <U+2192> cat a c
+  id : cat a a
+}
+object "Monoidal cat ten i" as Monoidal {
+  assoc : cat ((a `ten` b) `ten c) (a `ten` (b `ten` c))
+  assoc' : cat (a `ten` (b `ten` c)) ((a `ten` b) `ten c)
+  ..
+  unitl : cat (i `ten` a) a
+  unitl' : cat a (i `ten` a)
+  ..
+  unitr : cat (a `ten` i) a
+  unitr' : cat a (a `ten` i)
+}
+object "Braided cat ten i" as Braided {
+  braid : cat (a `ten` b) (b `ten` a)
+  braid' : cat (b `ten` a) (a `ten` b)
+}
+object "Cartesian cat ten i" as Cartesian {
+  projl : cat (a `ten` b) a
+  projr : cat (a `ten` b) b
+  prod : cat a b <U+2192> cat a b' <U+2192> cat a (b `ten` b')
+  __ or __
+  split : cat a (a `ten` a)
+  elim : cat a i
+}
+object "Cocartesian cat ten i" as Cocartesian {
+  injl : cat a (a `ten` b)
+  injr : cat b (a `ten` b)
+  coprod : cat a b <U+2192> cat a' b <U+2192> cat (a `ten` a') b
+  __ or __
+  merge : cat (a `ten` a) a
+  intro : cat i a
+}
+object "Traced cat ten i" as Traced {
+  tracel : cat (a `ten` b) (a `ten` c) <U+2192> cat b c
+  tracer : cat (a `ten` c) (b `ten` c) <U+2192> cat a b
+}
+object "Closed cat ten hom i" as Closed {
+  curry : cat (a `ten` b) c <U+2192> cat a (b `hom` c)
+  uncurry : cat a (b `hom` c) <U+2192> cat (a `ten` b) c
+}
+object "<color:blue>CartesianClosed cat ten hom i" as CartesianClosed
+object "Promonad cat" as Promonad {
+  funit : (a <U+2192> b) <U+2192> cat a b
+}
+object "Bimonoidal cat add mul z i" as Bimonoidal {
+  distribl : cat (a `mul` (b `add` c)) ((a `mul` b) `add` (a `mul` c))
+  distribl' : cat ((a `mul` b) `add` (a `mul` c)) (a `mul` (b `add` c))
+  ..
+  distribr : cat ((a `add` b) `mul` c) ((a `mul` c) `add` (b `mul` c))
+  distribr' : cat ((a `mul` c) `add` (b `mul` c)) ((a `add` b) `mul` c)
+  ..
+  absorbl : cat (a `mul` z) z
+  absorbl' : cat z (a `mul` z)
+  ..
+  absorbr : cat (z `mul` a) z
+  absorbr' : cat z (z `mul` a)
+}
+object "<color:blue>RigCategory cat add mul z i" as RigCategory
+object "<color:blue>SymRigCategory cat add mul z i" as SymRigCategory
+object "<color:blue>Distributive cat add mul z i" as Distributive
+
+object "CatFunctor cat cat' f" as CatFunctor {
+  map : cat a b <U+2192> cat' (f a) (f b)
+}
+object "<color:blue>CatEndofunctor cat f" as CatEndofunctor
+object "CatMonad cat m" as CatMonad {
+  join : cat (m (m a)) (m a)
+  unit : cat a (m a)
+}
+object "StrongMonad cat ten m" as StrongMonad {
+  strongl : cat (a `ten` m b) (m (a `ten` b))
+  strongr : cat (m a `ten` b) (m (a `ten` b))
+
+}
+object "CatBifunctor catA catB cat' f" as CatBifunctor {
+  bimap : catA a b <U+2192> catB a' b' <U+2192> cat' (f a a') (f b b')
+}
+object "<color:blue>CatEndoBifunctor cat f" as CatEndoBifunctor
+
+
+Semigroupoid <.. Category
+
+Category <-- Monoidal
+CatEndoBifunctor <-- Monoidal : cat,ten
+
+Monoidal <-- Braided
+
+Monoidal <-- Cartesian
+Braided <.. Cartesian
+
+Monoidal <-- Cocartesian
+Braided <.. Cocartesian
+
+Monoidal <-- Traced
+
+Monoidal <-- Closed
+Closed .. CartesianClosed
+Cartesian .. CartesianClosed
+
+Monoidal <-- Bimonoidal : cat,mul,i
+Monoidal <-- Bimonoidal : cat,add,z
+
+Bimonoidal .. RigCategory
+Braided .. RigCategory : cat,add,z
+
+RigCategory .. SymRigCategory
+Braided .. SymRigCategory : cat,mul,i
+
+SymRigCategory .. Distributive
+Cartesian .. Distributive : cat,mul,i
+Cocartesian .. Distributive : cat,add,z
+
+Category <-- Promonad
+
+
+CatFunctor .. CatEndofunctor : cat,cat,f
+CatBifunctor .. CatEndoBifunctor : cat,cat,cat,f
+
+CatEndofunctor <-- CatMonad
+
+CatMonad <-- StrongMonad
+@enduml
