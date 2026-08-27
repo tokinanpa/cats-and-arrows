@@ -37,7 +37,7 @@ public export
 ||| It is only a bifunctor if the monad `m` is commutative over `ten`.
 public export %hint
 KleisliBinoidal : Category cat => StrongMonad cat ten m =>
-                  CatEndoBinoidal cat ten => CatEndoBinoidal (Kleisli cat m) ten
+                  EndoBinoidal cat ten => EndoBinoidal (Kleisli cat m) ten
 KleisliBinoidal = Impl
   where
     [Impl] CatBifunctor (Kleisli cat m) (Kleisli cat m) (Kleisli cat m) ten where

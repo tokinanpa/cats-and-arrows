@@ -70,15 +70,18 @@ interface CatBifunctor
 ||| a binoidal functor, rather than a proper bifunctor. These have the
 ||| same data, but weaker laws.
 |||
+||| See https://github.com/tokinanpa/cats-and-arrows/tree/main/docs/CategoricalSins.md
+||| for more information on when/why this matters.
+|||
 ||| Laws for a binoidal functor:
 ||| * `bimap id id = id`
 ||| * `bimap id f . bimap id g = bimap id (f . g)`
 ||| * `bimap f id . bimap g id = bimap (f . g) id`
 ||| * `bimap f g = bimap id g . bimap f id` (NOTE: order matters here)
 public export
-CatBinoidal : (catA : Hom objA) -> (catB : Hom objB) -> (cat' : Hom obj') ->
-              (f : objA -> objB -> obj') -> Type
-CatBinoidal = CatBifunctor
+Binoidal : (catA : Hom objA) -> (catB : Hom objB) -> (cat' : Hom obj') ->
+           (f : objA -> objB -> obj') -> Type
+Binoidal = CatBifunctor
 
 ||| Apply a morphism to a bifunctor only on the left.
 public export
@@ -102,10 +105,10 @@ public export
 CatEndoBifunctor : (cat : Hom obj) -> (f : obj -> obj -> obj) -> Type
 CatEndoBifunctor cat f = CatBifunctor cat cat cat f
 
-||| See `CatBinoidal`.
+||| See `Binoidal`.
 public export
-CatEndoBinoidal : (cat : Hom obj) -> (f : obj -> obj -> obj) -> Type
-CatEndoBinoidal = CatEndoBifunctor
+EndoBinoidal : (cat : Hom obj) -> (f : obj -> obj -> obj) -> Type
+EndoBinoidal = CatEndoBifunctor
 
 
 ||| A synonym of `bimap` that only works for endo-bifunctors. May help
@@ -224,7 +227,7 @@ CatBifunctorMorEither = MorFromBifunctor
 
 ||| WARNING: This is a binoidal functor, not a true bifunctor.
 public export %hint
-CatBifunctorKleisliPair : Applicative m => CatEndoBinoidal (Kleislimorphism m) Pair
+CatBifunctorKleisliPair : Applicative m => EndoBinoidal (Kleislimorphism m) Pair
 CatBifunctorKleisliPair = KleisliFromBitraversable
 
 public export %hint

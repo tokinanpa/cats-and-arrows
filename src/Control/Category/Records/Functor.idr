@@ -46,7 +46,7 @@ record BifunctorR (catA,catB,cat' : CategoryR) where
   fun : catA.obj -> catB.obj -> cat'.obj
   {auto impl : CatBifunctor catA.hom catB.hom cat'.hom fun}
 
-||| See `CatBinoidal`.
+||| See `Binoidal`.
 public export
 BinoidalR : (catA,catB,cat' : CategoryR) -> Type
 BinoidalR = BifunctorR
@@ -57,7 +57,7 @@ public export
 EndoBifunctorR : (cat : CategoryR) -> Type
 EndoBifunctorR cat = BifunctorR cat cat cat
 
-||| See `CatBinoidal`.
+||| See `Binoidal`.
 public export
 EndoBinoidalR : (cat : CategoryR) -> Type
 EndoBinoidalR = EndoBifunctorR

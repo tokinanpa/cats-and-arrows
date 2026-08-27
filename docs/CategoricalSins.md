@@ -164,7 +164,7 @@ premonoidal categories. This is for two specific reasons:
    properly assess whether a binary operation is a bifunctor or just a binoidal
    functor.
 
-Instead, interface synonyms like `CatBinoidal` and `PreMonoidal` can be used to
+Instead, interface synonyms like `Binoidal` and `PreMonoidal` can be used to
 mark the difference if the programmer cares about it.
 
 This does lead to some unintuitive design decisions. In particular, the `bimap`
@@ -172,8 +172,8 @@ function is usable on binoidal functors when it should really be considered
 ill-defined. To ensure it behaves consistently, we take the convention of the
 arrow operator `(***)` and require that the left morphism is applied before the
 right morphism when there is a difference. This is the meaning of the last law
-listed under `CatBinoidal`. (Violating this law shouldn't break anything too
-badly, but it's helpful to be consistent about it where possible.)
+listed under `Binoidal`. (Violating this law shouldn't break anything too badly,
+but it's helpful to be consistent about it where possible.)
 
 The broad take-away from all this is that if you're just using the categories
 provided by this library or a dependency of it, this distinction isn't all that

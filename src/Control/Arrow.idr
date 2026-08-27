@@ -33,11 +33,11 @@ export infixr 6 \|/
 
 public export
 Arrow : (arr : Hom Type) -> Type
-Arrow arr = (Promonad arr, CatEndoBinoidal arr Pair)
+Arrow arr = (Promonad arr, EndoBinoidal arr Pair)
 
 public export
 ArrowChoice : (arr : Hom Type) -> Type
-ArrowChoice arr = (Arrow arr, CatEndoBinoidal arr Either)
+ArrowChoice arr = (Arrow arr, EndoBinoidal arr Either)
 
 public export
 ArrowLoop : (arr : Hom Type) -> Type
