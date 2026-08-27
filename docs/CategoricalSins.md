@@ -155,7 +155,7 @@ all arrows are premonoidal categories.
 
 In the interest of being as convenient to use for practical programming as
 possible, `cats-and-arrows` does not enforce a distinction between monoidal and
-premonoidal categories. This is for two specific reasons:
+premonoidal categories. This is for three specific reasons:
 
 1. Premonoidal categories contain the exact same data and behave nearly
    identically to proper monoidal categories, meaning that essentially all code
@@ -163,6 +163,9 @@ premonoidal categories. This is for two specific reasons:
 2. Users of this library who are new to category theory may find it difficult to
    properly assess whether a binary operation is a bifunctor or just a binoidal
    functor.
+3. Users who wish to entirely ignore the presence of premonoidal categories and
+   only work with true monoidal categories should be able to do so with no extra
+   boilerplate cost.
 
 Instead, interface synonyms like `Binoidal` and `PreMonoidal` can be used to
 mark the difference if the programmer cares about it.

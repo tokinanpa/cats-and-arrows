@@ -1,8 +1,8 @@
 # `cats-and-arrows`: Categorical Effect Systems
 
 > [!WARNING]
-> This library is currently in an **extremely** unstable state. Depend on it at
-> your own risk.
+> This library is currently half-implemented and in an **extremely** unstable
+> state. Depend on it at your own risk.
 
 ## To-Do List
 
@@ -38,11 +38,10 @@
 
 ### For people familiar with category theory
 
-This library is an attempt to use [string diagrams] as an intuitive model of
-effectful computation, suitable for general-purpose programming. To this end, it
-defines interfaces for various flavors of
-[monoidal category][monoidal categories], along with convenient utilities for
-composing diagrams within them.
+This library is an attempt to introduce [string diagrams] as an intuitive model
+of effectful computation, suitable for general-purpose programming. To this end,
+it defines interfaces for various flavors of [monoidal category][monoidal
+categories], along with convenient utilities for composing diagrams within them.
 
 Unlike prior attempts at using categorical models of computation to implement
 effect systems (the two primary examples being [monads] and [arrows]), string
@@ -80,9 +79,9 @@ The full hierarchy diagram is below.
 
 A particular benefit of this arrangement is that it lifts the restriction that
 arrows must embed regular functions. That requirement is sequestered into the
-`Promonad` interface; all other interfaces can be used with type constructors
-that have no relation to ordinary functions. In fact, they don't even have to be
-defined on types! Effectively any DSL can be represented with these interfaces.
+`Promonad` interface; all other interfaces can be used with categories that have
+no relation to ordinary functions. In fact, they don't even have to be defined
+on types! Effectively any DSL can be represented with these interfaces.
 
 ### For anyone else
 
