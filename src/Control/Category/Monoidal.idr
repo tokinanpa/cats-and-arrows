@@ -48,6 +48,9 @@ interface (Category cat, CatEndoBifunctor cat ten) =>
 ||| A type synonym that can be used to mark a category as merely being
 ||| premonoidal, rather than a true monoidal category. These have the
 ||| same laws, but allow the tensor product to be a binoidal functor.
+|||
+||| See https://github.com/tokinanpa/cats-and-arrows/tree/main/docs/CategoricalSins.md
+||| for more information on when/why this matters.
 public export
 PreMonoidal : (cat : Hom obj) -> (ten : obj -> obj -> obj) -> (i : obj) -> Type
 PreMonoidal = Monoidal

@@ -74,7 +74,7 @@ interface CatBifunctor
 ||| * `bimap id id = id`
 ||| * `bimap id f . bimap id g = bimap id (f . g)`
 ||| * `bimap f id . bimap g id = bimap (f . g) id`
-||| * `bimap f g = bimap id g . bimap f id` (NOTE: composition order matters)
+||| * `bimap f g = bimap id g . bimap f id` (NOTE: order matters here)
 public export
 CatBinoidal : (catA : Hom objA) -> (catB : Hom objB) -> (cat' : Hom obj') ->
               (f : objA -> objB -> obj') -> Type

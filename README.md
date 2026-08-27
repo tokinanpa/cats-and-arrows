@@ -190,11 +190,13 @@ In this diagram:
 
 Note that this diagram is (still) slightly simplified. The compatibility
 definitions in `Control.Arrow` are left out for space, as are the synonyms like
-`PreMonoidal` used to distinguish monoidal and premonoidal categories.
+`PreMonoidal` used to distinguish [premonoidal categories] (see
+[here](docs/CategoricalSins.md) for more information on that).
 
 <!-- Link References -->
 
 [string diagrams]: https://ncatlab.org/nlab/show/string+diagram 
 [monoidal categories]: https://ncatlab.org/nlab/show/monoidal+category
+[premonoidal categories]: https://ncatlab.org/nlab/show/premonoidal+category
 [monads]: https://hackage-content.haskell.org/package/base/docs/Prelude.html#t:Monad
 [arrows]: https://www.haskell.org/arrows/index.html
