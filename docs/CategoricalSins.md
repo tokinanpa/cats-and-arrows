@@ -84,8 +84,8 @@ interface, `(***)`:
 (***) : Arrow arr => arr a b -> arr a' b' -> arr (a, a') (b, b')
 ```
 
-If you are anything like me when I started working on this library, you may be
-under the impression that this operator witnesses that the `Pair` type
+If you are anything like I was when I started working on this library, you may
+be under the impression that this operator witnesses that the `Pair` type
 constructor acts as a bifunctor on arrows. After all, that is literally exactly
 what this operator looks like it's doing.
 
