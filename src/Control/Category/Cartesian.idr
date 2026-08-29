@@ -75,11 +75,13 @@ PreCartesian = Cartesian
 
 
 ------------------------------------------------------------
--- Functions
+-- Characterization
 ------------------------------------------------------------
 
+||| Project a single value out of a tensor product sequence by index.
 public export
-proj : Cartesian cat ten i => {n : _} -> {0 xs : Vect n _} -> (x : Fin n) -> cat (Tensor ten i xs) (index x xs)
+proj : Cartesian cat ten i => {n : _} -> {0 xs : Vect n _} ->
+       (x : Fin n) -> cat (Tensor ten i xs) (index x xs)
 proj {n=S Z,xs=_::xs'} FZ = rewrite invertVectZ xs' in id
 proj {n=S (S Z),xs=_::xs'} FZ = rewrite invertVectS xs' in projl
 proj {n=S (S Z),xs=_::xs'} (FS FZ) =
@@ -92,14 +94,18 @@ proj {n=S (S _),xs=_::xs'} x =
       FS x' => proj x' . projr
 
 
+||| A compact representation of an arbitrary function `Fin n -> Fin m`.
+||| Used to rearrange/"swizzle" tensor product sequences.
 public export
 Swizzle : (m,n : Nat) -> Type
 Swizzle m n = Vect n (Fin m)
 
+||| Apply a `Swizzle` to a vector, rearranging its elements.
 public export
 swizzleVect : Swizzle m n -> Vect m a -> Vect n a
 swizzleVect sw xs = map (`index` xs) sw
 
+||| Apply a `Swizzle` to a tensor product sequence.
 public export
 swizzle : Cartesian {obj} cat ten i => {m : _} -> {0 xs : Vect m _} ->
           (sw : Swizzle m n) -> cat (Tensor ten i xs) (Tensor ten i $ swizzleVect sw xs)

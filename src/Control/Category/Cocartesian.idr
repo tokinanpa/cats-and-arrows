@@ -76,7 +76,7 @@ PreCocartesian = Cocartesian
 
 
 ------------------------------------------------------------
--- Functions
+-- Characterization
 ------------------------------------------------------------
 
 public export

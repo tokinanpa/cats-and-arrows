@@ -58,14 +58,16 @@ PreMonoidal = Monoidal
 
 
 ------------------------------------------------------------
--- Functions
+-- Characterization
 ------------------------------------------------------------
 
+||| A nested tensor product sequence of the objects in `objs`.
 public export
-Tensor : (ten : obj -> obj -> obj) -> (i : obj) -> Vect n obj -> obj
-Tensor _ i [] = i
-Tensor ten _ objs@(_::_) = foldr1 ten objs
+Tensor : (ten : obj -> obj -> obj) -> (i : obj) -> (objs : Vect n obj) -> obj
+Tensor {n=Z} _ i [] = i
+Tensor {n=S _} ten _ objs@(_::_) = foldr1 ten objs
 
+||| Split a tensor product sequence into two by reassociating.
 public export
 splitAssoc : Monoidal cat ten i => {m,n : _} -> {0 xs : Vect m _} -> {0 ys : Vect n _} ->
              cat (Tensor ten i (xs ++ ys)) (Tensor ten i xs `ten` Tensor ten i ys)
@@ -75,6 +77,7 @@ splitAssoc {m=S Z,n=S _,xs=_::xs',ys=_::_} = rewrite invertVectZ xs' in id
 splitAssoc {m=S (S _),xs=_::xs'} =
   rewrite invertVectS xs' in assoc' . mapr' (splitAssoc {xs=head xs'::tail xs',ys})
 
+||| Merge two tensor product sequences into one by reassociating.
 public export
 mergeAssoc : Monoidal cat ten i => {m,n : _} -> {0 xs : Vect m _} -> {0 ys : Vect n _} ->
              cat (Tensor ten i xs `ten` Tensor ten i ys) (Tensor ten i (xs ++ ys))
@@ -84,6 +87,7 @@ mergeAssoc {m=S Z,n=S _,xs=_::xs',ys=_::_} = rewrite invertVectZ xs' in id
 mergeAssoc {m=S (S _),xs=_::xs'} =
   rewrite invertVectS xs' in mapr' (mergeAssoc {xs=head xs'::tail xs',ys}) . assoc
 
+||| Apply a morphism to the middle of a tensor product sequence.
 public export
 applyAssoc : Monoidal cat ten i => {m,n,n',o : _} ->
              {0 xs : Vect m _} -> {0 ys : Vect n _} -> {0 ys' : Vect n' _} -> {0 zs : Vect o _} ->
