@@ -4,6 +4,7 @@ import Control.Category.Core
 import Control.Category.Functor
 import Data.Morphisms
 import Data.Tensor
+import Data.Vect
 
 %default total
 
@@ -54,6 +55,40 @@ interface (Category cat, CatEndoBifunctor cat ten) =>
 public export
 PreMonoidal : (cat : Hom obj) -> (ten : obj -> obj -> obj) -> (i : obj) -> Type
 PreMonoidal = Monoidal
+
+
+------------------------------------------------------------
+-- Functions
+------------------------------------------------------------
+
+public export
+Tensor : (ten : obj -> obj -> obj) -> (i : obj) -> Vect n obj -> obj
+Tensor _ i [] = i
+Tensor ten _ objs@(_::_) = foldr1 ten objs
+
+public export
+splitAssoc : Monoidal cat ten i => {m,n : _} -> {0 xs : Vect m _} -> {0 ys : Vect n _} ->
+             cat (Tensor ten i (xs ++ ys)) (Tensor ten i xs `ten` Tensor ten i ys)
+splitAssoc {m=Z,xs=[]} = unitl'
+splitAssoc {m=S Z,n=Z,xs=_::xs',ys=[]} = rewrite invertVectZ xs' in unitr'
+splitAssoc {m=S Z,n=S _,xs=_::xs',ys=_::_} = rewrite invertVectZ xs' in id
+splitAssoc {m=S (S _),xs=_::xs'} =
+  rewrite invertVectS xs' in assoc' . mapr' (splitAssoc {xs=head xs'::tail xs',ys})
+
+public export
+mergeAssoc : Monoidal cat ten i => {m,n : _} -> {0 xs : Vect m _} -> {0 ys : Vect n _} ->
+             cat (Tensor ten i xs `ten` Tensor ten i ys) (Tensor ten i (xs ++ ys))
+mergeAssoc {m=Z,xs=[]} = unitl
+mergeAssoc {m=S Z,n=Z,xs=_::xs',ys=[]} = rewrite invertVectZ xs' in unitr
+mergeAssoc {m=S Z,n=S _,xs=_::xs',ys=_::_} = rewrite invertVectZ xs' in id
+mergeAssoc {m=S (S _),xs=_::xs'} =
+  rewrite invertVectS xs' in mapr' (mergeAssoc {xs=head xs'::tail xs',ys}) . assoc
+
+public export
+applyAssoc : Monoidal cat ten i => {m,n,n',o : _} ->
+             {0 xs : Vect m _} -> {0 ys : Vect n _} -> {0 ys' : Vect n' _} -> {0 zs : Vect o _} ->
+             cat (Tensor ten i ys) (Tensor ten i ys') -> cat (Tensor ten i (xs ++ ys ++ zs)) (Tensor ten i (xs ++ ys' ++ zs))
+applyAssoc f = mergeAssoc . mapr' (mergeAssoc . mapl' f . splitAssoc) . splitAssoc
 
 
 ------------------------------------------------------------
