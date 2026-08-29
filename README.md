@@ -11,7 +11,7 @@
 - [ ] Characterization functions for various transforms:
   - [X] Rearranging/"Swizzling" (cartesian monoidal categories)
   - [ ] Permuting (symmetric monoidal categories)
-  - [ ] Reassociating (monoidal categories)
+  - [X] Reassociating (monoidal categories)
   - [ ] Factoring/Expanding (bimonoidal categories)
 - [ ] Extended features:
   - [X] Traced monoidal categories
