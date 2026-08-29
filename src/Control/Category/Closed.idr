@@ -28,7 +28,7 @@ import Data.Morphisms
 ||| * `uncurry` is natural in `a`,`b`,`c` (see `NatTrans`)
 public export
 interface Monoidal cat ten i =>
-    Closed (0 cat : Hom obj) (0 ten,hom : obj -> obj -> obj) (0 i : obj) | cat where
+    Closed (0 cat : Hom obj) (0 ten,hom : obj -> obj -> obj) (0 i : obj) | cat,ten where
   constructor MkClosed
   ||| The currying transformation.
   curry : forall a,b,c. cat (a `ten` b) c -> cat a (b `hom` c)
@@ -57,7 +57,7 @@ eval = uncurry id
 ||| The coevaluation map of a closed monoidal category.
 public export
 coeval : Closed cat ten hom i => cat a (b `hom` (a `ten` b))
-coeval = curry id
+coeval = curry {ten} id
 
 
 ------------------------------------------------------------

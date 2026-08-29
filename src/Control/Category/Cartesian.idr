@@ -34,7 +34,7 @@ import Data.Vect
 ||| * `unitr . mapr elim . split = id`
 public export
 interface Monoidal cat ten i =>
-    Cartesian (0 cat : Hom obj) (0 ten : obj -> obj -> obj) (0 i : obj) | cat where
+    Cartesian (0 cat : Hom obj) (0 ten : obj -> obj -> obj) (0 i : obj) | cat,ten where
   constructor MkCartesian
   -- NOTE: If these default definitions look weird, it's because
   -- Idris's interface elaboration really doesn't like these methods,
@@ -54,11 +54,11 @@ interface Monoidal cat ten i =>
 
   ||| The cojoin of the universal comonoid structure.
   split : forall a. cat a (a `ten` a)
-  split = Cartesian.prod Core.id Core.id
+  split = Cartesian.prod {ten} Core.id Core.id
 
   ||| The counit of the universal comonoid structure.
   elim : forall a. cat a i
-  elim = Core.(.) projl unitl'
+  elim = Core.(.) (projl {ten}) (unitl' {ten})
 
 export infixr 7 &&&
 

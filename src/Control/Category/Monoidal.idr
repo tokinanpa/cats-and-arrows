@@ -29,7 +29,7 @@ import Data.Vect
 ||| * `assoc . assoc = mapr assoc . assoc . mapl assoc` (pentagon identity)
 public export
 interface (Category cat, CatEndoBifunctor cat ten) =>
-    Monoidal (0 cat : Hom obj) (0 ten : obj -> obj -> obj) (0 i : obj) | cat where
+    Monoidal (0 cat : Hom obj) (0 ten : obj -> obj -> obj) (0 i : obj) | cat,ten where
   constructor MkMonoidal
   ||| The left-biased associator. This must be the inverse of `assoc'`.
   assoc : forall a,b,c. cat ((a `ten` b) `ten` c) (a `ten` (b `ten` c))

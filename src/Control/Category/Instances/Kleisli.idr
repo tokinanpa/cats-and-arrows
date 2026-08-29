@@ -77,7 +77,7 @@ KleisliPreCartesian =
               (MkKleisli $ unit . projr)
               (\f,g => bimap' f g . (MkKleisli $ unit . split))
               (MkKleisli $ unit . split)
-              (MkKleisli $ unit . elim)
+              (MkKleisli $ unit . elim {ten})
 
 public export %hint
 KleisliPreCocartesian : PreCocartesian cat ten i => StrongMonad cat ten m =>
@@ -87,7 +87,7 @@ KleisliPreCocartesian =
                 (MkKleisli $ unit . injr)
                 (\f,g => (MkKleisli $ unit . merge) . bimap' f g)
                 (MkKleisli $ unit . merge)
-                (MkKleisli $ unit . intro)
+                (MkKleisli $ unit . intro {ten})
 
 public export %hint
 KleisliPreBimonoidal : PreBimonoidal cat add mul z i =>
@@ -98,10 +98,10 @@ KleisliPreBimonoidal @{_} @{(c@(MkStrongMonad @{impl} {}),_)} =
                (MkKleisli $ unit @{impl} . distribl')
                (MkKleisli $ unit @{impl} . distribr)
                (MkKleisli $ unit @{impl} . distribr')
-               (MkKleisli $ unit @{impl} . absorbl)
-               (MkKleisli $ unit @{impl} . absorbl')
-               (MkKleisli $ unit @{impl} . absorbr)
-               (MkKleisli $ unit @{impl} . absorbr')
+               (MkKleisli $ unit @{impl} . absorbl {add,mul})
+               (MkKleisli $ unit @{impl} . absorbl' {add,mul})
+               (MkKleisli $ unit @{impl} . absorbr {add,mul})
+               (MkKleisli $ unit @{impl} . absorbr' {add,mul})
 
 
 ------------------------------------------------------------

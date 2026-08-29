@@ -29,7 +29,7 @@ import Data.Tensor
 ||| laws, the same interface is used for this case.
 public export
 interface Monoidal cat ten i =>
-    Braided (0 cat : Hom obj) (0 ten : obj -> obj -> obj) (0 i : obj) | cat where
+    Braided (0 cat : Hom obj) (0 ten : obj -> obj -> obj) (0 i : obj) | cat,ten where
   constructor MkBraided
   ||| The braiding of the category.
   braid : forall a,b. cat (a `ten` b) (b `ten` a)

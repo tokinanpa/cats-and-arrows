@@ -31,7 +31,7 @@ private infixl 9 `mul`
 ||| * https://nilesjohnson.net/En-monoidal.html
 public export
 interface (Monoidal cat add z, Monoidal cat mul i) =>
-    Bimonoidal (0 cat : Hom obj) (0 add,mul : obj -> obj -> obj) (0 z,i : obj) | cat where
+    Bimonoidal (0 cat : Hom obj) (0 add,mul : obj -> obj -> obj) (0 z,i : obj) | cat,add,mul where
   constructor MkBimonoidal
   ||| The left distributor.
   distribl : forall a,b,c. cat (a `mul` (b `add` c)) (a `mul` b `add` a `mul` c)

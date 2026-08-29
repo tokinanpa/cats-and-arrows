@@ -35,7 +35,7 @@ import Data.Morphisms
 ||| * `merge . mapr intro . unitr' = id`
 public export
 interface Monoidal cat ten i =>
-    Cocartesian (0 cat : Hom obj) (0 ten : obj -> obj -> obj) (0 i : obj) | cat where
+    Cocartesian (0 cat : Hom obj) (0 ten : obj -> obj -> obj) (0 i : obj) | cat,ten where
   constructor MkCocartesian
   -- NOTE: If these default definitions look weird, it's because
   -- Idris's interface elaboration really doesn't like these methods,
@@ -59,7 +59,7 @@ interface Monoidal cat ten i =>
 
   ||| The unit of the universal monoid structure.
   intro : forall a. cat i a
-  intro = Core.(.) unitl injl
+  intro = Core.(.) (unitl {ten}) injl
 
 export infixr 6 \|/
 

@@ -59,4 +59,4 @@ PreTraced = Traced
 ||| `[ tr(M) ]`.
 public export
 trace : Traced cat ten i => cat a a -> cat i i
-trace f = tracer $ unitl' . f . unitl
+trace f = tracer $ unitl' {ten} . f . unitl

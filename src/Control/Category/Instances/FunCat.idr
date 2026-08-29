@@ -103,7 +103,7 @@ CartesianFunCat {cat'=cat'@(MkCategoryR{})} = MkCartesian @{MonoidalFunCat} proj
     split_ {f=MkFunctorR{}} = MkNatTransR split
 
     elim_ : NatTransR {cat'} f (FunUnit i)
-    elim_ {f=MkFunctorR{}} = MkNatTransR elim
+    elim_ {f=MkFunctorR{}} = MkNatTransR $ elim {ten}
 
 public export %hint
 CocartesianFunCat : {cat' : _} -> {0 ten : cat'.obj -> cat'.obj -> cat'.obj} -> {0 i : cat'.obj} ->
@@ -124,7 +124,7 @@ CocartesianFunCat {cat'=cat'@(MkCategoryR{})} = MkCocartesian @{MonoidalFunCat} 
     merge_ {f=MkFunctorR{}} = MkNatTransR merge
 
     intro_ : NatTransR {cat'} (FunUnit i) f
-    intro_ {f=MkFunctorR{}} = MkNatTransR intro
+    intro_ {f=MkFunctorR{}} = MkNatTransR $ intro {ten}
 
 public export %hint
 TracedFunCat : {cat' : _} -> {0 ten : cat'.obj -> cat'.obj -> cat'.obj} -> {0 i : cat'.obj} ->
