@@ -79,13 +79,17 @@ PreCartesian = Cartesian
 ------------------------------------------------------------
 
 public export
-proj : Cartesian cat ten i => {n : _} -> (0 as : Vect (S n) _) -> (x : Fin (S n)) -> cat (foldr1 ten as) (index x as)
-proj {n=Z} (_::as') FZ = rewrite invertVectZ as' in id
-proj {n=S _} (_::as') x =
-  rewrite invertVectS as'
+proj : Cartesian cat ten i => {n : _} -> {0 xs : Vect n _} -> (x : Fin n) -> cat (Tensor ten i xs) (index x xs)
+proj {n=S Z,xs=_::xs'} FZ = rewrite invertVectZ xs' in id
+proj {n=S (S Z),xs=_::xs'} FZ = rewrite invertVectS xs' in projl
+proj {n=S (S Z),xs=_::xs'} (FS FZ) =
+  rewrite invertVectS xs' in
+  rewrite invertVectZ (tail xs') in projr
+proj {n=S (S _),xs=_::xs'} x =
+  rewrite invertVectS xs'
   in case x of
       FZ => projl
-      FS x' => proj _ x' . projr
+      FS x' => proj x' . projr
 
 
 public export
@@ -97,11 +101,12 @@ swizzleVect : Swizzle m n -> Vect m a -> Vect n a
 swizzleVect sw xs = map (`index` xs) sw
 
 public export
-swizzle : Cartesian cat ten i => {m : _} -> (0 as : Vect (S m) _) ->
-          (sw : Swizzle (S m) (S n)) -> cat (foldr1 ten as) (foldr1 ten $ swizzleVect sw as)
-swizzle _ [x] = proj _ x
-swizzle (_::_) (x :: xs@(_::_)) =
-  bimap' (proj _ x) (swizzle _ xs) . split
+swizzle : Cartesian {obj} cat ten i => {m : _} -> {0 xs : Vect m _} ->
+          (sw : Swizzle m n) -> cat (Tensor ten i xs) (Tensor ten i $ swizzleVect sw xs)
+swizzle [] = elim {ten}
+swizzle {xs=_::_} [i] = proj i
+swizzle {xs=_::_} (i::is@(_::_)) =
+  bimap' (proj {ten} i) (swizzle is) . split
 
 
 ------------------------------------------------------------
