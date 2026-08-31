@@ -47,6 +47,10 @@ LinearSemigroupoid : Semigroupoid Linear
 LinearSemigroupoid = FromCategory
 
 
+-- NOTE: Functors defined on `Linear` can be thought of as "weak"
+-- linear functors, as in they have the type `(a -@ b) -> (f a -@ f b)`
+-- rather than `(a -@ b) -@ (f a -@ f b)`
+
 public export
 CatFunctor Linear Morphism Prelude.id where
   map (MkLinear f) = Mor $ \x => f x
