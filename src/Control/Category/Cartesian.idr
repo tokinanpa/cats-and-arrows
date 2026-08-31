@@ -107,7 +107,7 @@ swizzleVect sw xs = map (`index` xs) sw
 
 ||| Apply a `Swizzle` to a tensor product sequence.
 public export
-swizzle : Cartesian {obj} cat ten i => {m : _} -> {0 xs : Vect m _} ->
+swizzle : Cartesian cat ten i => {m : _} -> {0 xs : Vect m _} ->
           (sw : Swizzle m n) -> cat (TenSeq ten i xs) (TenSeq ten i $ swizzleVect sw xs)
 swizzle [] = elim {ten}
 swizzle {xs=_::_} [i] = proj i
