@@ -10,7 +10,7 @@
 - [X] Record-style wrapper types
 - [ ] Characterization functions for various transforms:
   - [X] Rearranging/"Swizzling" (cartesian monoidal categories)
-  - [ ] Permuting (symmetric monoidal categories)
+  - [X] Permuting (symmetric monoidal categories)
   - [X] Reassociating (monoidal categories)
   - [ ] Factoring/Expanding (bimonoidal categories)
 - [ ] Extended features:
