@@ -81,7 +81,7 @@ PreCartesian = Cartesian
 ||| Project a single value out of a tensor product sequence by index.
 public export
 proj : Cartesian cat ten i => {n : _} -> {0 xs : Vect n _} ->
-       (x : Fin n) -> cat (Tensor ten i xs) (index x xs)
+       (x : Fin n) -> cat (TenSeq ten i xs) (index x xs)
 proj {n=S Z,xs=_::xs'} FZ = rewrite invertVectZ xs' in id
 proj {n=S (S Z),xs=_::xs'} FZ = rewrite invertVectS xs' in projl
 proj {n=S (S Z),xs=_::xs'} (FS FZ) =
@@ -108,7 +108,7 @@ swizzleVect sw xs = map (`index` xs) sw
 ||| Apply a `Swizzle` to a tensor product sequence.
 public export
 swizzle : Cartesian {obj} cat ten i => {m : _} -> {0 xs : Vect m _} ->
-          (sw : Swizzle m n) -> cat (Tensor ten i xs) (Tensor ten i $ swizzleVect sw xs)
+          (sw : Swizzle m n) -> cat (TenSeq ten i xs) (TenSeq ten i $ swizzleVect sw xs)
 swizzle [] = elim {ten}
 swizzle {xs=_::_} [i] = proj i
 swizzle {xs=_::_} (i::is@(_::_)) =
