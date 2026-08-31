@@ -59,7 +59,7 @@ public export
 interface CatMonad cat m => StrongMonad
     (0 cat : Hom obj)
     (0 ten : obj -> obj -> obj)
-    (0 m : obj -> obj) | cat,m where
+    (0 m : obj -> obj) | cat,ten,m where
   constructor MkStrongMonad
   ||| The left tensor strength.
   strongl : forall a,b. cat (a `ten` m b) (m $ a `ten` b)
