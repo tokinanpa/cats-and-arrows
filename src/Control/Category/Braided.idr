@@ -5,6 +5,7 @@ import Control.Category.Functor
 import Control.Category.Monoidal
 import Data.Morphisms
 import Data.Tensor
+import Data.Vect
 
 %default total
 
@@ -46,6 +47,23 @@ interface Monoidal cat ten i =>
 public export
 PreBraided : (cat : Hom obj) -> (ten : obj -> obj -> obj) -> (i : obj) -> Type
 PreBraided = Braided
+
+
+------------------------------------------------------------
+-- Characterization
+------------------------------------------------------------
+
+||| Swap two halves of a tensor product sequence using the braiding.
+public export
+swapAssoc : Braided cat ten i => {m,n : _} -> {0 xs : Vect m _} -> {0 ys : Vect n _} ->
+             cat (TenSeq ten i (xs ++ ys)) (TenSeq ten i (ys ++ xs))
+swapAssoc = mergeAssoc . braid . splitAssoc
+
+||| Bring a single object of a tensor product sequence to the front.
+public export
+bringToFront : Braided cat ten i => {m,n : _} -> {0 xs : Vect m _} -> {0 ys : Vect n _} ->
+               cat (TenSeq ten i ((xs ++ [x]) ++ ys)) (TenSeq ten i (x :: xs ++ ys))
+bringToFront = mergeAssoc . mapl' swapAssoc . splitAssoc
 
 
 ------------------------------------------------------------
