@@ -27,6 +27,24 @@ liftW2 : (0 f : a -> b -> c) -> Wrap0 a -> Wrap0 b -> Wrap0 c
 liftW2 f x y = W0 (f x.runW0 y.runW0)
 
 
+-- I doubt these interface implementations will be of much use, but
+-- they might as well be defined.
+
+public export
+Functor Wrap0 where
+  map f x = W0 (f x.runW0)
+
+public export
+Applicative Wrap0 where
+  pure x = W0 x
+  f <*> x = W0 (f.runW0 x.runW0)
+
+public export
+Monad Wrap0 where
+  join x = W0 x.runW0.runW0
+  x >>= f = W0 (f x.runW0).runW0
+
+
 ||| A type that is erased at runtime.
 public export
 Type0 : Type
