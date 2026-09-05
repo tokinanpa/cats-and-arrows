@@ -21,7 +21,6 @@ import Data.Morphisms
 public export
 record BraidedR where
   constructor MkBraidedR
-  {obj : Type}
   hom : Hom obj
   tensor : obj -> obj -> obj
   unit : obj
@@ -40,12 +39,12 @@ namespace BraidedR
 
   ||| The identity morphism of an object `a`.
   public export %inline
-  (.id) : (rec : BraidedR) -> forall a. rec.hom a a
+  (.id) : (rec : BraidedR) -> {a : _} -> rec.hom a a
   (.id) rec@(MkBraidedR {}) = rec.categoryR.id
 
   ||| Binary right-to-left composition of morphisms.
   public export %inline
-  (.comp) : (rec : BraidedR) -> forall a,b,c.
+  (.comp) : (rec : BraidedR) -> {a,b,c : _} ->
             rec.hom b c -> rec.hom a b -> rec.hom a c
   (.comp) rec@(MkBraidedR {}) = rec.categoryR.comp
 
@@ -63,37 +62,37 @@ namespace BraidedR
 
   ||| The left-biased associator. This must be the inverse of `(.assoc')`.
   public export %inline
-  (.assoc) : (rec : BraidedR) -> forall a,b,c.
+  (.assoc) : (rec : BraidedR) -> {a,b,c : _} ->
              rec.hom (rec.tensor (rec.tensor a b) c) (rec.tensor a (rec.tensor b c))
   (.assoc) rec@(MkBraidedR {}) = rec.monoidalR.assoc
 
   ||| The right-biased associator. This must be the inverse of `(.assoc)`.
   public export %inline
-  (.assoc') : (rec : BraidedR) -> forall a,b,c.
+  (.assoc') : (rec : BraidedR) -> {a,b,c : _} ->
               rec.hom (rec.tensor a (rec.tensor b c)) (rec.tensor (rec.tensor a b) c)
   (.assoc') rec@(MkBraidedR {}) = rec.monoidalR.assoc'
 
   ||| The left unitor.
   public export %inline
-  (.unitl) : (rec : BraidedR) -> forall a.
+  (.unitl) : (rec : BraidedR) -> {a : _} ->
              rec.hom (rec.tensor rec.unit a) a
   (.unitl) rec@(MkBraidedR {}) = rec.monoidalR.unitl
 
   ||| The inverse of `(.unitl)`, the left unitor.
   public export %inline
-  (.unitl') : (rec : BraidedR) -> forall a.
+  (.unitl') : (rec : BraidedR) -> {a : _} ->
               rec.hom a (rec.tensor rec.unit a)
   (.unitl') rec@(MkBraidedR {}) = rec.monoidalR.unitl'
 
   ||| The right unitor.
   public export %inline
-  (.unitr) : (rec : BraidedR) -> forall a.
+  (.unitr) : (rec : BraidedR) -> {a : _} ->
              rec.hom (rec.tensor a rec.unit) a
   (.unitr) rec@(MkBraidedR {}) = rec.monoidalR.unitr
 
   ||| The inverse of `(.unitr)`, the right unitor.
   public export %inline
-  (.unitr') : (rec : BraidedR) -> forall a.
+  (.unitr') : (rec : BraidedR) -> {a : _} ->
               rec.hom a (rec.tensor a rec.unit)
   (.unitr') rec@(MkBraidedR {}) = rec.monoidalR.unitr'
 
@@ -105,13 +104,13 @@ namespace BraidedR
 
   ||| The braiding of the category.
   public export %inline
-  (.braid) : (rec : BraidedR) -> forall a,b.
+  (.braid) : (rec : BraidedR) -> {a,b : _} ->
              rec.hom (rec.tensor a b) (rec.tensor b a)
   (.braid) rec = braid @{rec.impl}
 
   ||| The inverse of `(.braid)`, the braiding of the category.
   public export %inline
-  (.braid') : (rec : BraidedR) -> forall a,b.
+  (.braid') : (rec : BraidedR) -> {a,b : _} ->
               rec.hom (rec.tensor b a) (rec.tensor a b)
   (.braid') rec = braid' @{rec.impl}
 

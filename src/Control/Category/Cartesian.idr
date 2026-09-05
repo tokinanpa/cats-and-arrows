@@ -5,7 +5,8 @@ import Control.Category.Functor
 import Control.Category.Monoidal
 import Control.Category.Braided
 import Data.Morphisms
-import Data.Vect
+import Data.Fin
+import Data.List
 
 %default total
 
@@ -34,30 +35,30 @@ import Data.Vect
 ||| * `unitr . mapr elim . split = id`
 public export
 interface Monoidal cat ten i =>
-    Cartesian (0 cat : Hom obj) (0 ten : obj -> obj -> obj) (0 i : obj) | cat,ten where
+    Cartesian (0 cat : Hom obj) (ten : obj -> obj -> obj) (i : obj) | cat,ten where
   constructor MkCartesian
   -- NOTE: If these default definitions look weird, it's because
   -- Idris's interface elaboration really doesn't like these methods,
   -- so I'm giving it as much help as possible.
 
   ||| The left projection of the product.
-  projl : forall a,b. cat (a `ten` b) a
+  projl : {a,b : _} -> cat (a `ten` b) a
   projl = Core.(.) {cat} (unitr {cat,ten,i}) (mapr' {cat,f=ten} $ elim {ten})
 
   ||| The right projection of the product.
-  projr : forall a,b. cat (a `ten` b) b
+  projr : {a,b : _} -> cat (a `ten` b) b
   projr = Core.(.) {cat} (unitl {cat,ten,i}) (mapl' {cat,f=ten} $ elim {ten})
 
   ||| The universal property of the product.
-  prod : forall a,b,b'. cat a b -> cat a b' -> cat a (b `ten` b')
+  prod : {a,b,b' : _} -> cat a b -> cat a b' -> cat a (b `ten` b')
   prod f g = Core.(.) (bimap' f g) split
 
   ||| The cojoin of the universal comonoid structure.
-  split : forall a. cat a (a `ten` a)
+  split : {a : _} -> cat a (a `ten` a)
   split = Cartesian.prod {ten} Core.id Core.id
 
   ||| The counit of the universal comonoid structure.
-  elim : forall a. cat a i
+  elim : {a : _} -> cat a i
   elim = Core.(.) (projl {ten}) (unitl' {ten})
 
 export infixr 7 &&&
@@ -65,7 +66,8 @@ export infixr 7 &&&
 ||| An operator synonym for `prod`, the universal property of a
 ||| cartesian monoidal category's product structure.
 public export %inline %tcinline
-(&&&) : Cartesian cat ten i => forall a,b,b'. cat a b -> cat a b' -> cat a (b `ten` b')
+(&&&) : {ten,i : _} -> Cartesian cat ten i => {a,b,b' : _} ->
+        cat a b -> cat a b' -> cat a (b `ten` b')
 (&&&) = prod
 
 ||| See `PreMonoidal`.
@@ -80,44 +82,49 @@ PreCartesian = Cartesian
 
 ||| Project a single value out of a tensor product sequence by index.
 public export
-proj : Cartesian cat ten i => {n : _} -> {0 xs : Vect n _} ->
-       (x : Fin n) -> cat (TenSeq ten i xs) (index x xs)
-proj {n=S Z,xs=_::xs'} FZ = rewrite invertVectZ xs' in id
-proj {n=S (S Z),xs=_::xs'} FZ = rewrite invertVectS xs' in projl
-proj {n=S (S Z),xs=_::xs'} (FS FZ) =
-  rewrite invertVectS xs' in
-  rewrite invertVectZ (tail xs') in projr
-proj {n=S (S _),xs=_::xs'} x =
-  rewrite invertVectS xs'
-  in case x of
-      FZ => projl
-      FS x' => proj x' . projr
+proj : Cartesian cat ten i => {xs : _} ->
+       (x : Fin (length xs)) -> cat (TenSeq ten i xs) (index' xs x)
+proj @{c@(MkCartesian{})} {xs=[_]} FZ = id
+proj @{c@(MkCartesian{})} {xs=[_,_]} (FS FZ) = projr
+proj @{c@(MkCartesian{})} {xs=_::_::_} FZ = projl
+proj @{c@(MkCartesian{})} {xs=_::_::_} (FS x) = proj x . projr
 
-
-||| A compact representation of an arbitrary function `Fin n -> Fin m`.
-||| Used to rearrange/"swizzle" tensor product sequences.
+||| A compact representation of a function out of a tensor product
+||| sequence of size `n`. Used to rearrange/"swizzle" tensor products.
 public export
-Swizzle : (m,n : Nat) -> Type
-Swizzle m n = Vect n (Fin m)
+Swizzle : (n : Nat) -> Type
+Swizzle n = List (Fin n)
 
-||| Apply a `Swizzle` to a vector, rearranging its elements.
+||| Apply a `Swizzle` to a list, rearranging its elements.
 public export
-swizzleVect : Swizzle m n -> Vect m a -> Vect n a
-swizzleVect sw xs = map (`index` xs) sw
+swizzleList : (xs : List a) -> Swizzle (length xs) -> List a
+swizzleList xs sw = map (index' xs) sw
 
 ||| Apply a `Swizzle` to a tensor product sequence.
 public export
-swizzle : Cartesian cat ten i => {m : _} -> {0 xs : Vect m _} ->
-          (sw : Swizzle m n) -> cat (TenSeq ten i xs) (TenSeq ten i $ swizzleVect sw xs)
-swizzle [] = elim {ten}
-swizzle {xs=_::_} [i] = proj i
-swizzle {xs=_::_} (i::is@(_::_)) =
+swizzle : Cartesian cat ten i => {xs : _} ->
+          (sw : Swizzle (length xs)) -> cat (TenSeq ten i xs) (TenSeq ten i $ swizzleList xs sw)
+swizzle @{c@(MkCartesian{})} [] = elim {ten}
+swizzle @{c@(MkCartesian{})} {xs=_::_} [i] = proj i
+swizzle @{c@(MkCartesian{})} {xs=_::_} (i::is@(_::_)) =
   bimap' (proj {ten} i) (swizzle is) . split
 
 
 ------------------------------------------------------------
 -- Existing Instances
 ------------------------------------------------------------
+
+namespace Braided
+  ||| Convert a cartesian monoidal category into a
+  ||| symmetric monoidal category.
+  public export
+  [FromCartesian] {ten,i : _} -> Cartesian cat ten i => Braided cat ten i where
+    braid = prod projr projl
+
+
+-- These instances should not be used unless necessary, as they have
+-- poor runtime quantity behavior. Prefer `Typ` over base's `Morphism`
+-- and `Kleisli` over base's `Kleislimorphism`.
 
 public export
 Cartesian Morphism Pair () where
@@ -137,7 +144,6 @@ namespace Cartesian
     split = dup
     elim = const ()
 
-
 ||| WARNING: This is a premonoidal category, not truly monoidal.
 public export %hint
 PreCartesianKleisliPair : Monad m => PreCartesian (Kleislimorphism m) Pair ()
@@ -150,10 +156,3 @@ PreCartesianKleisliPair = Impl
       split = Kleisli $ pure . dup
       elim = Kleisli $ pure . const ()
 
-
-namespace Braided
-  ||| Convert a cartesian monoidal category into a
-  ||| symmetric monoidal category.
-  public export
-  [FromCartesian] Cartesian cat ten i => Braided cat ten i where
-    braid = prod projr projl

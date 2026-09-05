@@ -28,12 +28,12 @@ import Data.Morphisms
 ||| * `uncurry` is natural in `a`,`b`,`c` (see `NatTrans`)
 public export
 interface Monoidal cat ten i =>
-    Closed (0 cat : Hom obj) (0 ten,hom : obj -> obj -> obj) (0 i : obj) | cat,ten where
+    Closed (0 cat : Hom obj) (ten,hom : obj -> obj -> obj) (i : obj) | cat,ten where
   constructor MkClosed
   ||| The currying transformation.
-  curry : forall a,b,c. cat (a `ten` b) c -> cat a (b `hom` c)
+  curry : {a,b,c : _} -> cat (a `ten` b) c -> cat a (b `hom` c)
   ||| The uncurrying transformation.
-  uncurry : forall a,b,c. cat a (b `hom` c) -> cat (a `ten` b) c
+  uncurry : {a,b,c : _} -> cat a (b `hom` c) -> cat (a `ten` b) c
 
 ||| A monoidal category that is both cartesian and closed.
 |||
@@ -51,13 +51,13 @@ CartesianClosed cat ten hom i = (Cartesian cat ten i, Closed cat ten hom i)
 
 ||| The evaluation map of a closed monoidal category.
 public export
-eval : Closed cat ten hom i => cat ((a `hom` b) `ten` a) b
-eval = uncurry id
+eval : Closed cat ten hom i => {a,b : _} -> cat ((a `hom` b) `ten` a) b
+eval @{c@(MkClosed{})} = uncurry id
 
 ||| The coevaluation map of a closed monoidal category.
 public export
-coeval : Closed cat ten hom i => cat a (b `hom` (a `ten` b))
-coeval = curry {ten} id
+coeval : Closed cat ten hom i => {a,b : _} -> cat a (b `hom` (a `ten` b))
+coeval @{c@(MkClosed{})} = curry {ten} id
 
 
 ------------------------------------------------------------

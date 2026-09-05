@@ -12,7 +12,6 @@ import Control.Category
 public export
 record SemigroupoidR where
   constructor MkSemigroupoidR
-  {obj : Type}
   hom : Hom obj
   {auto impl : Semigroupoid hom}
 
@@ -24,6 +23,6 @@ namespace SemigroupoidR
 
   ||| Binary right-to-left composition of morphisms.
   public export %inline
-  (.comp) : (rec : SemigroupoidR) -> forall a,b,c.
+  (.comp) : (rec : SemigroupoidR) -> {a,b,c : _} ->
             rec.hom b c -> rec.hom a b -> rec.hom a c
   (.comp) rec = (.) @{rec.impl}

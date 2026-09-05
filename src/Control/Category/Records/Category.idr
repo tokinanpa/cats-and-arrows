@@ -14,7 +14,6 @@ import Control.Category.Records.Semigroupoid
 public export
 record CategoryR where
   constructor MkCategoryR
-  {obj : Type}
   hom : Hom obj
   {auto impl : Category hom}
 
@@ -32,11 +31,11 @@ namespace CategoryR
 
   ||| The identity morphism of an object `a`.
   public export %inline
-  (.id) : (rec : CategoryR) -> forall a. rec.hom a a
+  (.id) : (rec : CategoryR) -> {a : _} -> rec.hom a a
   (.id) rec = id @{rec.impl}
 
   ||| Binary right-to-left composition of morphisms.
   public export %inline
-  (.comp) : (rec : CategoryR) -> forall a,b,c.
+  (.comp) : (rec : CategoryR) -> {a,b,c : _} ->
             rec.hom b c -> rec.hom a b -> rec.hom a c
   (.comp) rec = (.) @{rec.impl}

@@ -20,19 +20,19 @@ import Data.Profunctor.Types
 public export
 interface Semigroupoid (0 cat : obj -> obj -> Type) | cat where
   constructor MkSemigroupoid
-  (.) : forall a,b,c. cat b c -> cat a b -> cat a c
+  (.) : {a,b,c : _} -> cat b c -> cat a b -> cat a c
 
 export infixl 5 <<<
 export infixr 5 >>>
 
 ||| A synonym for right-to-left semigroupoid composition.
 public export %inline %tcinline
-(<<<) : Semigroupoid cat => cat b c -> cat a b -> cat a c
+(<<<) : Semigroupoid cat => {a,b,c : _} -> cat b c -> cat a b -> cat a c
 (<<<) = (.)
 
 ||| A synonym for left-to-right semigroupoid composition.
 public export %inline %tcinline
-(>>>) : Semigroupoid cat => cat a b -> cat b c -> cat a c
+(>>>) : Semigroupoid cat => {a,b,c : _} -> cat a b -> cat b c -> cat a c
 (>>>) = flip (.)
 
 
@@ -46,6 +46,10 @@ namespace Semigroupoid
   [FromCategory] Category cat => Semigroupoid cat where
     (.) = Core.(.)
 
+
+-- These instances should not be used unless necessary, as they have
+-- poor runtime quantity behavior. Prefer `Typ` over base's `Morphism`
+-- and `Kleisli` over base's `Kleislimorphism`.
 
 public export
 Semigroupoid Morphism where

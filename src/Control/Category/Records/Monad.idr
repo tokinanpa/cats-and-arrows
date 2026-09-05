@@ -27,7 +27,8 @@ namespace MonadR
 
   ||| Apply the monad to a morphism in `cat`.
   public export %inline
-  (.map) : (rec : MonadR cat) -> forall a,b. cat.hom a b -> cat.hom (rec.fun a) (rec.fun b)
+  (.map) : (rec : MonadR cat) -> {a,b : _} ->
+           cat.hom a b -> cat.hom (rec.fun a) (rec.fun b)
   (.map) rec@(MkMonadR {}) = rec.functorR.map
 
 
@@ -38,12 +39,14 @@ namespace MonadR
 
   ||| The join transformation of the monad.
   public export %inline
-  (.join) : (rec : MonadR cat) -> forall a. cat.hom (rec.fun (rec.fun a)) (rec.fun a)
+  (.join) : (rec : MonadR cat) -> {a : _} ->
+            cat.hom (rec.fun (rec.fun a)) (rec.fun a)
   (.join) rec = join @{rec.impl}
 
   ||| The unit transformation of the monad.
   public export %inline
-  (.unit) : (rec : MonadR cat) -> forall a. cat.hom a (rec.fun a)
+  (.unit) : (rec : MonadR cat) -> {a : _} ->
+            cat.hom a (rec.fun a)
   (.unit) rec = unit @{rec.impl}
 
 
@@ -65,7 +68,8 @@ namespace StrongMonadR
 
   ||| Apply the monad to a morphism in `cat`.
   public export %inline
-  (.map) : (rec : StrongMonadR cat) -> forall a,b. cat.hom a b -> cat.hom (rec.fun a) (rec.fun b)
+  (.map) : (rec : StrongMonadR cat) -> {a,b : _} ->
+           cat.hom a b -> cat.hom (rec.fun a) (rec.fun b)
   (.map) {cat=MkMonoidalR{}} rec@(MkStrongMonadR {}) = rec.functorR.map
 
 
@@ -76,12 +80,14 @@ namespace StrongMonadR
 
   ||| The join transformation of the monad.
   public export %inline
-  (.join) : (rec : StrongMonadR cat) -> forall a. cat.hom (rec.fun (rec.fun a)) (rec.fun a)
+  (.join) : (rec : StrongMonadR cat) -> {a : _} ->
+            cat.hom (rec.fun (rec.fun a)) (rec.fun a)
   (.join) {cat=MkMonoidalR{}} rec@(MkStrongMonadR {}) = rec.monadR.join
 
   ||| The unit transformation of the monad.
   public export %inline
-  (.unit) : (rec : StrongMonadR cat) -> forall a. cat.hom a (rec.fun a)
+  (.unit) : (rec : StrongMonadR cat) -> {a : _} ->
+            cat.hom a (rec.fun a)
   (.unit) {cat=MkMonoidalR{}} rec@(MkStrongMonadR {}) = rec.monadR.unit
 
 
@@ -92,12 +98,12 @@ namespace StrongMonadR
 
   ||| The left tensor strength.
   public export %inline
-  (.strongl) : (rec : StrongMonadR cat) ->
+  (.strongl) : (rec : StrongMonadR cat) -> {a,b : _} ->
                cat.hom (cat.tensor a (rec.fun b)) (rec.fun (cat.tensor a b))
   (.strongl) rec = strongl @{rec.impl}
 
   ||| The right tensor strength.
   public export %inline
-  (.strongr) : (rec : StrongMonadR cat) ->
+  (.strongr) : (rec : StrongMonadR cat) -> {a,b : _} ->
                cat.hom (cat.tensor (rec.fun a) b) (rec.fun (cat.tensor a b))
   (.strongr) rec = strongr @{rec.impl}

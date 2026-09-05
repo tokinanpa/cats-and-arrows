@@ -31,7 +31,7 @@ namespace FunctorR
 
   ||| Apply the functor to a morphism in `cat`, translating it into `cat'`.
   public export %inline
-  (.map) : (rec : FunctorR cat cat') -> forall a,b.
+  (.map) : (rec : FunctorR cat cat') -> {a,b : _} ->
            cat.hom a b -> cat'.hom (rec.fun a) (rec.fun b)
   (.map) rec = map @{rec.impl}
 
@@ -66,19 +66,19 @@ namespace BifunctorR
   ||| Apply the bifunctor to morphism in `catA` and `catB`, translating
   ||| them into a combined morphism in `cat'`.
   public export %inline
-  (.bimap) : (rec : BifunctorR catA catB cat') -> forall a,a',b,b'.
+  (.bimap) : (rec : BifunctorR catA catB cat') -> {a,a',b,b' : _} ->
              catA.hom a b -> catB.hom a' b' -> cat'.hom (rec.fun a a') (rec.fun b b')
   (.bimap) rec = bimap @{rec.impl}
 
   ||| Apply a morphism to a bifunctor only on the left.
   public export %inline
-  (.mapl) : {catB : _} -> (rec : BifunctorR catA catB cat') -> forall a,b,c.
+  (.mapl) : {catB : _} -> (rec : BifunctorR catA catB cat') -> {a,b,c : _} ->
             catA.hom a b -> cat'.hom (rec.fun a c) (rec.fun b c)
   (.mapl) rec = mapl @{rec.impl} @{catB.impl}
 
   ||| Apply a morphism to a bifunctor only on the right.
   public export %inline
-  (.mapr) : {catA : _} -> (rec : BifunctorR catA catB cat') -> forall a,b,c.
+  (.mapr) : {catA : _} -> (rec : BifunctorR catA catB cat') -> {a,b,c : _} ->
             catB.hom a b -> cat'.hom (rec.fun c a) (rec.fun c b)
   (.mapr) rec = mapr @{rec.impl} @{catA.impl}
 

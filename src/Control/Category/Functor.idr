@@ -27,7 +27,7 @@ interface CatFunctor
     (0 f : obj -> obj') | cat,cat',f where
   constructor MkCatFunctor
   ||| Apply the functor to a morphism in `cat`, translating it into `cat'`.
-  map : forall a,b. cat a b -> cat' (f a) (f b)
+  map : {a,b : _} -> cat a b -> cat' (f a) (f b)
 
 ||| A type synonym for an *endofunctor*, a functor from a category to
 ||| itself.
@@ -41,7 +41,7 @@ CatEndofunctor cat f = CatFunctor cat cat f
 ||| A synonym of `map` that only works for endofunctors. May help
 ||| typechecking and interface resolution.
 public export
-map' : CatEndofunctor cat f => cat a b -> cat (f a) (f b)
+map' : CatEndofunctor cat f => {a,b : _} -> cat a b -> cat (f a) (f b)
 map' = map
 
 
@@ -64,7 +64,7 @@ interface CatBifunctor
   constructor MkCatBifunctor
   ||| Apply the bifunctor to morphism in `catA` and `catB`, translating
   ||| them into a combined morphism in `cat'`.
-  bimap : forall a,a',b,b'. catA a b -> catB a' b' -> cat' (f a a') (f b b')
+  bimap : {a,a',b,b' : _} -> catA a b -> catB a' b' -> cat' (f a a') (f b b')
 
 ||| A type synonym that can be used to mark an operator as merely being
 ||| a binoidal functor, rather than a proper bifunctor. These have the
@@ -86,13 +86,13 @@ Binoidal = CatBifunctor
 ||| Apply a morphism to a bifunctor only on the left.
 public export
 mapl : CatBifunctor catA catB cat' f => Category catB =>
-       forall a,b,c. catA a b -> cat' (f a c) (f b c)
+       {a,b,c : _} -> catA a b -> cat' (f a c) (f b c)
 mapl m = bimap {catA,catB,cat',f} m id
 
 ||| Apply a morphism to a bifunctor only on the right.
 public export
 mapr : CatBifunctor catA catB cat' f => Category catA =>
-       forall a,b,c. catB a b -> cat' (f c a) (f c b)
+       {a,b,c : _} -> catB a b -> cat' (f c a) (f c b)
 mapr = bimap {catA,catB,cat',f} id
 
 
@@ -114,25 +114,70 @@ EndoBinoidal = CatEndoBifunctor
 ||| A synonym of `bimap` that only works for endo-bifunctors. May help
 ||| typechecking and interface resolution.
 public export
-bimap' : CatEndoBifunctor cat f => cat a b -> cat a' b' -> cat (f a a') (f b b')
+bimap' : CatEndoBifunctor cat f => {a,a',b,b' : _} ->
+         cat a b -> cat a' b' -> cat (f a a') (f b b')
 bimap' = bimap {catA=cat,catB=cat,cat'=cat}
 
 ||| A synonym of `mapl` that only works for endo-bifunctors. May help
 ||| typechecking and interface resolution.
 public export
-mapl' : CatEndoBifunctor cat f => Category cat => cat a b -> cat (f a c) (f b c)
+mapl' : CatEndoBifunctor cat f => Category cat =>
+        {a,b,c : _} -> cat a b -> cat (f a c) (f b c)
 mapl' = mapl {catA=cat,catB=cat,cat'=cat}
 
 ||| A synonym of `mapr` that only works for endo-bifunctors. May help
 ||| typechecking and interface resolution.
 public export
-mapr' : CatEndoBifunctor cat f => Category cat => cat a b -> cat (f c a) (f c b)
+mapr' : CatEndoBifunctor cat f => Category cat => {a,b,c : _} ->
+        cat a b -> cat (f c a) (f c b)
 mapr' = mapr {catA=cat,catB=cat,cat'=cat}
 
 
 ------------------------------------------------------------
 -- Existing Instances
 ------------------------------------------------------------
+
+namespace CatFunctor
+  ||| Compose two functors into a composite functor.
+  public export
+  [Compose] {g : _} -> CatFunctor cat' cat'' f => CatFunctor cat cat' g =>
+      CatFunctor cat cat'' (Prelude.(.) f g) where
+    map = map {cat=cat',cat'=cat'',f} . map {cat,cat',f=g}
+
+  ||| The identity functor on a category.
+  public export
+  [Id] CatFunctor cat cat Prelude.id where
+    map = id
+
+  ||| The constant functor on a category. It maps all morphisms to the
+  ||| identity morphism.
+  public export
+  [Const] {x : _} -> Category cat' => CatFunctor cat cat' (const x) where
+    map _ = id
+
+namespace CatBifunctor
+  ||| Convert a bifunctor (or binoidal functor) into its left functor.
+  public export
+  [Left] {r : _} -> CatBifunctor catA catB cat' f => Category catB =>
+      CatFunctor catA cat' (`f` r) where
+    map = mapl {catA,catB,cat'}
+
+  ||| Convert a bifunctor (or binoidal functor) into its right functor.
+  public export
+  [Right] {l : _} -> CatBifunctor catA catB cat' f => Category catA =>
+      CatFunctor catB cat' (l `f`) where
+    map = mapr {catA,catB,cat'}
+
+  ||| Compose a functor with a bifunctor to form a composite bifunctor.
+  public export
+  [Compose] {g : _} -> CatFunctor cat' cat'' f => CatBifunctor catA catB cat' g =>
+      CatBifunctor catA catB cat'' (f .: g) where
+    bimap = map {cat=cat',cat'=cat'',f} .: bimap {catA,catB,cat',f=g}
+
+
+-- These instances should not be used unless necessary, as they have
+-- poor runtime quantity behavior. Prefer `Typ` over base's `Morphism`
+-- and `Kleisli` over base's `Kleislimorphism`.
 
 namespace CatFunctor
   ||| Convert an ordinary Prelude `Functor` into a `CatFunctor` over the
@@ -153,23 +198,6 @@ namespace CatFunctor
   [KleisliFromTraversable] (Traversable f, Applicative m) =>
       CatFunctor (Kleislimorphism m) (Kleislimorphism m) f where
     map (Kleisli f) = Kleisli $ traverse f
-
-  ||| Compose two functors into a composite functor.
-  public export
-  [Compose] CatFunctor cat' cat'' f => CatFunctor cat cat' g =>
-      CatFunctor cat cat'' (Prelude.(.) f g) where
-    map = map {cat=cat',cat'=cat'',f} . map {cat,cat',f=g}
-
-  ||| The identity functor on a category.
-  public export
-  [Id] CatFunctor cat cat Prelude.id where
-    map = id
-
-  ||| The constant functor on a category. It maps all morphisms to the
-  ||| identity morphism.
-  public export
-  [Const] Category cat' => CatFunctor cat cat' (const x) where
-    map _ = id
 
 namespace CatBifunctor
   ||| Convert an ordinary Prelude `Bifunctor` into a `CatBifunctor` over
@@ -197,25 +225,6 @@ namespace CatBifunctor
                    (Kleislimorphism m)
                    (Kleislimorphism m) f where
     bimap (Kleisli f) (Kleisli g) = Kleisli $ bitraverse f g
-
-  ||| Convert a bifunctor (or binoidal functor) into its left functor.
-  public export
-  [Left] {0 r : _} -> CatBifunctor catA catB cat' f => Category catB =>
-      CatFunctor catA cat' (`f` r) where
-    map = mapl {catA,catB,cat'}
-
-  ||| Convert a bifunctor (or binoidal functor) into its right functor.
-  public export
-  [Right] {0 l : _} -> CatBifunctor catA catB cat' f => Category catA =>
-      CatFunctor catB cat' (l `f`) where
-    map = mapr {catA,catB,cat'}
-
-  ||| Compose a functor with a bifunctor to form a composite bifunctor.
-  public export
-  [Compose] CatFunctor cat' cat'' f => CatBifunctor catA catB cat' g =>
-      CatBifunctor catA catB cat'' (f .: g) where
-    bimap = map {cat=cat',cat'=cat'',f} .: bimap {catA,catB,cat',f=g}
-
 
 public export %hint
 CatBifunctorMorPair : CatEndoBifunctor Morphism Pair

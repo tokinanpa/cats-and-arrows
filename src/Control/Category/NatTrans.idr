@@ -17,6 +17,5 @@ import Control.Category.Core
 ||| Laws (for natural transformation `tr`):
 ||| * `map f . tr = tr . map f`
 public export
-0 NatTrans : (cat : Hom obj') -> (f,g : obj -> obj') -> Type
-NatTrans cat f g = forall a. cat (f a) (g a)
-
+0 NatTrans : {obj : _} -> (cat : Hom obj') -> (f,g : obj -> obj') -> Type
+NatTrans cat f g = {a : _} -> cat (f a) (g a)

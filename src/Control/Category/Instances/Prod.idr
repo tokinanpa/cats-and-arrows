@@ -52,6 +52,7 @@ namespace CatBifunctor
   [FromCatFunctor] CatFunctor (Prod catA catB) cat' f => CatBifunctor catA catB cat' (curry f) where
     bimap f' g = map {cat=Prod catA catB,f} (MkProd f' g)
 
+public export
 [Horizontal] CatFunctor catF catF' f => CatFunctor catG catG' g =>
     CatFunctor (Prod catF catG) (Prod catF' catG') (Prelude.bimap f g) where
   map {a=(_,_),b=(_,_)} (MkProd f g) = MkProd (map f) (map g)

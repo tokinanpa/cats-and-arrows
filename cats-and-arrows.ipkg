@@ -46,4 +46,5 @@ modules = Control.Category,
           Control.Category.Instances.Prod,
           Control.Category.Instances.Type,
           Control.Category.Instances.Zero,
-          Control.Arrow
+          Control.Arrow,
+          Data.Wrap0

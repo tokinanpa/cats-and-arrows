@@ -18,6 +18,7 @@ public export
 (~~>) : Type -> Type -> Type
 (~~>) a b = a -> b
 
+
 ------------------------------------------------------------
 -- Interface
 ------------------------------------------------------------
@@ -37,9 +38,9 @@ public export
 interface Category (0 cat : Hom obj) | cat where
   constructor MkCategory
   ||| The identity morphism of an object `a`.
-  id : forall a. cat a a
+  id : {a : _} -> cat a a
   ||| Binary right-to-left composition of morphisms.
-  (.) : forall a,b,c. cat b c -> cat a b -> cat a c
+  (.) : {a,b,c : _} -> cat b c -> cat a b -> cat a c
 
 export infixl 5 <<<
 export infixr 5 >>>
@@ -47,19 +48,23 @@ export infixr 5 >>>
 ||| A synonym for right-to-left category composition that may be easier
 ||| to read. The arrow shows the direction the morphisms are composed.
 public export %inline %tcinline
-(<<<) : Category cat => cat b c -> cat a b -> cat a c
+(<<<) : Category cat => {a,b,c : _} -> cat b c -> cat a b -> cat a c
 (<<<) = (.)
 
 ||| A synonym for left-to-right category composition that may be easier
 ||| to read. The arrow shows the direction the morphisms are composed.
 public export %inline %tcinline
-(>>>) : Category cat => cat a b -> cat b c -> cat a c
+(>>>) : Category cat => {a,b,c : _} -> cat a b -> cat b c -> cat a c
 (>>>) = flip (.)
 
 
 ------------------------------------------------------------
 -- Existing Instances
 ------------------------------------------------------------
+
+-- These instances should not be used unless necessary, as they have
+-- poor runtime quantity behavior. Prefer `Typ` over base's `Morphism`
+-- and `Kleisli` over base's `Kleislimorphism`.
 
 ||| The `Morphism` type from `Data.Morphisms` forms a category.
 public export

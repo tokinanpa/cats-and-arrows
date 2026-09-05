@@ -37,12 +37,12 @@ import Data.Morphisms
 ||| depending on the needs of the implementation.
 public export
 interface Monoidal cat ten i =>
-    Traced (0 cat : Hom obj) (0 ten : obj -> obj -> obj) (0 i : obj) | cat,ten where
+    Traced (0 cat : Hom obj) (ten : obj -> obj -> obj) (i : obj) | cat,ten where
   constructor MkTraced
   ||| The left trace.
-  tracel : forall a,b,c. cat (a `ten` b) (a `ten` c) -> cat b c
+  tracel : {a,b,c : _} -> cat (a `ten` b) (a `ten` c) -> cat b c
   ||| The right trace.
-  tracer : forall a,b,c. cat (a `ten` c) (b `ten` c) -> cat a b
+  tracer : {a,b,c : _} -> cat (a `ten` c) (b `ten` c) -> cat a b
 
 ||| See `PreMonoidal`.
 public export
@@ -58,5 +58,5 @@ PreTraced = Traced
 ||| vector spaces, this takes a square matrix `M` to the 1x1 matrix
 ||| `[ tr(M) ]`.
 public export
-trace : Traced cat ten i => cat a a -> cat i i
-trace f = tracer $ unitl' {ten} . f . unitl
+trace : Traced cat ten i => {a : _} -> cat a a -> cat i i
+trace @{c@(MkTraced{})} f = tracer $ unitl' {ten} . f . unitl

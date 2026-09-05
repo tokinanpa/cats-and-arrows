@@ -24,19 +24,19 @@ record Kleisli (cat : Hom obj) (m : obj -> obj) (a,b : obj) where
 ------------------------------------------------------------
 
 public export
-Category cat => CatMonad cat m => Category (Kleisli cat m) where
+{m : _} -> Category cat => CatMonad cat m => Category (Kleisli cat m) where
   id = MkKleisli unit
   MkKleisli f . MkKleisli g = MkKleisli (join . map f . g)
 
 public export
-[KleisliInj] Category cat => CatMonad cat m => CatFunctor cat (Kleisli cat m) Prelude.id where
+[KleisliInj] {m : _} -> Category cat => CatMonad cat m => CatFunctor cat (Kleisli cat m) Prelude.id where
   map f = MkKleisli $ unit . f
 
 
 ||| WARNING: This is typically a binoidal functor, not a true bifunctor.
 ||| It is only a bifunctor if the monad `m` is commutative over `ten`.
 public export %hint
-KleisliBinoidal : Category cat => StrongMonad cat ten m =>
+KleisliBinoidal : {ten,m : _} -> Category cat => StrongMonad cat ten m =>
                   EndoBinoidal cat ten => EndoBinoidal (Kleisli cat m) ten
 KleisliBinoidal = Impl
   where
@@ -45,14 +45,10 @@ KleisliBinoidal = Impl
         MkKleisli (strongl . mapr' g) . -- mapr
         MkKleisli (strongr . mapl' f)   -- mapl
 
-public export
-Promonad cat => CatMonad cat m => Promonad (Kleisli cat m) where
-  funit f = MkKleisli $ unit . funit f
-
 ||| WARNING: This is typically a premonoidal category, not truly monoidal.
 ||| It is only monoidal if the monad `m` is commutative over `ten`.
 public export %hint
-KleisliPreMonoidal : PreMonoidal cat ten i => StrongMonad cat ten m =>
+KleisliPreMonoidal : {m,ten,i : _} -> PreMonoidal cat ten i => StrongMonad cat ten m =>
                      PreMonoidal (Kleisli cat m) ten i
 KleisliPreMonoidal =
   MkMonoidal (MkKleisli $ unit . assoc)
@@ -63,14 +59,14 @@ KleisliPreMonoidal =
              (MkKleisli $ unit . unitr')
 
 public export %hint
-KleisliPreBraided : PreBraided cat ten i => StrongMonad cat ten m =>
+KleisliPreBraided : {m,ten,i : _} -> PreBraided cat ten i => StrongMonad cat ten m =>
                     PreBraided (Kleisli cat m) ten i
 KleisliPreBraided =
   MkBraided (MkKleisli $ unit . braid)
             (MkKleisli $ unit . braid')
 
 public export %hint
-KleisliPreCartesian : PreCartesian cat ten i => StrongMonad cat ten m =>
+KleisliPreCartesian : {m,ten,i : _} -> PreCartesian cat ten i => StrongMonad cat ten m =>
                       PreCartesian (Kleisli cat m) ten i
 KleisliPreCartesian =
   MkCartesian (MkKleisli $ unit . projl)
@@ -80,7 +76,7 @@ KleisliPreCartesian =
               (MkKleisli $ unit . elim {ten})
 
 public export %hint
-KleisliPreCocartesian : PreCocartesian cat ten i => StrongMonad cat ten m =>
+KleisliPreCocartesian : {m,ten,i : _} -> PreCocartesian cat ten i => StrongMonad cat ten m =>
                         PreCocartesian (Kleisli cat m) ten i
 KleisliPreCocartesian =
   MkCocartesian (MkKleisli $ unit . injl)
@@ -90,7 +86,7 @@ KleisliPreCocartesian =
                 (MkKleisli $ unit . intro {ten})
 
 public export %hint
-KleisliPreBimonoidal : PreBimonoidal cat add mul z i =>
+KleisliPreBimonoidal : {m,add,mul,z,i : _} -> PreBimonoidal cat add mul z i =>
                        (StrongMonad cat add m, StrongMonad cat mul m) =>
                        PreBimonoidal (Kleisli cat m) add mul z i
 KleisliPreBimonoidal @{_} @{(c@(MkStrongMonad @{impl} {}),_)} =

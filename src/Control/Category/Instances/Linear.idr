@@ -10,21 +10,35 @@ import Data.Linear
 import Data.Linear.LEither
 import Data.Linear.LMaybe
 import Data.Morphisms
+import Data.Wrap0
 
 %default total
 
 ||| The category of types and linear functions.
 public export
-data Linear : (a,b : Type) -> Type where
-  MkLinear : (1 _ : a -@ b) -> Linear a b
+data Linear : (a,b : Type0) -> Type where
+  MkLinear : (1 _ : a.runW0 -@ b.runW0) -> Linear a b
 
 public export %inline %tcinline
-runLinear : Linear a b -@ a -@ b
+runLinear : Linear a b -@ a.runW0 -@ b.runW0
 runLinear (MkLinear f) = f
 
 public export %inline %tcinline
-(.runLinear) : Linear a b -@ a -@ b
+(.runLinear) : Linear a b -@ a.runW0 -@ b.runW0
 (.runLinear) = runLinear
+
+
+public export
+LPair : Type0 -> Type0 -> Type0
+LPair = liftW2 LPair
+
+public export
+LEither : Type0 -> Type0 -> Type0
+LEither = liftW2 LEither
+
+public export
+LinearHom : Type0 -> Type0 -> Type0
+LinearHom a b = W0 (Linear a b)
 
 
 public export
@@ -52,11 +66,11 @@ LinearSemigroupoid = FromCategory
 -- rather than `(a -@ b) -@ (f a -@ f b)`
 
 public export
-CatFunctor Linear Morphism Prelude.id where
-  map (MkLinear f) = Mor $ \x => f x
+CatFunctor Linear Typ Prelude.id where
+  map (MkLinear f) = MkTyp $ \x => f x
 
 public export
-CatFunctor Linear Linear LMaybe where
+CatFunctor Linear Linear (liftW LMaybe) where
   map (MkLinear f) = MkLinear $ (<$>) f
 
 public export
@@ -68,7 +82,7 @@ CatBifunctor Linear Linear Linear LEither where
   bimap (MkLinear f) (MkLinear g) = MkLinear (leither (Left . f) (Right . g))
 
 public export
-Monoidal Linear LPair () where
+Monoidal Linear LPair (W0 ()) where
   assoc = MkLinear $ \((x # y) # z) => x # (y # z)
   assoc' = MkLinear $ \(x # (y # z)) => (x # y) # z
   unitl = MkLinear $ \(() # x) => x
@@ -77,7 +91,7 @@ Monoidal Linear LPair () where
   unitr' = MkLinear (# ())
 
 public export
-Monoidal Linear LEither Void where
+Monoidal Linear LEither (W0 Void) where
   assoc = MkLinear $ leither (leither Left (Right . Left)) (Right . Right)
   assoc' = MkLinear $ leither (Left . Left) (leither (Left . Right) Right)
   unitl = MkLinear $ leither (\_ impossible) id
@@ -86,15 +100,15 @@ Monoidal Linear LEither Void where
   unitr' = MkLinear Left
 
 public export
-Braided Linear LPair () where
+Braided Linear LPair (W0 ()) where
   braid = MkLinear $ \(x # y) => y # x
 
 public export
-Braided Linear LEither Void where
+Braided Linear LEither (W0 Void) where
   braid = MkLinear $ leither Right Left
 
 public export
-Bimonoidal Linear LEither LPair Void () where
+Bimonoidal Linear LEither LPair (W0 Void) (W0 ()) where
   distribl = MkLinear $ \(x # y) => case y of
                                       Left y' => Left (x # y')
                                       Right y' => Right (x # y')
@@ -109,14 +123,9 @@ Bimonoidal Linear LEither LPair Void () where
   absorbr' = MkLinear $ \_ impossible
 
 public export
-Closed Linear LPair Linear () where
+Closed Linear LPair LinearHom (W0 ()) where
   curry (MkLinear f) = MkLinear $ \x => MkLinear $ \y => f (x # y)
   uncurry (MkLinear f) = MkLinear $ \(x # y) => case f x of MkLinear f' => f' y
-
-public export
-Closed Linear LPair (-@) () where
-  curry (MkLinear f) = MkLinear $ \x,y => f (x # y)
-  uncurry (MkLinear f) = MkLinear $ \(x # y) => f x y
 
 
 ------------------------------------------------------------
@@ -136,11 +145,12 @@ namespace CategoryR
 namespace FunctorR
   public export
   LinearToTyp : FunctorR Linear Typ
-  LinearToTyp = MkFunctorR id {impl = MkCatFunctor $ \(MkLinear f),x => f x}
+  LinearToTyp = MkFunctorR id
+    {impl = MkCatFunctor $ \(MkLinear f) => MkTyp (\x => f x)}
 
   public export
   LMaybe : EndofunctorR Linear
-  LMaybe = MkFunctorR LMaybe
+  LMaybe = MkFunctorR (liftW LMaybe)
 
 namespace BifunctorR
   public export
@@ -154,37 +164,37 @@ namespace BifunctorR
 namespace MonoidalR
   public export
   LinearLPair : MonoidalR
-  LinearLPair = MkMonoidalR Linear LPair ()
+  LinearLPair = MkMonoidalR Linear LPair (W0 ())
 
   public export
   LinearLEither : MonoidalR
-  LinearLEither = MkMonoidalR Linear LEither Void
+  LinearLEither = MkMonoidalR Linear LEither (W0 Void)
 
 namespace BraidedR
   public export
   LinearLPair : BraidedR
-  LinearLPair = MkBraidedR Linear LPair ()
+  LinearLPair = MkBraidedR Linear LPair (W0 ())
 
   public export
   LinearLEither : BraidedR
-  LinearLEither = MkBraidedR Linear LEither Void
+  LinearLEither = MkBraidedR Linear LEither (W0 Void)
 
 namespace BimonoidalR
   public export
   Linear : BimonoidalR
-  Linear = MkBimonoidalR Linear LEither LPair Void ()
+  Linear = MkBimonoidalR Linear LEither LPair (W0 Void) (W0 ())
 
 namespace RigCategoryR
   public export
   Linear : RigCategoryR
-  Linear = MkRigCategoryR Linear LEither LPair Void ()
+  Linear = MkRigCategoryR Linear LEither LPair (W0 Void) (W0 ())
 
 namespace SymRigCategoryR
   public export
   Linear : SymRigCategoryR
-  Linear = MkSymRigCategoryR Linear LEither LPair Void ()
+  Linear = MkSymRigCategoryR Linear LEither LPair (W0 Void) (W0 ())
 
 namespace ClosedR
   public export
   Linear : ClosedR
-  Linear = MkClosedR Linear LPair (-@) ()
+  Linear = MkClosedR Linear LPair LinearHom (W0 ())

@@ -29,9 +29,9 @@ interface CatFunctor cat cat m => CatMonad
     (0 m : obj -> obj) | cat,m where
   constructor MkCatMonad
   ||| The join transformation of the monad.
-  join : forall a. cat (m (m a)) (m a)
+  join : {a : _} -> cat (m (m a)) (m a)
   ||| The unit transformation of the monad.
-  unit : forall a. cat a (m a)
+  unit : {a : _} -> cat a (m a)
 
 ||| A monad has *tensorial strength* if it is compatible with a
 ||| monoidal category's tensor product. Generally, `cat` is a monoidal
@@ -62,14 +62,18 @@ interface CatMonad cat m => StrongMonad
     (0 m : obj -> obj) | cat,ten,m where
   constructor MkStrongMonad
   ||| The left tensor strength.
-  strongl : forall a,b. cat (a `ten` m b) (m $ a `ten` b)
+  strongl : {a,b : _} -> cat (a `ten` m b) (m $ a `ten` b)
   ||| The right tensor strength.
-  strongr : forall a,b. cat (m a `ten` b) (m $ a `ten` b)
+  strongr : {a,b : _} -> cat (m a `ten` b) (m $ a `ten` b)
 
 
 ------------------------------------------------------------
 -- Existing Instances
 ------------------------------------------------------------
+
+-- These instances should not be used unless necessary, as they have
+-- poor runtime quantity behavior. Prefer `Typ` over base's `Morphism`
+-- and `Kleisli` over base's `Kleislimorphism`.
 
 namespace CatMonad
   ||| Convert a Prelude `Monad` into a `CatMonad` over `Morphism`.

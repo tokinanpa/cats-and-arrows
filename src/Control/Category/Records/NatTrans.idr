@@ -19,12 +19,12 @@ record NatTransR (f,g : FunctorR cat cat') where
 namespace NatTransR
   ||| The identity natural transformation.
   public export
-  id : {cat' : _} -> {0 f : FunctorR cat cat'} ->
+  id : {cat' : _} -> {f : FunctorR cat cat'} ->
        NatTransR {cat'} f f
   id = MkNatTransR cat'.id
 
   ||| Binary right-to-left composition of natural transformations.
   public export
-  (.) : {cat' : _} -> {0 f,g,h : FunctorR cat cat'} ->
+  (.) : {cat' : _} -> {f,g,h : FunctorR cat cat'} ->
         NatTransR g h -> NatTransR f g -> NatTransR f h
   MkNatTransR tr . MkNatTransR tr' = MkNatTransR (cat'.comp tr tr')

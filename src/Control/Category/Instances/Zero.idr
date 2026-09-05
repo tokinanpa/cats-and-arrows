@@ -48,7 +48,7 @@ CatMonad Zero m where
   unit {a} = void a
 
 public export
-Monoidal Zero ten i where
+{ten,i : _} -> Monoidal Zero ten i where
   assoc {a} = void a
   assoc' {a} = void a
   unitl {a} = void a
@@ -57,12 +57,12 @@ Monoidal Zero ten i where
   unitr' {a} = void a
 
 public export
-Braided Zero ten i where
+{ten,i : _} -> Braided Zero ten i where
   braid {a} = void a
   braid' {a} = void a
 
 public export
-Cartesian Zero ten i where
+{ten,i : _} -> Cartesian Zero ten i where
   projl {a} = void a
   projr {a} = void a
   prod {a} = void a
@@ -70,7 +70,7 @@ Cartesian Zero ten i where
   elim {a} = void a
 
 public export
-Cocartesian Zero ten i where
+{ten,i : _} -> Cocartesian Zero ten i where
   injl {a} = void a
   injr {a} = void a
   coprod {a} = void a
@@ -78,17 +78,17 @@ Cocartesian Zero ten i where
   intro {a} = void a
 
 public export
-Closed Zero ten hom i where
+{ten,hom,i : _} -> Closed Zero ten hom i where
   curry {a} = void a
   uncurry {a} = void a
 
 public export
-Traced Zero ten i where
+{ten,i : _} -> Traced Zero ten i where
   tracel {a} = void a
   tracer {a} = void a
 
 public export
-Bimonoidal Zero add mul z i where
+{add,mul,z,i : _} -> Bimonoidal Zero add mul z i where
   distribl {a} = void a
   distribl' {a} = void a
   distribr {a} = void a

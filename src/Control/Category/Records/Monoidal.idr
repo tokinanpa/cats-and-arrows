@@ -18,7 +18,6 @@ import Data.Morphisms
 public export
 record MonoidalR where
   constructor MkMonoidalR
-  {obj : Type}
   hom : Hom obj
   tensor : obj -> obj -> obj
   unit : obj
@@ -37,12 +36,12 @@ namespace MonoidalR
 
   ||| The identity morphism of an object `a`.
   public export %inline
-  (.id) : (rec : MonoidalR) -> forall a. rec.hom a a
+  (.id) : (rec : MonoidalR) -> {a : _} -> rec.hom a a
   (.id) rec@(MkMonoidalR {}) = rec.categoryR.id
 
   ||| Binary right-to-left composition of morphisms.
   public export %inline
-  (.comp) : (rec : MonoidalR) -> forall a,b,c.
+  (.comp) : (rec : MonoidalR) -> {a,b,c : _} ->
             rec.hom b c -> rec.hom a b -> rec.hom a c
   (.comp) rec@(MkMonoidalR {}) = rec.categoryR.comp
 
@@ -60,36 +59,36 @@ namespace MonoidalR
 
   ||| The left-biased associator. This must be the inverse of `(.assoc')`.
   public export %inline
-  (.assoc) : (rec : MonoidalR) -> forall a,b,c.
+  (.assoc) : (rec : MonoidalR) -> {a,b,c : _} ->
              rec.hom (rec.tensor (rec.tensor a b) c) (rec.tensor a (rec.tensor b c))
   (.assoc) rec = assoc @{rec.impl}
 
   ||| The right-biased associator. This must be the inverse of `(.assoc)`.
   public export %inline
-  (.assoc') : (rec : MonoidalR) -> forall a,b,c.
+  (.assoc') : (rec : MonoidalR) -> {a,b,c : _} ->
               rec.hom (rec.tensor a (rec.tensor b c)) (rec.tensor (rec.tensor a b) c)
   (.assoc') rec = assoc' @{rec.impl}
 
   ||| The left unitor.
   public export %inline
-  (.unitl) : (rec : MonoidalR) -> forall a.
+  (.unitl) : (rec : MonoidalR) -> {a : _} ->
              rec.hom (rec.tensor rec.unit a) a
   (.unitl) rec = unitl @{rec.impl}
 
   ||| The inverse of `(.unitl)`, the left unitor.
   public export %inline
-  (.unitl') : (rec : MonoidalR) -> forall a.
+  (.unitl') : (rec : MonoidalR) -> {a : _} ->
               rec.hom a (rec.tensor rec.unit a)
   (.unitl') rec = unitl' @{rec.impl}
 
   ||| The right unitor.
   public export %inline
-  (.unitr) : (rec : MonoidalR) -> forall a.
+  (.unitr) : (rec : MonoidalR) -> {a : _} ->
              rec.hom (rec.tensor a rec.unit) a
   (.unitr) rec = unitr @{rec.impl}
 
   ||| The inverse of `(.unitr)`, the right unitor.
   public export %inline
-  (.unitr') : (rec : MonoidalR) -> forall a.
+  (.unitr') : (rec : MonoidalR) -> {a : _} ->
               rec.hom a (rec.tensor a rec.unit)
   (.unitr') rec = unitr' @{rec.impl}

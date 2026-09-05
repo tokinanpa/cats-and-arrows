@@ -18,7 +18,6 @@ import Data.Morphisms
 public export
 record TracedR where
   constructor MkTracedR
-  {obj : Type}
   hom : Hom obj
   tensor : obj -> obj -> obj
   unit : obj
@@ -37,12 +36,12 @@ namespace TracedR
 
   ||| The identity morphism of an object `a`.
   public export %inline
-  (.id) : (rec : TracedR) -> forall a. rec.hom a a
+  (.id) : (rec : TracedR) -> {a : _} -> rec.hom a a
   (.id) rec@(MkTracedR {}) = rec.categoryR.id
 
   ||| Binary right-to-left composition of morphisms.
   public export %inline
-  (.comp) : (rec : TracedR) -> forall a,b,c.
+  (.comp) : (rec : TracedR) -> {a,b,c : _} ->
             rec.hom b c -> rec.hom a b -> rec.hom a c
   (.comp) rec@(MkTracedR {}) = rec.categoryR.comp
 
@@ -60,37 +59,37 @@ namespace TracedR
 
   ||| The left-biased associator. This must be the inverse of `(.assoc')`.
   public export %inline
-  (.assoc) : (rec : TracedR) -> forall a,b,c.
+  (.assoc) : (rec : TracedR) -> {a,b,c : _} ->
              rec.hom (rec.tensor (rec.tensor a b) c) (rec.tensor a (rec.tensor b c))
   (.assoc) rec@(MkTracedR {}) = rec.monoidalR.assoc
 
   ||| The right-biased associator. This must be the inverse of `(.assoc)`.
   public export %inline
-  (.assoc') : (rec : TracedR) -> forall a,b,c.
+  (.assoc') : (rec : TracedR) -> {a,b,c : _} ->
               rec.hom (rec.tensor a (rec.tensor b c)) (rec.tensor (rec.tensor a b) c)
   (.assoc') rec@(MkTracedR {}) = rec.monoidalR.assoc'
 
   ||| The left unitor.
   public export %inline
-  (.unitl) : (rec : TracedR) -> forall a.
+  (.unitl) : (rec : TracedR) -> {a : _} ->
              rec.hom (rec.tensor rec.unit a) a
   (.unitl) rec@(MkTracedR {}) = rec.monoidalR.unitl
 
   ||| The inverse of `(.unitl)`, the left unitor.
   public export %inline
-  (.unitl') : (rec : TracedR) -> forall a.
+  (.unitl') : (rec : TracedR) -> {a : _} ->
               rec.hom a (rec.tensor rec.unit a)
   (.unitl') rec@(MkTracedR {}) = rec.monoidalR.unitl'
 
   ||| The right unitor.
   public export %inline
-  (.unitr) : (rec : TracedR) -> forall a.
+  (.unitr) : (rec : TracedR) -> {a : _} ->
              rec.hom (rec.tensor a rec.unit) a
   (.unitr) rec@(MkTracedR {}) = rec.monoidalR.unitr
 
   ||| The inverse of `(.unitr)`, the right unitor.
   public export %inline
-  (.unitr') : (rec : TracedR) -> forall a.
+  (.unitr') : (rec : TracedR) -> {a : _} ->
               rec.hom a (rec.tensor a rec.unit)
   (.unitr') rec@(MkTracedR {}) = rec.monoidalR.unitr'
 
@@ -102,13 +101,13 @@ namespace TracedR
 
   ||| The left trace.
   public export %inline
-  (.tracel) : (rec : TracedR) -> forall a,b,c.
+  (.tracel) : (rec : TracedR) -> {a,b,c : _} ->
               rec.hom (rec.tensor a b) (rec.tensor a c) -> rec.hom b c
   (.tracel) rec = tracel @{rec.impl}
 
   ||| The right trace.
   public export %inline
-  (.tracer) : (rec : TracedR) -> forall a,b,c.
+  (.tracer) : (rec : TracedR) -> {a,b,c : _} ->
               rec.hom (rec.tensor a c) (rec.tensor b c) -> rec.hom a b
   (.tracer) rec = tracer @{rec.impl}
 
@@ -120,6 +119,6 @@ namespace TracedR
   ||| vector spaces, this takes a square matrix `M` to the 1x1 matrix
   ||| `[ tr(M) ]`.
   public export %inline
-  (.trace) : (rec : TracedR) -> forall a.
+  (.trace) : (rec : TracedR) -> {a : _} ->
              rec.hom a a -> rec.hom rec.unit rec.unit
   (.trace) rec = trace @{rec.impl}

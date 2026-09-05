@@ -5,7 +5,8 @@ import Control.Category.Functor
 import Control.Category.Monoidal
 import Control.Category.Braided
 import Data.Either
-import Data.Vect
+import Data.Fin
+import Data.List
 import Data.Morphisms
 
 %default total
@@ -35,30 +36,30 @@ import Data.Morphisms
 ||| * `merge . mapr intro . unitr' = id`
 public export
 interface Monoidal cat ten i =>
-    Cocartesian (0 cat : Hom obj) (0 ten : obj -> obj -> obj) (0 i : obj) | cat,ten where
+    Cocartesian (0 cat : Hom obj) (ten : obj -> obj -> obj) (i : obj) | cat,ten where
   constructor MkCocartesian
   -- NOTE: If these default definitions look weird, it's because
   -- Idris's interface elaboration really doesn't like these methods,
   -- so I'm giving it as much help as possible.
 
   ||| The left injection of the coproduct.
-  injl : forall a,b. cat a (a `ten` b)
+  injl : {a,b : _} -> cat a (a `ten` b)
   injl = Core.(.) {cat} (mapr' {cat,f=ten} $ intro {ten}) (unitr' {cat,ten,i})
 
   ||| The right injection of the coproduct.
-  injr : forall a,b. cat b (a `ten` b)
+  injr : {a,b : _} -> cat b (a `ten` b)
   injr = Core.(.) {cat} (mapl' {cat,f=ten} $ intro {ten}) (unitl' {cat,ten,i})
 
   ||| The universal property of the coproduct.
-  coprod : forall a,a',b. cat a b -> cat a' b -> cat (a `ten` a') b
+  coprod : {a,a',b : _} -> cat a b -> cat a' b -> cat (a `ten` a') b
   coprod f g = Core.(.) merge (bimap' {f=ten} f g)
 
   ||| The join of the universal monoid structure.
-  merge : forall a. cat (a `ten` a) a
+  merge : {a : _} -> cat (a `ten` a) a
   merge = Cocartesian.coprod Core.id Core.id
 
   ||| The unit of the universal monoid structure.
-  intro : forall a. cat i a
+  intro : {a : _} -> cat i a
   intro = Core.(.) (unitl {ten}) injl
 
 export infixr 6 \|/
@@ -66,7 +67,8 @@ export infixr 6 \|/
 ||| An operator synonym for `coprod`, the universal property of a
 ||| cocartesian monoidal category's coproduct structure.
 public export %inline %tcinline
-(\|/) : Cocartesian cat ten i => forall a,a',b. cat a b -> cat a' b -> cat (a `ten` a') b
+(\|/) : {ten,i : _} -> Cocartesian cat ten i => {a,a',b : _} ->
+        cat a b -> cat a' b -> cat (a `ten` a') b
 (\|/) = coprod
 
 ||| See `PreMonoidal`.
@@ -80,19 +82,28 @@ PreCocartesian = Cocartesian
 ------------------------------------------------------------
 
 public export
-inj : Cocartesian cat ten i =>
-      {n : _} -> (0 as : Vect (S n) _) -> (x : Fin (S n)) -> cat (index x as) (foldr1 ten as)
-inj {n=Z} (_::as') FZ = rewrite invertVectZ as' in id
-inj {n=S _} (_::as') x =
-  rewrite invertVectS as'
-  in case x of
-      FZ => injl
-      FS x' => injr . inj _ x'
+inj : Cocartesian cat ten i => {xs : _} -> (x : Fin (length xs)) -> cat (index' xs x) (TenSeq ten i xs)
+inj @{c@(MkCocartesian{})} {xs=[_]} FZ = id
+inj @{c@(MkCocartesian{})} {xs=[_,_]} (FS FZ) = injr
+inj @{c@(MkCocartesian{})} {xs=_::_::_} FZ = injl
+inj @{c@(MkCocartesian{})} {xs=_::_::_} (FS x) = injr . inj x
 
 
 ------------------------------------------------------------
 -- Existing Instances
 ------------------------------------------------------------
+
+namespace Braided
+  ||| Convert a cocartesian monoidal category into a
+  ||| symmetric monoidal category.
+  public export
+  [FromCocartesian] {ten,i : _} -> Cocartesian cat ten i => Braided cat ten i where
+    braid = coprod injr injl
+
+
+-- These instances should not be used unless necessary, as they have
+-- poor runtime quantity behavior. Prefer `Typ` over base's `Morphism`
+-- and `Kleisli` over base's `Kleislimorphism`.
 
 public export
 Cocartesian Morphism Either Void where
@@ -120,10 +131,3 @@ Monad m => Cocartesian (Kleislimorphism m) Either Void where
   merge = Kleisli $ pure . fromEither
   intro = Kleisli $ pure . absurd
 
-
-namespace Braided
-  ||| Convert a cocartesian monoidal category into a
-  ||| symmetric monoidal category.
-  public export
-  [FromCocartesian] Cocartesian cat ten i => Braided cat ten i where
-    braid = coprod injr injl

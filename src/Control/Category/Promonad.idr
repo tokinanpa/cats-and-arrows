@@ -25,8 +25,7 @@ import Data.Vect
 ||| Prelude monads) is a monad in the bicategory of profunctors.
 |||
 ||| Equivalently, a promonad is a category equipped with an
-||| identity-on-objects functor from the standard category of
-||| functions.
+||| identity-on-objects functor from the category `Typ`.
 |||
 ||| Laws - `funit` is functorial (see `CatFunctor`), meaning:
 ||| * `funit id = id`
@@ -42,21 +41,6 @@ interface Category cat => Promonad (0 cat : Hom Type) where
 -- Existing Instances
 ------------------------------------------------------------
 
-public export
-Promonad Morphism where
-  funit = Mor
-
-namespace Promonad
-  public export
-  [Function] Promonad (~~>) using Category.Function where
-    funit = id
-
-public export
-Monad m => Promonad (Kleislimorphism m) where
-  funit f = Kleisli $ pure . f
-
--- Generic Category Instances
-
 ||| The unit identity-on-objects functor of a promonad.
 public export
 [PromonadUnit] Promonad cat => CatFunctor Morphism cat Prelude.id where
@@ -65,7 +49,7 @@ public export
 namespace Monoidal
   ||| Convert a promonad into a (pre)monoidal category.
   public export
-  [FromPromonad] (Promonad cat, CatEndoBifunctor cat ten, Monoidal Morphism ten i) =>
+  [FromPromonad] {ten,i : _} -> (Promonad cat, CatEndoBifunctor cat ten, Monoidal Morphism ten i) =>
       Monoidal cat ten i where
     assoc = funit $ applyMor assoc
     assoc' = funit $ applyMor assoc'
@@ -77,14 +61,14 @@ namespace Monoidal
 namespace Braided
   ||| Convert a promonad into a braided (pre)monoidal category.
   public export
-  [FromPromonad] (Promonad cat, CatEndoBifunctor cat ten, Braided Morphism ten i) =>
+  [FromPromonad] {ten,i : _} -> (Promonad cat, CatEndoBifunctor cat ten, Braided Morphism ten i) =>
       Braided cat ten i using Monoidal.FromPromonad where
     braid = funit $ applyMor braid
 
 namespace Cartesian
   ||| Convert a promonad into a cartesian (pre)monoidal category.
   public export
-  [FromPromonad] (Promonad cat, CatEndoBifunctor cat ten, Cartesian Morphism ten i) =>
+  [FromPromonad] {ten,i : _} -> (Promonad cat, CatEndoBifunctor cat ten, Cartesian Morphism ten i) =>
       Cartesian cat ten i using Monoidal.FromPromonad where
     projl = funit $ applyMor projl
     projr = funit $ applyMor projr
@@ -95,7 +79,7 @@ namespace Cartesian
 namespace Cocartesian
   ||| Convert a promonad into a cocartesian (pre)monoidal category.
   public export
-  [FromPromonad] (Promonad cat, CatEndoBifunctor cat ten, Cocartesian Morphism ten i) =>
+  [FromPromonad] {ten,i : _} -> (Promonad cat, CatEndoBifunctor cat ten, Cocartesian Morphism ten i) =>
       Cocartesian cat ten i using Monoidal.FromPromonad where
     injl = funit $ applyMor injl
     injr = funit $ applyMor injr
@@ -106,7 +90,7 @@ namespace Cocartesian
 namespace Bimonoidal
   ||| Convert a promonad into a (pre)bimonoidal category.
   public export
-  [FromPromonad] (Promonad cat, CatEndoBifunctor cat add, CatEndoBifunctor cat mul,
+  [FromPromonad] {add,mul,z,i : _} -> (Promonad cat, CatEndoBifunctor cat add, CatEndoBifunctor cat mul,
                   Bimonoidal Morphism add mul z i) => Bimonoidal cat add mul z i
       using Monoidal.FromPromonad where
     distribl = funit $ applyMor distribl
@@ -119,26 +103,19 @@ namespace Bimonoidal
     absorbr' = funit $ applyMor $ absorbr' {add,mul}
 
 
--- Generic Profunctor Instances
+-- These instances should not be used unless necessary, as they have
+-- poor runtime quantity behavior. Prefer `Typ` over base's `Morphism`
+-- and `Kleisli` over base's `Kleislimorphism`.
 
-namespace Profunctor
-  ||| Convert a promonad into its underlying profunctor.
-  public export
-  [FromPromonad] Promonad cat => Profunctor cat where
-    dimap f g p = funit g . p . funit f
+public export
+Promonad Morphism where
+  funit = Mor
 
-namespace Strong
-  ||| Convert a promonad into a profunctor with strength.
+namespace Promonad
   public export
-  [FromPromonad] (Promonad cat, CatEndoBifunctor cat ten) => GenStrong ten cat
-      using Profunctor.FromPromonad where
-    strongl = mapl'
-    strongr = mapr'
+  [Function] Promonad (~~>) using Category.Function where
+    funit = id
 
-namespace Costrong
-  ||| Convert a promonad into a profunctor with costrength.
-  public export
-  [FromPromonad] (Promonad cat, Traced cat ten i) => GenCostrong ten cat
-      using Profunctor.FromPromonad where
-    costrongl = tracer {ten}
-    costrongr = tracel {ten}
+public export
+Monad m => Promonad (Kleislimorphism m) where
+  funit f = Kleisli $ pure . f

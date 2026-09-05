@@ -30,17 +30,17 @@ import Data.Vect
 ||| laws, the same interface is used for this case.
 public export
 interface Monoidal cat ten i =>
-    Braided (0 cat : Hom obj) (0 ten : obj -> obj -> obj) (0 i : obj) | cat,ten where
+    Braided (0 cat : Hom obj) (ten : obj -> obj -> obj) (i : obj) | cat,ten where
   constructor MkBraided
   ||| The braiding of the category.
-  braid : forall a,b. cat (a `ten` b) (b `ten` a)
+  braid : {a,b : _} -> cat (a `ten` b) (b `ten` a)
 
   ||| The inverse of `braid`, the braiding of the category.
   |||
   ||| The default definition sets this equal to `braid`, making the
   ||| assumption that this braiding is symmetric. If it isn't, then
   ||| both methods must be defined.
-  braid' : forall a,b. cat (b `ten` a) (a `ten` b)
+  braid' : {a,b : _} -> cat (b `ten` a) (a `ten` b)
   braid' = braid
 
 ||| See `PreMonoidal`.
@@ -55,15 +55,15 @@ PreBraided = Braided
 
 ||| Swap two halves of a tensor product sequence using the braiding.
 public export
-swapAssoc : Braided cat ten i => {m,n : _} -> {0 xs : Vect m _} -> {0 ys : Vect n _} ->
+swapAssoc : Braided cat ten i => {xs,ys : _} ->
              cat (TenSeq ten i (xs ++ ys)) (TenSeq ten i (ys ++ xs))
-swapAssoc = mergeAssoc . braid . splitAssoc
+swapAssoc @{c@(MkBraided{})} = mergeAssoc . braid . splitAssoc
 
 ||| Bring a single object of a tensor product sequence to the front.
 public export
-bringToFront : Braided cat ten i => {m,n : _} -> {0 xs : Vect m _} -> {0 ys : Vect n _} ->
+bringToFront : Braided cat ten i => {xs,x,ys : _} ->
                cat (TenSeq ten i ((xs ++ [x]) ++ ys)) (TenSeq ten i (x :: xs ++ ys))
-bringToFront = mergeAssoc . mapl' swapAssoc . splitAssoc
+bringToFront @{c@(MkBraided{})} = mergeAssoc . mapl' swapAssoc . splitAssoc
 
 
 ------------------------------------------------------------
@@ -71,18 +71,31 @@ bringToFront = mergeAssoc . mapl' swapAssoc . splitAssoc
 ------------------------------------------------------------
 
 namespace Braided
+  ||| Invert the braiding of the monoidal category. If the braiding is
+  ||| symmetric, this does nothing.
+  public export
+  [FlipBraid] {ten,i : _} -> Braided cat ten i => Braided cat ten i where
+    braid = braid'
+    braid' = braid
+
+
+-- These instances should not be used unless necessary, as they have
+-- poor runtime quantity behavior. Prefer `Typ` over base's `Morphism`
+-- and `Kleisli` over base's `Kleislimorphism`.
+
+namespace Braided
   ||| Convert a `Symmetric` `Tensor` into a braided monoidal structure
   ||| on `Morphism`.
   public export
-  [MorFromTensor] (Tensor.Symmetric ten, Tensor ten i) => Braided Morphism ten i
-      using Monoidal.MorFromTensor where
+  [MorFromTensor] {ten,i : _} -> (Tensor.Symmetric ten, Tensor ten i) =>
+      Braided Morphism ten i using Monoidal.MorFromTensor where
     braid = Mor swap'
 
   ||| Convert a `Symmetric` `Tensor` into a braided monoidal structure
   ||| on the function category.
   public export
-  [FuncFromTensor] (Tensor.Symmetric ten, Tensor ten i) => Braided (~~>) ten i
-      using Category.Function Monoidal.FuncFromTensor where
+  [FuncFromTensor] {ten,i : _} -> (Tensor.Symmetric ten, Tensor ten i) =>
+      Braided (~~>) ten i using Category.Function Monoidal.FuncFromTensor where
     braid = swap'
 
   ||| Convert a `Symmetric` `Tensor` into a braided monoidal structure
@@ -92,7 +105,7 @@ namespace Braided
   ||| dependent on the behavior of the `Bitraversable` implementation.
   ||| In particular, this is usually a premonoidal category.
   public export
-  [KleisliFromTensor] (Tensor.Symmetric ten, Tensor ten i, Bitraversable ten, Monad m) =>
+  [KleisliFromTensor] {ten,i : _} -> (Tensor.Symmetric ten, Tensor ten i, Bitraversable ten, Monad m) =>
       Braided (Kleislimorphism m) ten i using Monoidal.KleisliFromTensor where
     braid = Kleisli $ pure . swap'
 
@@ -121,10 +134,3 @@ namespace Braided
   public export
   FuncEither : Braided (~~>) Either Void
   FuncEither = FuncFromTensor
-
-  ||| Invert the braiding of the monoidal category. If the braiding is
-  ||| symmetric, this does nothing.
-  public export
-  [FlipBraid] Braided cat ten i => Braided cat ten i where
-    braid = braid'
-    braid' = braid

@@ -37,7 +37,7 @@ CatBifunctor catA catB cat' f => CatBifunctor (Op catA) (Op catB) (Op cat') f wh
   bimap (MkOp f) (MkOp g) = MkOp $ bimap f g
 
 public export
-Monoidal cat ten i => Monoidal (Op cat) ten i where
+{ten,i : _} -> Monoidal cat ten i => Monoidal (Op cat) ten i where
   assoc = MkOp assoc'
   assoc' = MkOp assoc
   unitl = MkOp unitl'
@@ -46,12 +46,12 @@ Monoidal cat ten i => Monoidal (Op cat) ten i where
   unitr' = MkOp unitr
 
 public export
-Braided cat ten i => Braided (Op cat) ten i where
+{ten,i : _} -> Braided cat ten i => Braided (Op cat) ten i where
   braid = MkOp braid'
   braid' = MkOp braid
 
 public export
-Cocartesian cat ten i => Cartesian (Op cat) ten i where
+{ten,i : _} -> Cocartesian cat ten i => Cartesian (Op cat) ten i where
   projl = MkOp injl
   projr = MkOp injr
   prod (MkOp f) (MkOp g) = MkOp $ coprod f g
@@ -59,7 +59,7 @@ Cocartesian cat ten i => Cartesian (Op cat) ten i where
   elim = MkOp $ intro {ten}
 
 public export
-Cartesian cat ten i => Cocartesian (Op cat) ten i where
+{ten,i : _} -> Cartesian cat ten i => Cocartesian (Op cat) ten i where
   injl = MkOp projl
   injr = MkOp projr
   coprod (MkOp f) (MkOp g) = MkOp $ prod f g
@@ -67,7 +67,7 @@ Cartesian cat ten i => Cocartesian (Op cat) ten i where
   intro = MkOp $ elim {ten}
 
 public export
-Traced cat ten i => Traced (Op cat) ten i where
+{ten,i : _} -> Traced cat ten i => Traced (Op cat) ten i where
   tracel = MkOp . tracel . runOp
   tracer = MkOp . tracer . runOp
 

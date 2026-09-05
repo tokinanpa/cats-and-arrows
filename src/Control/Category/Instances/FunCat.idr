@@ -50,91 +50,91 @@ public export %hint
     (MkNatTransR tr) (MkNatTransR tr') = MkNatTransR $ bimap tr tr'
 
 public export %hint
-MonoidalFunCat : {cat' : _} -> {0 ten : cat'.obj -> cat'.obj -> cat'.obj} -> {0 i : cat'.obj} ->
+MonoidalFunCat : {cat' : _} -> {ten : cat'.obj -> cat'.obj -> cat'.obj} -> {i : cat'.obj} ->
                   Monoidal cat'.hom ten i => Monoidal (FunCat cat cat') (FunProd ten) (FunUnit i)
 MonoidalFunCat {cat'=cat'@(MkCategoryR{})} =
   MkMonoidal @{%search} @{BifunctorFunProd} assoc_ assoc'_ unitl_ unitl'_ unitr_ unitr'_
   where
-    assoc_ : NatTransR {cat'} (FunProd ten (FunProd ten f g) h) (FunProd ten f (FunProd ten g h))
+    assoc_ : {f,g,h : _} -> NatTransR {cat'} (FunProd ten (FunProd ten f g) h) (FunProd ten f (FunProd ten g h))
     assoc_ {f=MkFunctorR{},g=MkFunctorR{},h=MkFunctorR{}} = MkNatTransR assoc
 
-    assoc'_ : NatTransR {cat'} (FunProd ten f (FunProd ten g h)) (FunProd ten (FunProd ten f g) h)
+    assoc'_ : {f,g,h : _} -> NatTransR {cat'} (FunProd ten f (FunProd ten g h)) (FunProd ten (FunProd ten f g) h)
     assoc'_ {f=MkFunctorR{},g=MkFunctorR{},h=MkFunctorR{}} = MkNatTransR assoc'
 
-    unitl_ : NatTransR {cat'} (FunProd ten (FunUnit i) f) f
+    unitl_ : {f : _} -> NatTransR {cat'} (FunProd ten (FunUnit i) f) f
     unitl_ {f=MkFunctorR{}} = MkNatTransR unitl
 
-    unitl'_ : NatTransR {cat'} f (FunProd ten (FunUnit i) f)
+    unitl'_ : {f : _} -> NatTransR {cat'} f (FunProd ten (FunUnit i) f)
     unitl'_ {f=MkFunctorR{}} = MkNatTransR unitl'
 
-    unitr_ : NatTransR {cat'} (FunProd ten f (FunUnit i)) f
+    unitr_ : {f : _} -> NatTransR {cat'} (FunProd ten f (FunUnit i)) f
     unitr_ {f=MkFunctorR{}} = MkNatTransR unitr
 
-    unitr'_ : NatTransR {cat'} f (FunProd ten f (FunUnit i))
+    unitr'_ : {f : _} -> NatTransR {cat'} f (FunProd ten f (FunUnit i))
     unitr'_ {f=MkFunctorR{}} = MkNatTransR unitr'
 
 public export %hint
-BraidedFunCat : {cat' : _} -> {0 ten : cat'.obj -> cat'.obj -> cat'.obj} -> {0 i : cat'.obj} ->
+BraidedFunCat : {cat' : _} -> {ten : cat'.obj -> cat'.obj -> cat'.obj} -> {i : cat'.obj} ->
                   Braided cat'.hom ten i => Braided (FunCat cat cat') (FunProd ten) (FunUnit i)
 BraidedFunCat {cat'=cat'@(MkCategoryR{})} = MkBraided @{MonoidalFunCat} braid_ braid'_
   where
-    braid_ : NatTransR {cat'} (FunProd ten f g) (FunProd ten g f)
+    braid_ : {f,g : _} -> NatTransR {cat'} (FunProd ten f g) (FunProd ten g f)
     braid_ {f=MkFunctorR{},g=MkFunctorR{}} = MkNatTransR braid
 
-    braid'_ : NatTransR {cat'} (FunProd ten g f) (FunProd ten f g)
+    braid'_ : {f,g : _} -> NatTransR {cat'} (FunProd ten g f) (FunProd ten f g)
     braid'_ {f=MkFunctorR{},g=MkFunctorR{}} = MkNatTransR braid'
 
 public export %hint
-CartesianFunCat : {cat' : _} -> {0 ten : cat'.obj -> cat'.obj -> cat'.obj} -> {0 i : cat'.obj} ->
+CartesianFunCat : {cat' : _} -> {ten : cat'.obj -> cat'.obj -> cat'.obj} -> {i : cat'.obj} ->
                   Cartesian cat'.hom ten i => Cartesian (FunCat cat cat') (FunProd ten) (FunUnit i)
 CartesianFunCat {cat'=cat'@(MkCategoryR{})} = MkCartesian @{MonoidalFunCat} projl_ projr_ prod_ split_ elim_
   where
-    projl_ : NatTransR {cat'} (FunProd ten f g) f
+    projl_ : {f,g : _} -> NatTransR {cat'} (FunProd ten f g) f
     projl_ {f=MkFunctorR{},g=MkFunctorR{}} = MkNatTransR projl
 
-    projr_ : NatTransR {cat'} (FunProd ten f g) g
+    projr_ : {f,g : _} -> NatTransR {cat'} (FunProd ten f g) g
     projr_ {f=MkFunctorR{},g=MkFunctorR{}} = MkNatTransR projr
 
-    prod_ : NatTransR {cat'} f g -> NatTransR f g' -> NatTransR f (FunProd ten g g')
+    prod_ : {f,g,g' : _} -> NatTransR {cat'} f g -> NatTransR f g' -> NatTransR f (FunProd ten g g')
     prod_ {f=MkFunctorR{},g=MkFunctorR{},g'=MkFunctorR{}} (MkNatTransR tr) (MkNatTransR tr') =
       MkNatTransR $ prod tr tr'
 
-    split_ : NatTransR {cat'} f (FunProd ten f f)
+    split_ : {f : _} -> NatTransR {cat'} f (FunProd ten f f)
     split_ {f=MkFunctorR{}} = MkNatTransR split
 
-    elim_ : NatTransR {cat'} f (FunUnit i)
+    elim_ : {f : _} -> NatTransR {cat'} f (FunUnit i)
     elim_ {f=MkFunctorR{}} = MkNatTransR $ elim {ten}
 
 public export %hint
-CocartesianFunCat : {cat' : _} -> {0 ten : cat'.obj -> cat'.obj -> cat'.obj} -> {0 i : cat'.obj} ->
+CocartesianFunCat : {cat' : _} -> {ten : cat'.obj -> cat'.obj -> cat'.obj} -> {i : cat'.obj} ->
                     Cocartesian cat'.hom ten i => Cocartesian (FunCat cat cat') (FunProd ten) (FunUnit i)
 CocartesianFunCat {cat'=cat'@(MkCategoryR{})} = MkCocartesian @{MonoidalFunCat} injl_ injr_ coprod_ merge_ intro_
   where
-    injl_ : NatTransR {cat'} f (FunProd ten f g)
+    injl_ : {f,g : _} -> NatTransR {cat'} f (FunProd ten f g)
     injl_ {f=MkFunctorR{},g=MkFunctorR{}} = MkNatTransR injl
 
-    injr_ : NatTransR {cat'} g (FunProd ten f g)
+    injr_ : {f,g : _} -> NatTransR {cat'} g (FunProd ten f g)
     injr_ {f=MkFunctorR{},g=MkFunctorR{}} = MkNatTransR injr
 
-    coprod_ : NatTransR {cat'} f g -> NatTransR f' g -> NatTransR (FunProd ten f f') g
+    coprod_ : {f,f',g : _} -> NatTransR {cat'} f g -> NatTransR f' g -> NatTransR (FunProd ten f f') g
     coprod_ {f=MkFunctorR{},f'=MkFunctorR{},g=MkFunctorR{}} (MkNatTransR tr) (MkNatTransR tr') =
       MkNatTransR $ coprod tr tr'
 
-    merge_ : NatTransR {cat'} (FunProd ten f f) f
+    merge_ : {f : _} -> NatTransR {cat'} (FunProd ten f f) f
     merge_ {f=MkFunctorR{}} = MkNatTransR merge
 
-    intro_ : NatTransR {cat'} (FunUnit i) f
+    intro_ : {f : _} -> NatTransR {cat'} (FunUnit i) f
     intro_ {f=MkFunctorR{}} = MkNatTransR $ intro {ten}
 
 public export %hint
-TracedFunCat : {cat' : _} -> {0 ten : cat'.obj -> cat'.obj -> cat'.obj} -> {0 i : cat'.obj} ->
+TracedFunCat : {cat' : _} -> {ten : cat'.obj -> cat'.obj -> cat'.obj} -> {i : cat'.obj} ->
                Traced cat'.hom ten i => Traced (FunCat cat cat') (FunProd ten) (FunUnit i)
 TracedFunCat {cat'=cat'@(MkCategoryR{})} = MkTraced @{MonoidalFunCat} tracel_ tracer_
   where
-    tracel_ : NatTransR {cat'} (FunProd ten f g) (FunProd ten f h) -> NatTransR g h
+    tracel_ : {f,g,h : _} -> NatTransR {cat'} (FunProd ten f g) (FunProd ten f h) -> NatTransR g h
     tracel_ {f=MkFunctorR{},g=MkFunctorR{},h=MkFunctorR{}} (MkNatTransR tr) = MkNatTransR $ tracel tr
 
-    tracer_ : NatTransR {cat'} (FunProd ten f h) (FunProd ten g h) -> NatTransR f g
+    tracer_ : {f,g,h : _} -> NatTransR {cat'} (FunProd ten f h) (FunProd ten g h) -> NatTransR f g
     tracer_ {f=MkFunctorR{},g=MkFunctorR{},h=MkFunctorR{}} (MkNatTransR tr) = MkNatTransR $ tracer tr
 
 

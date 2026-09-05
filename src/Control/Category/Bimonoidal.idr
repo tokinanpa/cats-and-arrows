@@ -31,27 +31,27 @@ private infixl 9 `mul`
 ||| * https://nilesjohnson.net/En-monoidal.html
 public export
 interface (Monoidal cat add z, Monoidal cat mul i) =>
-    Bimonoidal (0 cat : Hom obj) (0 add,mul : obj -> obj -> obj) (0 z,i : obj) | cat,add,mul where
+    Bimonoidal (0 cat : Hom obj) (add,mul : obj -> obj -> obj) (z,i : obj) | cat,add,mul where
   constructor MkBimonoidal
   ||| The left distributor.
-  distribl : forall a,b,c. cat (a `mul` (b `add` c)) (a `mul` b `add` a `mul` c)
+  distribl : {a,b,c : _} -> cat (a `mul` (b `add` c)) (a `mul` b `add` a `mul` c)
   ||| The inverse of `distribl`, the left distributor.
-  distribl' : forall a,b,c. cat (a `mul` b `add` a `mul` c) (a `mul` (b `add` c))
+  distribl' : {a,b,c : _} -> cat (a `mul` b `add` a `mul` c) (a `mul` (b `add` c))
 
   ||| The right distributor.
-  distribr : forall a,b,c. cat ((a `add` b) `mul` c) (a `mul` c `add` b `mul` c)
+  distribr : {a,b,c : _} -> cat ((a `add` b) `mul` c) (a `mul` c `add` b `mul` c)
   ||| The inverse of `distribr`, the right distributor.
-  distribr' : forall a,b,c. cat (a `mul` c `add` b `mul` c) ((a `add` b) `mul` c)
+  distribr' : {a,b,c : _} -> cat (a `mul` c `add` b `mul` c) ((a `add` b) `mul` c)
 
   ||| The left absorbor.
-  absorbl : forall a. cat (a `mul` z) z
+  absorbl : {a : _} -> cat (a `mul` z) z
   ||| The inverse of `absorbl`, the left absorbor.
-  absorbl' : forall a. cat z (a `mul` z)
+  absorbl' : {a : _} -> cat z (a `mul` z)
 
   ||| The right absorbor.
-  absorbr : forall a. cat (z `mul` a) z
+  absorbr : {a : _} -> cat (z `mul` a) z
   ||| The inverse of `absorbr`, the right absorbor.
-  absorbr' : forall a. cat z (z `mul` a)
+  absorbr' : {a : _} -> cat z (z `mul` a)
 
 ||| A pre-bimonoidal category has a multiplicative structure that is
 ||| premonoidal. See `PreMonoidal`.
@@ -111,6 +111,10 @@ PreDistributive = Distributive
 ------------------------------------------------------------
 -- Existing Instances
 ------------------------------------------------------------
+
+-- These instances should not be used unless necessary, as they have
+-- poor runtime quantity behavior. Prefer `Typ` over base's `Morphism`
+-- and `Kleisli` over base's `Kleislimorphism`.
 
 public export
 Bimonoidal Morphism Either Pair Void () where
