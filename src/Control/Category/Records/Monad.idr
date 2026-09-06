@@ -49,9 +49,42 @@ namespace MonadR
             cat.hom a (rec.fun a)
   (.unit) rec = unit @{rec.impl}
 
-
-||| A monad has *tensorial strength* if it is compatible with a
+||| An endofunctor has *tensorial strength* if it is compatible with a
 ||| monoidal category's tensor product.
+|||
+||| See `StrongFunctor` for required laws.
+public export
+record StrongFunctorR (cat : MonoidalR) where
+  constructor MkStrongFunctorR
+  fun : cat.obj -> cat.obj
+  {auto impl : StrongFunctor cat.hom cat.tensor fun}
+
+namespace StrongFunctorR
+  ||| Convert this into a `FunctorR`.
+  public export %inline
+  (.functorR) : (rec : StrongFunctorR cat) -> EndofunctorR cat.categoryR
+  (.functorR) {cat=MkMonoidalR{}} (MkStrongFunctorR {} {fun}) = MkFunctorR fun
+
+  ||| Apply the functor to a morphism in `cat`.
+  public export %inline
+  (.map) : (rec : StrongFunctorR cat) -> {a,b : _} ->
+           cat.hom a b -> cat.hom (rec.fun a) (rec.fun b)
+  (.map) {cat=MkMonoidalR{}} rec@(MkStrongFunctorR {}) = rec.functorR.map
+
+  ||| The left tensor strength.
+  public export %inline
+  (.strongl) : (rec : StrongFunctorR cat) -> {a,b : _} ->
+               cat.hom (cat.tensor a (rec.fun b)) (rec.fun (cat.tensor a b))
+  (.strongl) rec = strongl @{rec.impl}
+
+  ||| The right tensor strength.
+  public export %inline
+  (.strongr) : (rec : StrongFunctorR cat) -> {a,b : _} ->
+               cat.hom (cat.tensor (rec.fun a) b) (rec.fun (cat.tensor a b))
+  (.strongr) rec = strongr @{rec.impl}
+
+
+||| A strong monad is a monad that is also a strong functor.
 |||
 ||| See `StrongMonad` for required laws.
 public export
@@ -91,19 +124,25 @@ namespace StrongMonadR
   (.unit) {cat=MkMonoidalR{}} rec@(MkStrongMonadR {}) = rec.monadR.unit
 
 
-  ||| Convert this into a `StrongMonadR`.
+  ||| Convert this into a `StrongFunctorR`.
   public export %inline
-  (.strongMonadR) : (rec : StrongMonadR cat) -> StrongMonadR cat
-  (.strongMonadR) = id
+  (.strongFunctorR) : (rec : StrongMonadR cat) -> StrongFunctorR cat
+  (.strongFunctorR) (MkStrongMonadR {} {fun}) = MkStrongFunctorR fun
 
   ||| The left tensor strength.
   public export %inline
   (.strongl) : (rec : StrongMonadR cat) -> {a,b : _} ->
                cat.hom (cat.tensor a (rec.fun b)) (rec.fun (cat.tensor a b))
-  (.strongl) rec = strongl @{rec.impl}
+  (.strongl) rec@(MkStrongMonadR {}) = rec.strongFunctorR.strongl
 
   ||| The right tensor strength.
   public export %inline
   (.strongr) : (rec : StrongMonadR cat) -> {a,b : _} ->
                cat.hom (cat.tensor (rec.fun a) b) (rec.fun (cat.tensor a b))
-  (.strongr) rec = strongr @{rec.impl}
+  (.strongr) rec@(MkStrongMonadR {}) = rec.strongFunctorR.strongr
+
+
+  ||| Convert this into a `StrongMonadR`.
+  public export %inline
+  (.strongMonadR) : (rec : StrongMonadR cat) -> StrongMonadR cat
+  (.strongMonadR) = id

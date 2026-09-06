@@ -75,15 +75,16 @@ object "CatMonad cat m" as CatMonad {
   join : cat (m (m a)) (m a)
   unit : cat a (m a)
 }
-object "StrongMonad cat ten m" as StrongMonad {
-  strongl : cat (a `ten` m b) (m (a `ten` b))
-  strongr : cat (m a `ten` b) (m (a `ten` b))
-
+object "StrongFunctor cat ten f" as StrongFunctor {
+  strongl : cat (a `ten` f b) (f (a `ten` b))
+  strongr : cat (f a `ten` b) (f (a `ten` b))
 }
 object "CatBifunctor catA catB cat' f" as CatBifunctor {
   bimap : catA a b <U+2192> catB a' b' <U+2192> cat' (f a a') (f b b')
 }
 object "<color:blue>CatEndoBifunctor cat f" as CatEndoBifunctor
+object "<color:blue>StrongMonad cat ten m" as StrongMonad
+
 
 
 Semigroupoid <.. Category
@@ -125,6 +126,8 @@ CatFunctor .. CatEndofunctor : cat,cat,f
 CatBifunctor .. CatEndoBifunctor : cat,cat,cat,f
 
 CatEndofunctor <-- CatMonad
+CatEndofunctor <-- StrongFunctor
 
-CatMonad <-- StrongMonad
+CatMonad .. StrongMonad
+StrongFunctor .. StrongMonad
 @enduml

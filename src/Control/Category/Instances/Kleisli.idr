@@ -89,7 +89,7 @@ public export %hint
 KleisliPreBimonoidal : {m,add,mul,z,i : _} -> PreBimonoidal cat add mul z i =>
                        (StrongMonad cat add m, StrongMonad cat mul m) =>
                        PreBimonoidal (Kleisli cat m) add mul z i
-KleisliPreBimonoidal @{_} @{(c@(MkStrongMonad @{impl} {}),_)} =
+KleisliPreBimonoidal @{_} @{(c@(impl,_),_)} =
   MkBimonoidal (MkKleisli $ unit @{impl} . distribl)
                (MkKleisli $ unit @{impl} . distribl')
                (MkKleisli $ unit @{impl} . distribr)

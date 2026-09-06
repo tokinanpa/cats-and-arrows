@@ -33,38 +33,46 @@ interface CatFunctor cat cat m => CatMonad
   ||| The unit transformation of the monad.
   unit : {a : _} -> cat a (m a)
 
-||| A monad has *tensorial strength* if it is compatible with a
+||| An endofunctor has *tensorial strength* if it is compatible with a
 ||| monoidal category's tensor product. Generally, `cat` is a monoidal
 ||| category with `ten` as its tensor produt, though this is not
 ||| enforced by the interface.
 |||
-||| Note that while all Prelude monads have strength over `Pair`, this
-||| does not necessarily hold for other tensor products or in other
-||| categories.
+||| Note that while all Prelude functors have strength over `Pair`,
+||| this does not necessarily hold for other tensor products or in
+||| other categories.
 |||
-||| This is the interface-style definition of a strong monad. For
-||| the record-style definition, see `Control.Category.Records.StrongMonadR`.
+||| This is the interface-style definition of a strong functor. For
+||| the record-style definition, see `Control.Category.Records.StrongFunctorR`.
 |||
 ||| Laws (when `cat` is a monoidal category):
 ||| * `map unitl . strongl = unitl`
 ||| * `map unitr . strongr = unitr`
-||| * `strongl . mapr unit = unit`
-||| * `strongr . mapl unit = unit`
 ||| * `map assoc . strongl = strongl . mapr strongl . assoc`
 ||| * `map assoc' . strongr = strongr . mapl strongr . assoc'`
-||| * `join . map strongl . strongl = strongl . mapr join`
-||| * `join . map strongr . strongr = strongr . mapl join`
 ||| * `strongr . mapl strongl = strongl . mapr strongr . assoc`
 public export
-interface CatMonad cat m => StrongMonad
+interface CatFunctor cat cat f => StrongFunctor
     (0 cat : Hom obj)
     (0 ten : obj -> obj -> obj)
-    (0 m : obj -> obj) | cat,ten,m where
-  constructor MkStrongMonad
+    (0 f : obj -> obj) | cat,ten,f where
+  constructor MkStrongFunctor
   ||| The left tensor strength.
-  strongl : {a,b : _} -> cat (a `ten` m b) (m $ a `ten` b)
+  strongl : {a,b : _} -> cat (a `ten` f b) (f $ a `ten` b)
   ||| The right tensor strength.
-  strongr : {a,b : _} -> cat (m a `ten` b) (m $ a `ten` b)
+  strongr : {a,b : _} -> cat (f a `ten` b) (f $ a `ten` b)
+
+||| A strong monad is a monad that is also a strong functor, with
+||| additional compatibility laws.
+|||
+||| Laws:
+||| * `strongl . mapr unit = unit`
+||| * `strongr . mapl unit = unit`
+||| * `join . map strongl . strongl = strongl . mapr join`
+||| * `join . map strongr . strongr = strongr . mapl join`
+public export
+StrongMonad : (cat : Hom obj) -> (ten : obj -> obj -> obj) -> (m : obj -> obj) -> Type
+StrongMonad cat ten m = (CatMonad cat m, StrongFunctor cat ten m)
 
 
 ------------------------------------------------------------
@@ -91,18 +99,37 @@ namespace CatMonad
     join = Prelude.join
     unit = Prelude.pure
 
+namespace StrongFunctor
+  ||| Convert a Prelude `Functor` into a strong functor over
+  ||| `Morphism`.
+  public export
+  [MorFromFunctor] Functor f => StrongFunctor Morphism Pair f
+      using CatFunctor.MorFromFunctor where
+    strongl = Mor $ \(x,y) => map (x,) y
+    strongr = Mor $ \(x,y) => map (,y) x
+
+  ||| Convert a Prelude `Functor` into a strong functor over the
+  ||| function category.
+  public export
+  [FuncFromFunctor] Functor m => StrongFunctor (~~>) Pair m
+      using CatFunctor.FuncFromFunctor where
+    strongl (x,y) = map (x,) y
+    strongr (x,y) = map (,y) x
+
 namespace StrongMonad
   ||| Convert a Prelude `Monad` into a strong monad over `Morphism`.
   public export
-  [MorFromMonad] Monad m => Bitraversable ten => StrongMonad Morphism ten m
-      using CatMonad.MorFromMonad where
-    strongl = Mor $ bitraverse pure id
-    strongr = Mor $ bitraverse id pure
+  MorFromMonad : Monad m => Bitraversable ten => StrongMonad Morphism ten m
+  MorFromMonad = (MorFromMonad,
+                  MkStrongFunctor @{MorFromFunctor}
+                    (Mor $ bitraverse pure id)
+                    (Mor $ bitraverse id pure))
 
   ||| Convert a Prelude `Monad` into a strong monad over the function
   ||| category.
   public export
-  [FuncFromMonad] Monad m => Bitraversable ten => StrongMonad (~~>) ten m
-      using CatMonad.FuncFromMonad where
-    strongl = bitraverse pure id
-    strongr = bitraverse id pure
+  FuncFromMonad : Monad m => Bitraversable ten => StrongMonad (~~>) ten m
+  FuncFromMonad = (FuncFromMonad,
+                    MkStrongFunctor @{FuncFromFunctor}
+                      (bitraverse pure id)
+                      (bitraverse id pure))
