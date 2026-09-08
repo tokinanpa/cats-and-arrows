@@ -22,19 +22,6 @@ interface Semigroupoid (0 cat : obj -> obj -> Type) | cat where
   constructor MkSemigroupoid
   (.) : {a,b,c : _} -> cat b c -> cat a b -> cat a c
 
-export infixl 5 <<<
-export infixr 5 >>>
-
-||| A synonym for right-to-left semigroupoid composition.
-public export %inline %tcinline
-(<<<) : Semigroupoid cat => {a,b,c : _} -> cat b c -> cat a b -> cat a c
-(<<<) = (.)
-
-||| A synonym for left-to-right semigroupoid composition.
-public export %inline %tcinline
-(>>>) : Semigroupoid cat => {a,b,c : _} -> cat a b -> cat b c -> cat a c
-(>>>) = flip (.)
-
 
 ------------------------------------------------------------
 -- Existing Instances
