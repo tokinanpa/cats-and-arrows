@@ -5,7 +5,7 @@ import Control.Category.Functor
 import Control.Category.Monoidal
 import Data.Morphisms
 import Data.Tensor
-import Data.Vect
+import Data.List
 
 %default total
 
@@ -62,8 +62,10 @@ swapAssoc @{c@(MkBraided{})} = mergeAssoc . braid . splitAssoc
 ||| Bring a single object of a tensor product sequence to the front.
 public export
 bringToFront : Braided cat ten i => {xs,x,ys : _} ->
-               cat (TenSeq ten i ((xs ++ [x]) ++ ys)) (TenSeq ten i (x :: xs ++ ys))
-bringToFront @{c@(MkBraided{})} = mergeAssoc . mapl' swapAssoc . splitAssoc
+               cat (TenSeq ten i (xs ++ x :: ys)) (TenSeq ten i (x :: xs ++ ys))
+bringToFront @{c@(MkBraided{})} {ys=[]} = rewrite appendNilRightNeutral xs in mergeAssoc . braid . splitAssoc
+bringToFront @{c@(MkBraided{})} {ys=_::_} =
+  mergeAssoc {xs=x::xs} .  mapl' (mergeAssoc {xs=[x]} . braid) . assoc' . splitAssoc
 
 
 ------------------------------------------------------------
