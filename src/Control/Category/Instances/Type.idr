@@ -12,9 +12,16 @@ import Data.Wrap0
 %default total
 
 public export
-record Typ (a,b : Type0) where
-  constructor MkTyp
-  runTyp : runW0 a -> runW0 b
+data Typ : (a,b : Type0) -> Type where
+  MkTyp : (a.runW0 -> b.runW0) -> Typ a b
+
+public export %inline %tcinline
+runTyp : Typ a b -> a.runW0 -> b.runW0
+runTyp (MkTyp f) = f
+
+public export %inline %tcinline
+(.runTyp) : Typ a b -> a.runW0 -> b.runW0
+(.runTyp) = runTyp
 
 public export %inline
 Typ_ : (0 a,b : Type) -> Type
@@ -57,13 +64,13 @@ namespace CatBifunctor
   [FromBifunctor] Bifunctor f => CatBifunctor Typ Typ Typ (liftW2 f) where
     bimap {a=W0 _,a'=W0 _,b=W0 _,b'=W0 _} (MkTyp f) (MkTyp g) = MkTyp (bimap f g)
 
-public export %hint
-PairBifunctor : CatBifunctor Typ Typ Typ Pair
-PairBifunctor = FromBifunctor
+public export
+CatBifunctor Typ Typ Typ Pair where
+  bimap {a=W0 _,a'=W0 _,b=W0 _,b'=W0 _} (MkTyp f) (MkTyp g) = MkTyp (bimap f g)
 
-public export %hint
-EitherBifunctor : CatBifunctor Typ Typ Typ Either
-EitherBifunctor = FromBifunctor
+public export
+CatBifunctor Typ Typ Typ Either where
+  bimap {a=W0 _,a'=W0 _,b=W0 _,b'=W0 _} (MkTyp f) (MkTyp g) = MkTyp (bimap f g)
 
 namespace Monoidal
   public export
@@ -76,26 +83,36 @@ namespace Monoidal
     (MkTyp unitr.leftToRight)
     (MkTyp unitr.rightToLeft)
 
-public export %hint
-PairMonoidal : Monoidal Typ Pair (W0 ())
-PairMonoidal = FromTensor
+public export
+Monoidal Typ Pair (W0 ()) where
+  assoc = MkTyp (\((x,y),z) => (x,(y,z)))
+  assoc' = MkTyp (\(x,(y,z)) => ((x,y),z))
+  unitl = MkTyp snd
+  unitl' = MkTyp ((),)
+  unitr = MkTyp fst
+  unitr' = MkTyp (,())
 
-public export %hint
-EitherMonoidal : Monoidal Typ Either (W0 Void)
-EitherMonoidal = FromTensor
+public export
+Monoidal Typ Either (W0 Void) where
+  assoc = MkTyp $ either (either Left (Right . Left)) (Right . Right)
+  assoc' = MkTyp $ either (Left . Left) (either (Left . Right) Right)
+  unitl = MkTyp $ either absurd id
+  unitl' = MkTyp Right
+  unitr = MkTyp $ either id absurd
+  unitr' = MkTyp Left
 
 namespace Braided
   public export
   FromTensor : {ten,i : _} -> (Tensor ten i, Symmetric ten) => Braided Typ (liftW2 ten) (W0 i)
   FromTensor = MkBraided @{FromTensor} (MkTyp swap') (MkTyp swap')
 
-public export %hint
-PairBraided : Braided Typ Pair (W0 ())
-PairBraided = FromTensor
+public export
+Braided Typ Pair (W0 ()) where
+  braid = MkTyp swap
 
-public export %hint
-EitherBraided : Braided Typ Either (W0 Void)
-EitherBraided = FromTensor
+public export
+Braided Typ Either (W0 Void) where
+  braid = MkTyp mirror
 
 public export
 Cartesian Typ Pair (W0 ()) where

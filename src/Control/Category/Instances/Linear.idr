@@ -6,7 +6,7 @@ module Control.Category.Instances.Linear
 import Control.Category
 import Control.Category.Records
 import Control.Category.Instances.Type
-import Data.Linear
+import public Data.Linear
 import Data.Linear.LEither
 import Data.Linear.LMaybe
 import Data.Morphisms
@@ -26,6 +26,10 @@ runLinear (MkLinear f) = f
 public export %inline %tcinline
 (.runLinear) : Linear a b -@ a.runW0 -@ b.runW0
 (.runLinear) = runLinear
+
+public export %inline
+Linear_ : (0 a,b : Type) -> Type
+Linear_ a b = Linear (W0 a) (W0 b)
 
 
 public export

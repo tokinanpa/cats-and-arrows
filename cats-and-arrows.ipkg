@@ -47,4 +47,7 @@ modules = Control.Category,
           Control.Category.Instances.Type,
           Control.Category.Instances.Zero,
           Control.Arrow,
-          Data.Wrap0
+          Data.Wrap0,
+          Syntax.StringDiagram.Cartesian,
+          Syntax.StringDiagram.Monoidal,
+          Syntax.StringDiagram.Util

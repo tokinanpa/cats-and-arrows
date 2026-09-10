@@ -31,7 +31,12 @@
   - [ ] Co-Kleisli categories
   - [ ] Eilenberg-Moore categories
   - [ ] Free category constructions
-- [ ] Macro for string diagram notation (if possible)
+- [ ] String diagram notation:
+  - [X] `Monoidal`
+  - [ ] `Braided`
+  - [X] `Cartesian`
+  - [ ] `CartesianClosed`
+  - [ ] `Arrow`
 - [ ] Optimize performance
 
 ## What is this?
