@@ -31,18 +31,17 @@ findSublist (s :: sub) (f :: full) =
 
 ||| Check if this string diagram is valid in a monoidal category.
 checkDiagram : SDiagram -> Elab MonDiagram
-checkDiagram (MkSDiagram inp steps out) = checkDiagram' inp steps
+checkDiagram (MkSDiagram inp steps out) = checkDiagram' [<] inp steps
   where
-    checkDiagram' : List (Maybe CatString) -> List SDiagramStep -> Elab MonDiagram
-    checkDiagram' strings (MkSDStep i m o :: steps) =
+    checkDiagram' : SnocList MonDiagramStep -> List (Maybe CatString) -> List SDiagramStep -> Elab MonDiagram
+    checkDiagram' diag strings (MkSDStep i m o :: steps) =
       case findSublist (map Just i) strings of
         Nothing => fail "Strings are not contiguous"
-        Just (l,r) => do
-          diag <- checkDiagram' (l ++ o ++ r) steps
-          pure $ MkMDStep (length l) (length i) (length o) (length r) m :: diag
-    checkDiagram' strings [] =
+        Just (l,r) => checkDiagram' (diag :< MkMDStep (length l) (length i) (length o) (length r) m)
+                                    (l ++ o ++ r) steps
+    checkDiagram' diag strings [] =
       if strings == map Just out
-      then pure []
+      then pure (diag <>> [])
       else fail "Return strings are not contiguous"
 
 ||| Expand shortened string diagram notation into a full expression.

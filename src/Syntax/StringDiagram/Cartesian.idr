@@ -28,9 +28,9 @@ export
 stringImpl : (obj,impl : TTImp) -> TTImp -> Elab TTImp
 stringImpl obj impl t = do
   MkSDiagram inp steps out <- parseDiagram t
-  ts <- stringImpl' inp out steps
-  i <- genSym "impl"
-  pure $ composeImp i ts
+  ts <- stringImpl' [<] inp out steps
+  im <- genSym "imvar"
+  pure $ composeImp im ts
   where
     listImp : Nat -> TTImp
     listImp Z = `(Prelude.Nil)
@@ -41,8 +41,9 @@ stringImpl obj impl t = do
     toFinList (n :: ns) =
       `(Prelude.(::) (Data.Fin.fromInteger ~(IPrimVal EmptyFC (BI n))) ~(toFinList ns))
 
-    stringImpl' : List (Maybe CatString) -> List CatString -> List SDiagramStep -> Elab (List TTImp)
-    stringImpl' strings out (step :: steps) = do
+    stringImpl' : SnocList TTImp -> List (Maybe CatString) -> List CatString ->
+                  List SDiagramStep -> Elab (SnocList TTImp)
+    stringImpl' ts strings out (step :: steps) = do
       let (us, used) = unzip $
                         filter (usedInDiagram steps out . snd) $
                         mapMaybe (\(i,n) => (i,) <$> n) $
@@ -51,34 +52,37 @@ stringImpl obj impl t = do
                       finToInteger <$> findIndex (== Just n) strings
         | Nothing => fail "Unrecognized string name"
       let sw = toFinList (us ++ is)
-      i <- genSym "impl"
-      si <- stringImpl' (map Just used ++ step.outputs) out steps
-      pure $
+      im <- genSym "imvar"
+      stringImpl'
+        (ts :<
         `(Control.Category.Cartesian.swizzle @{~impl}
-        {xs = ~(listImp $ length strings)} ~sw) ::
+        {xs = ~(listImp $ length strings)} ~sw) :<
         `(Control.Category.Monoidal.applyAssoc
-          @{let Control.Category.Cartesian.MkCartesian @{~(IBindVar EmptyFC i)} {} = ~impl
-            in ~(IVar EmptyFC i)}
+          @{let Control.Category.Cartesian.MkCartesian @{~(IBindVar EmptyFC im)} {} = ~impl
+            in ~(IVar EmptyFC im)}
           {xs = ~(listImp $ length us), ys = ~(listImp $ length step.inputs),
-           ys' = ~(listImp $ length step.outputs), zs = Prelude.Nil} ~(step.mor)) :: si
-    stringImpl' strings out [] = do
+           ys' = ~(listImp $ length step.outputs), zs = Prelude.Nil} ~(step.mor)))
+        (map Just used ++ step.outputs)
+        out steps
+    stringImpl' ts strings out [] = do
       let Just is = for out $ \n =>
                       finToInteger <$> findIndex (== Just n) strings
         | Nothing => fail "Unrecognized string name"
       let sw = toFinList is
-      pure [`(Control.Category.Cartesian.swizzle @{~impl}
-              {xs = ~(listImp $ length strings)} ~sw)]
+      pure (ts :<
+        `(Control.Category.Cartesian.swizzle @{~impl}
+          {xs = ~(listImp $ length strings)} ~sw))
       
-    composeImp : Name -> List TTImp -> TTImp
-    composeImp i [] = `(Control.Category.Core.id {a = ~obj})
-    composeImp i [t] = t
-    composeImp i (t :: ts) =
+    composeImp : Name -> SnocList TTImp -> TTImp
+    composeImp im [<] = `(Control.Category.Core.id {a = ~obj})
+    composeImp im [<t] = t
+    composeImp im (ts :< t) =
       `(Control.Category.Core.(.)
         {a = ~obj, b = ~obj, c = ~obj}
         @{let Control.Category.Cartesian.MkCartesian
-                @{Control.Category.Monoidal.MkMonoidal @{~(IBindVar EmptyFC i)} {}} {} = ~impl
-        in ~(IVar EmptyFC i)}
-        ~(composeImp i ts) ~t)
+                @{Control.Category.Monoidal.MkMonoidal @{~(IBindVar EmptyFC im)} {}} {} = ~impl
+        in ~(IVar EmptyFC im)}
+        ~t ~(composeImp im ts))
 
 ||| Enter string diagram notation (for `Cartesian`).
 |||

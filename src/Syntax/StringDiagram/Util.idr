@@ -8,42 +8,58 @@ import Language.Reflection
 export infix 0 -<
 export prefix 0 =<
 
-export
 parseList : TTImp -> Elab (List String)
-parseList `(~(IVar _ $ UN $ Basic var) :: ~t) = map (var ::) $ parseList t
-parseList t@`(~(IVar _ $ UN Underscore) :: ~_) = failAt (getFC t) "Underscores are not allowed here"
-parseList t@`(~(Implicit _ True) :: ~_) = failAt (getFC t) "Underscores are not allowed here"
-parseList t@`(~_ :: ~_) = failAt (getFC t) "Could not read list"
-parseList `(Nil) = pure []
-parseList (IVar _ $ UN $ Basic var) = pure [var]
-parseList t@(IVar _ $ UN Underscore) = failAt (getFC t) "Underscores are not allowed here"
-parseList t@(Implicit _ True) = failAt (getFC t) "Underscores are not allowed here"
-parseList t = failAt (getFC t) "Not in proper list form"
+parseList = go [<]
+  where
+    go : SnocList String -> TTImp -> Elab (List String)
+    go res `(~(IVar _ $ UN $ Basic var) :: ~t) = go (res :< var) t
+    go res t@`(~(IVar _ $ UN Underscore) :: ~_) = failAt (getFC t) "Underscores are not allowed here"
+    go res t@`(~(Implicit _ True) :: ~_) = failAt (getFC t) "Underscores are not allowed here"
+    go res t@`(~_ :: ~_) = failAt (getFC t) "Could not read list"
+    go res `(Nil) = pure (res <>> [])
+    go res t = failAt (getFC t) "Not in proper list form"
+
+parseSingle : TTImp -> Elab (List String)
+parseSingle (IVar _ $ UN $ Basic var) = pure [var]
+parseSingle t@(IVar _ $ UN Underscore) = failAt (getFC t) "Underscores are not allowed here"
+parseSingle t@(Implicit _ True) = failAt (getFC t) "Underscores are not allowed here"
+parseSingle t = failAt (getFC t) "Not in proper list form"
 
 export
+parseListOrSing : TTImp -> Elab (List String)
+parseListOrSing t = parseList t <|> parseSingle t
+
 parseListPat : TTImp -> Elab (List (Maybe String))
-parseListPat `(~(IBindVar _ $ UN $ Basic var) :: ~t) = map (Just var ::) $ parseListPat t
-parseListPat `(~(IBindVar _ $ UN Underscore) :: ~t) = map (Nothing ::) $ parseListPat t
-parseListPat `(~(Implicit _ True) :: ~t) = map (Nothing ::) $ parseListPat t
-parseListPat `(Nil) = pure []
-parseListPat (IBindVar _ $ UN $ Basic var) = pure [Just var]
-parseListPat (IBindVar _ $ UN Underscore) = pure [Nothing]
-parseListPat (Implicit _ True) = pure [Nothing]
-parseListPat t = failAt (getFC t) "Not in proper list form"
+parseListPat = go [<]
+  where
+    go : SnocList (Maybe String) -> TTImp -> Elab (List (Maybe String))
+    go res `(~(IBindVar _ $ UN $ Basic var) :: ~t) = go (res :< Just var) t
+    go res `(~(IBindVar _ $ UN Underscore) :: ~t) = go (res :< Nothing) t
+    go res `(~(Implicit _ True) :: ~t) = go (res :< Nothing) t
+    go res t@`(~_ :: ~_) = failAt (getFC t) "Could not read list"
+    go res `(Nil) = pure (res <>> [])
+    go res t = failAt (getFC t) "Not in proper list form"
+
+parseSinglePat : TTImp -> Elab (List (Maybe String))
+parseSinglePat (IBindVar _ $ UN $ Basic var) = pure [Just var]
+parseSinglePat t@(IBindVar _ $ UN Underscore) = pure [Nothing]
+parseSinglePat t@(Implicit _ True) = pure [Nothing]
+parseSinglePat t = failAt (getFC t) "Not in proper list form"
 
 export
-parseListLam : TTImp -> Elab (List (Maybe String), TTImp)
-parseListLam
-  t@(ILam _ MW ExplicitArg (Just var) _
-    (ICase _ [] (IVar _ var') _ [PatClause _ ls exp])) =
-      if var == var'
-      then (,exp) <$> parseListPat ls
-      else failAt (getFC t) "Invalid string pattern"
-parseListLam (ILam _ MW ExplicitArg (Just $ UN $ Basic var) _ exp) = pure ([Just var], exp)
-parseListLam (ILam _ MW ExplicitArg (Just $ UN Underscore) _ exp) = pure ([Nothing], exp)
-parseListLam (ILam _ MW ExplicitArg Nothing _ exp) = pure ([Nothing], exp)
-parseListLam t@(ILam {}) = failAt (getFC t) "Invalid string pattern"
-parseListLam t = failAt (getFC t) "Expected string pattern"
+parseListOrSingPat : TTImp -> Elab (List (Maybe String))
+parseListOrSingPat t = parseListPat t <|> parseSinglePat t
+
+export
+parseLam : TTImp -> Elab (List (Maybe String), TTImp)
+parseLam
+  t@(ILam _ MW ExplicitArg (Just _) _
+    (ICase _ [] (IVar _ _) _ [PatClause _ ls exp])) = (,exp) <$> parseListOrSingPat ls
+parseLam (ILam _ MW ExplicitArg (Just $ UN $ Basic var) _ exp) = pure ([Just var], exp)
+parseLam (ILam _ MW ExplicitArg (Just $ UN Underscore) _ exp) = pure ([Nothing], exp)
+parseLam (ILam _ MW ExplicitArg Nothing _ exp) = pure ([Nothing], exp)
+parseLam t@(ILam {}) = failAt (getFC t) "Invalid string pattern"
+parseLam t = failAt (getFC t) "Expected string pattern"
 
 
 public export
@@ -55,6 +71,11 @@ record CatString where
 export
 Eq CatString where
   MkCatString n d == MkCatString n' d' = n == n' && d == d'
+
+export
+Show CatString where
+  showPrec p (MkCatString n d) =
+    showCon p "MkCatString" $ showArg n ++ showArg d
 
 public export
 record SDiagramStep where
@@ -74,10 +95,10 @@ record SDiagram where
 export
 parseDiagram : TTImp -> Elab SDiagram
 parseDiagram t = do
-  (inp, rest) <- mapFst (map $ map $ flip MkCatString Z) <$> parseListLam t
+  (inp, rest) <- mapFst (map $ map $ flip MkCatString Z) <$> parseLam t
   let Nothing = findDup (catMaybes inp)
     | Just n => failAt (getFC t) "Duplicate string name '\{n.name}'"
-  (steps, out) <- parseDiagram' (catMaybes inp) rest
+  (steps, out) <- parseDiagram' [<] (catMaybes inp) rest
   pure $ MkSDiagram inp steps out
   where
     findDup : Eq a => List a -> Maybe a
@@ -97,22 +118,22 @@ parseDiagram t = do
       Just (MkCatString _ d) => MkCatString n (S d)
       Nothing => MkCatString n Z
 
-    parseDiagram' : List CatString -> TTImp -> Elab (List SDiagramStep, List CatString)
-    parseDiagram' names t@`((~(mor) -< ~(inp)) >>= ~(pat)) = do
-      inp' <- parseList inp >>= traverse (resolveString (getFC inp) names)
-      (o, rest) <- parseListLam pat
-      let o' = map (resolveStringPat names) <$> o
-      let onames = catMaybes o'
-      let Nothing = findDup onames
-        | Just n => failAt (getFC pat) "Duplicate string name '\{n.name}'"
-      let names' = filter (\n => not $ any (\n' => n.name == n'.name) onames) names
-      (steps, out) <- parseDiagram' (onames ++ names') (assert_smaller t rest)
-      pure $ (MkSDStep inp' mor o' :: steps, out)
-    parseDiagram' names t@`((~(mor) -< ~(inp)) >> ~(rest)) = do
-      inp' <- parseList inp >>= traverse (resolveString (getFC inp) names)
-      (steps, out) <- parseDiagram' names (assert_smaller t rest)
-      pure $ (MkSDStep inp' mor [] :: steps, out)
-    parseDiagram' names `(=< ~(out)) = do
-      out' <- parseList out >>= traverse (resolveString (getFC out) names)
-      pure ([], out')
-    parseDiagram' _ t = failAt (getFC t) "Could not parse expression as string diagram"
+    parseDiagram' : SnocList SDiagramStep -> List CatString -> TTImp -> Elab (List SDiagramStep, List CatString)
+    parseDiagram' steps names t@`((~(mor) -< ~(inp)) >>= ~(pat)) = do
+      (inp',o',names',rest) <- do
+        inp' <- parseListOrSing inp >>= traverse (resolveString (getFC inp) names)
+        (o, rest) <- parseLam pat
+        let o' = map (resolveStringPat names) <$> o
+        let onames = catMaybes o'
+        let Nothing = findDup onames
+          | Just n => failAt (getFC pat) "Duplicate string name '\{n.name}'"
+        let names' = filter (\n => not $ any (\n' => n.name == n'.name) onames) names
+        pure (inp',o',onames ++ names',rest)
+      parseDiagram' (steps :< MkSDStep inp' mor o') names' (assert_smaller t rest)
+    parseDiagram' steps names t@`((~(mor) -< ~(inp)) >> ~(rest)) = do
+      inp' <- parseListOrSing inp >>= traverse (resolveString (getFC inp) names)
+      parseDiagram' (steps :< MkSDStep inp' mor []) names (assert_smaller t rest)
+    parseDiagram' steps names `(=< ~(out)) = do
+      out' <- parseListOrSing out >>= traverse (resolveString (getFC out) names)
+      pure (steps <>> [], out')
+    parseDiagram' _ _ t = failAt (getFC t) "Could not parse expression as string diagram"
