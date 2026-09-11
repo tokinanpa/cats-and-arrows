@@ -53,6 +53,7 @@ export
 stringImpl : (obj,impl : TTImp) -> TTImp -> Elab TTImp
 stringImpl obj impl t = do
   diag <- checkDiagram =<< parseDiagram t
+  cat <- genSym "cat"
   ts <- for diag $ \(MkMDStep l c c' r mor) => do
     pure `(
       Control.Category.Monoidal.applyAssoc
@@ -60,26 +61,22 @@ stringImpl obj impl t = do
       {xs = ~(listImp l), ys = ~(listImp c),
        ys' = ~(listImp c'), zs = ~(listImp r)}
        ~(mor))
-  i <- genSym "impl"
-  pure $ composeImp i ts
+  pure `(let Control.Category.Monoidal.MkMonoidal @{~(IBindVar EmptyFC cat)} {} = ~impl
+         in ~(composeImp (IVar EmptyFC cat) ts))
   where
     listImp : Nat -> TTImp
     listImp Z = `(Prelude.Nil)
     listImp (S n) = `(Prelude.(::) ~obj ~(listImp n))
 
-    composeImp : Name -> List TTImp -> TTImp
-    composeImp i [] =
-      `(Control.Category.Core.id
-        @{let Control.Category.Monoidal.MkMonoidal @{~(IBindVar EmptyFC i)} {} = ~impl
-          in ~(IVar EmptyFC i)}
+    composeImp : TTImp -> List TTImp -> TTImp
+    composeImp cat [] =
+      `(Control.Category.Core.id @{~cat}
         {a = ~obj})
-    composeImp i [t] = t
-    composeImp i (t :: ts) =
-      `(Control.Category.Core.(.)
+    composeImp _ [t] = t
+    composeImp cat (t :: ts) =
+      `(Control.Category.Core.(.) @{~cat}
         {a = ~obj, b = ~obj, c = ~obj}
-        @{let Control.Category.Monoidal.MkMonoidal @{~(IBindVar EmptyFC i)} {} = ~impl
-        in ~(IVar EmptyFC i)}
-        ~(composeImp i ts) ~t)
+        ~(composeImp cat ts) ~t)
 
 ||| Enter string diagram notation (for `Monoidal`).
 |||
