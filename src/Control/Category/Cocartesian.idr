@@ -56,7 +56,7 @@ interface Monoidal cat ten i =>
 
   ||| The join of the universal monoid structure.
   merge : {a : _} -> cat (a `ten` a) a
-  merge = Cocartesian.coprod Core.id Core.id
+  merge = Cocartesian.coprod {ten} Core.id Core.id
 
   ||| The unit of the universal monoid structure.
   intro : {a : _} -> cat i a
