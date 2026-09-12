@@ -150,6 +150,21 @@ namespace BimonoidalR
   One : BimonoidalR
   One = MkBimonoidalR One UnitOp2 UnitOp2 () ()
 
+namespace RigCategoryR
+  public export
+  One : RigCategoryR
+  One = MkRigCategoryR One UnitOp2 UnitOp2 () ()
+
+namespace SymRigCategoryR
+  public export
+  One : SymRigCategoryR
+  One = MkSymRigCategoryR One UnitOp2 UnitOp2 () ()
+
+namespace DistributiveR
+  public export
+  One : DistributiveR
+  One = MkDistributiveR One UnitOp2 UnitOp2 () ()
+
 
 namespace FunctorR
   public export

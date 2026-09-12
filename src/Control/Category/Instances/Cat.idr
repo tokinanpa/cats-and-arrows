@@ -552,6 +552,15 @@ namespace RigCategoryR
   Cat0 : RigCategoryR
   Cat0 = MkRigCategoryR Cat0 Cat0Sum Cat0Prod (W0 Zero) (W0 One)
 
+namespace SymRigCategoryR
+  public export
+  Cat : SymRigCategoryR
+  Cat = MkSymRigCategoryR Cat Sum Prod Zero One
+
+  public export
+  Cat0 : SymRigCategoryR
+  Cat0 = MkSymRigCategoryR Cat0 Cat0Sum Cat0Prod (W0 Zero) (W0 One)
+
 namespace DistributiveR
   public export
   Cat : DistributiveR
