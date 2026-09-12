@@ -2,6 +2,8 @@ module Control.Category.Core
 
 import Data.Morphisms
 import Data.Profunctor.Types
+import Control.Relation
+import Control.Relation.Closure
 
 %default total
 
@@ -42,6 +44,11 @@ interface Category (0 cat : Hom obj) | cat where
   ||| Binary right-to-left composition of morphisms.
   (.) : {a,b,c : _} -> cat b c -> cat a b -> cat a c
 
+
+------------------------------------------------------------
+-- Functions
+------------------------------------------------------------
+
 export infixl 5 <<<
 export infixr 5 >>>
 
@@ -56,6 +63,13 @@ public export %inline %tcinline
 public export %inline %tcinline
 (>>>) : Category cat => {a,b,c : _} -> cat a b -> cat b c -> cat a c
 (>>>) = flip (.)
+
+||| Compose a list of morphisms left-to-right.
+public export
+compose : Category cat => {a,b : _} -> TransClosure cat a b -> cat a b
+compose [] = id
+compose [f] = f
+compose (f :: fs@(_ :: _)) = compose fs . f
 
 
 ------------------------------------------------------------

@@ -59,13 +59,104 @@ swapAssoc : Braided cat ten i => {xs,ys : _} ->
              cat (TenSeq ten i (xs ++ ys)) (TenSeq ten i (ys ++ xs))
 swapAssoc @{c@(MkBraided{})} = mergeAssoc . braid . splitAssoc
 
+||| Swap two halves of a tensor product sequence using the braiding.
+|||
+||| This uses `braid'` instead of `braid`. For symmetric monoidal
+||| categories, this is identical to `swapAssoc`.
+public export
+swapAssoc' : Braided cat ten i => {xs,ys : _} ->
+             cat (TenSeq ten i (xs ++ ys)) (TenSeq ten i (ys ++ xs))
+swapAssoc' @{c@(MkBraided{})} = mergeAssoc . braid' . splitAssoc
+
 ||| Bring a single object of a tensor product sequence to the front.
 public export
 bringToFront : Braided cat ten i => {xs,x,ys : _} ->
                cat (TenSeq ten i (xs ++ x :: ys)) (TenSeq ten i (x :: xs ++ ys))
-bringToFront @{c@(MkBraided{})} {ys=[]} = rewrite appendNilRightNeutral xs in mergeAssoc . braid . splitAssoc
+bringToFront @{c@(MkBraided{})} {ys=[]} =
+  rewrite appendNilRightNeutral xs in mergeAssoc . braid . splitAssoc
 bringToFront @{c@(MkBraided{})} {ys=_::_} =
   mergeAssoc {xs=x::xs} .  mapl' (mergeAssoc {xs=[x]} . braid) . assoc' . splitAssoc
+
+||| Bring a single object of a tensor product sequence to the front.
+|||
+||| This uses `braid'` instead of `braid`. For symmetric monoidal
+||| categories, this is identical to `bringToFront`.
+public export
+bringToFront' : Braided cat ten i => {xs,x,ys : _} ->
+               cat (TenSeq ten i (xs ++ x :: ys)) (TenSeq ten i (x :: xs ++ ys))
+bringToFront' @{c@(MkBraided{})} {ys=[]} =
+  rewrite appendNilRightNeutral xs in mergeAssoc . braid' . splitAssoc
+bringToFront' @{c@(MkBraided{})} {ys=_::_} =
+  mergeAssoc {xs=x::xs} .  mapl' (mergeAssoc {xs=[x]} . braid') . assoc' . splitAssoc
+
+||| Insert the first object of a tensor product sequence into a later
+||| position.
+|||
+||| This is the inverse of `bringToFront'`.
+public export
+insertFromFront : Braided cat ten i => {x,xs,ys : _} ->
+              cat (TenSeq ten i (x :: xs ++ ys)) (TenSeq ten i (xs ++ x :: ys))
+insertFromFront @{c@(MkBraided{})} {ys=[]} =
+  rewrite appendNilRightNeutral xs in mergeAssoc . braid . splitAssoc {xs=[_]}
+insertFromFront @{c@(MkBraided{})} {ys=_::_} =
+  mergeAssoc . assoc . mapl' (Core.(.) braid $ splitAssoc {xs=[x]}) . splitAssoc {xs=x::xs}
+
+||| Insert the first object of a tensor product sequence into a later
+||| position.
+|||
+||| This is the inverse of `bringToFront`. This uses `braid'` instead
+||| of `braid`. For symmetric monoidal categories, this is equivalent
+||| to `insertFromFront`.
+public export
+insertFromFront' : Braided cat ten i => {x,xs,ys : _} ->
+               cat (TenSeq ten i (x :: xs ++ ys)) (TenSeq ten i (xs ++ x :: ys))
+insertFromFront' @{c@(MkBraided{})} {ys=[]} =
+  rewrite appendNilRightNeutral xs in mergeAssoc . braid' . splitAssoc {xs=[_]}
+insertFromFront' @{c@(MkBraided{})} {ys=_::_} =
+  mergeAssoc . assoc . mapl' (Core.(.) braid' $ splitAssoc {xs=[x]}) . splitAssoc {xs=x::xs}
+
+||| Send a single object of a tensor product sequence to the back.
+public export
+sendToBack : Braided cat ten i => {xs,x,ys : _} ->
+               cat (TenSeq ten i (xs ++ x :: ys)) (TenSeq ten i (xs ++ ys ++ [x]))
+sendToBack @{c@(MkBraided{})} {ys=[]} = id
+sendToBack @{c@(MkBraided{})} {ys=_::_} =
+  mergeAssoc . mapr' (mergeAssoc {ys=[x]} . braid) . splitAssoc
+
+||| Send a single object of a tensor product sequence to the back.
+|||
+||| This uses `braid'` instead of `braid`. For symmetric monoidal
+||| categories, this is identical to `sendToBack`.
+public export
+sendToBack' : Braided cat ten i => {xs,x,ys : _} ->
+               cat (TenSeq ten i (xs ++ x :: ys)) (TenSeq ten i (xs ++ ys ++ [x]))
+sendToBack' @{c@(MkBraided{})} {ys=[]} = id
+sendToBack' @{c@(MkBraided{})} {ys=_::_} =
+  mergeAssoc . mapr' (mergeAssoc {ys=[x]} . braid') . splitAssoc
+
+||| Insert the last object of a tensor product sequence into an earlier
+||| position.
+|||
+||| This is the inverse of `bringToBack'`.
+public export
+insertFromBack : Braided cat ten i => {xs,x,ys : _} ->
+                 cat (TenSeq ten i (xs ++ ys ++ [x])) (TenSeq ten i (xs ++ x :: ys))
+insertFromBack @{c@(MkBraided{})} {ys=[]} = id
+insertFromBack @{c@(MkBraided{})} {ys=_::_} =
+  mergeAssoc . mapr' (braid . splitAssoc {ys=[x]}) . splitAssoc
+
+||| Insert the last object of a tensor product sequence into an earlier
+||| position.
+|||
+||| This is the inverse of `bringToBack`. This uses `braid'` instead
+||| of `braid`. For symmetric monoidal categories, this is equivalent
+||| to `insertFromBack`.
+public export
+insertFromBack' : Braided cat ten i => {xs,x,ys : _} ->
+                 cat (TenSeq ten i (xs ++ ys ++ [x])) (TenSeq ten i (xs ++ x :: ys))
+insertFromBack' @{c@(MkBraided{})} {ys=[]} = id
+insertFromBack' @{c@(MkBraided{})} {ys=_::_} =
+  mergeAssoc . mapr' (braid' . splitAssoc {ys=[x]}) . splitAssoc
 
 
 ------------------------------------------------------------
