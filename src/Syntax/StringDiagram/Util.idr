@@ -133,6 +133,18 @@ parseDiagram t = do
     parseDiagram' steps names t@`((~(mor) -< ~(inp)) >> ~(rest)) = do
       inp' <- parseListOrSing inp >>= traverse (resolveString (getFC inp) names)
       parseDiagram' (steps :< MkSDStep inp' mor []) names (assert_smaller t rest)
+    parseDiagram' steps names t@`(~(mor) >>= ~(pat)) = do
+      (o',names',rest) <- do
+        (o, rest) <- parseLam pat
+        let o' = map (resolveStringPat names) <$> o
+        let onames = catMaybes o'
+        let Nothing = findDup onames
+          | Just n => failAt (getFC pat) "Duplicate string name '\{n.name}'"
+        let names' = filter (\n => not $ any (\n' => n.name == n'.name) onames) names
+        pure (o',onames ++ names',rest)
+      parseDiagram' (steps :< MkSDStep [] mor o') names' (assert_smaller t rest)
+    parseDiagram' steps names t@`(~(mor) >> ~(rest)) =
+      parseDiagram' (steps :< MkSDStep [] mor []) names (assert_smaller t rest)
     parseDiagram' steps names `(=< ~(out)) = do
       out' <- parseListOrSing out >>= traverse (resolveString (getFC out) names)
       pure (steps <>> [], out')
