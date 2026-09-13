@@ -5,6 +5,7 @@ module Control.Category.Instances.Kleisli
 
 import Control.Category
 import Control.Category.Records
+import Data.Wrap0
 
 %default total
 
@@ -31,6 +32,10 @@ public export
 public export
 [KleisliInj] {m : _} -> Category cat => CatMonad cat m => CatFunctor cat (Kleisli cat m) Prelude.id where
   map f = MkKleisli $ unit . f
+
+public export
+{m : _} -> Promonad0 cat => CatMonad cat m => Promonad0 (Kleisli cat m) where
+  funitW f = MkKleisli (unit . funitW f)
 
 
 ||| WARNING: This is typically a binoidal functor, not a true bifunctor.

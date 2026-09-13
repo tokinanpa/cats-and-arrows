@@ -14,6 +14,7 @@ import Data.Profunctor.Costrong
 import Data.Either
 import Data.Morphisms
 import Data.Vect
+import Data.Wrap0
 
 %default total
 
@@ -36,6 +37,13 @@ interface Category cat => Promonad (0 cat : Hom Type) where
   ||| Equivalently, the action of the unit functor on morphisms.
   funit : (a -> b) -> cat a b
 
+||| Like `Promonad`, but allows the category's objects to be wrapped
+||| using `Wrap0`. This is typically the more practical option.
+public export
+interface Category cat => Promonad0 (0 cat : Hom Type0) where
+  ||| The unit transformation of the promonad.
+  ||| Equivalently, the action of the unit functor on morphisms.
+  funitW : (a -> b) -> cat (W0 a) (W0 b)
 
 ------------------------------------------------------------
 -- Existing Instances
@@ -45,6 +53,11 @@ interface Category cat => Promonad (0 cat : Hom Type) where
 public export
 [PromonadUnit] Promonad cat => CatFunctor Morphism cat Prelude.id where
   map = funit . applyMor
+
+||| The unit identity-on-objects functor of a promonad.
+public export
+[PromonadUnit0] Promonad0 cat => CatFunctor Morphism cat (\x => W0 x) where
+  map = funitW . applyMor
 
 namespace Monoidal
   ||| Convert a promonad into a (pre)monoidal category.

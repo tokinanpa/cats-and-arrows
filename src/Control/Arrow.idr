@@ -3,10 +3,6 @@
 ||| library. These functions may be easier to write code with for users
 ||| who are already familiar with arrows.
 |||
-||| Note that this interface isn't exactly identical to regular arrows.
-||| In particular, these functions currently require the types to be
-||| available at runtime. This will likely be changed in the future.
-|||
 ||| Currently, the `Arrow`, `ArrowChoice` and `ArrowLoop` interfaces
 ||| are fully defined. `ArrowPlus` may also be defined in the future
 ||| if I ever get around to adding support for enriched categories.
@@ -21,6 +17,7 @@ import Control.Category.Promonad
 import Control.Category.Traced
 import Data.Either
 import Data.Morphisms
+import Data.Wrap0
 
 %default total
 
@@ -34,64 +31,64 @@ export infixr 6 \|/
 ------------------------------------------------------------
 
 public export
-Arrow : (arr : Hom Type) -> Type
-Arrow arr = (Promonad arr, EndoBinoidal arr Pair)
+0 Arrow : (arr : Hom Type0) -> Type
+Arrow arr = (Promonad0 arr, EndoBinoidal arr (liftW2 Pair))
 
 public export
-ArrowChoice : (arr : Hom Type) -> Type
-ArrowChoice arr = (Arrow arr, EndoBinoidal arr Either)
+0 ArrowChoice : (arr : Hom Type0) -> Type
+ArrowChoice arr = (Arrow arr, EndoBinoidal arr (liftW2 Either))
 
 public export
-ArrowLoop : (arr : Hom Type) -> Type
-ArrowLoop arr = (Promonad arr, Traced arr Pair ())
+0 ArrowLoop : (arr : Hom Type0) -> Type
+ArrowLoop arr = (Promonad0 arr, Traced arr (liftW2 Pair) (W0 ()))
 
 
 ------------------------------------------------------------
 -- Functions
 ------------------------------------------------------------
 
-public export
-arrow : Arrow arr => (a -> b) -> arr a b
-arrow = funit
+public export %inline
+arrow : Arrow arr => (a -> b) -> arr (W0 a) (W0 b)
+arrow = funitW
+
+public export %inline
+first : Arrow arr => arr (W0 a) (W0 b) -> arr (W0 (a, c)) (W0 (b, c))
+first = mapl' {f=liftW2 Pair,a=W0 _,b=W0 _,c=W0 _}
+
+public export %inline
+second : Arrow arr => arr (W0 a) (W0 b) -> arr (W0 (c, a)) (W0 (c, b))
+second = mapr' {f=liftW2 Pair,a=W0 _,b=W0 _,c=W0 _}
 
 public export
-first : Arrow arr => {a,b,c : _} -> arr a b -> arr (a, c) (b, c)
-first = mapl'
+(***) : Arrow arr => arr (W0 a) (W0 b) -> arr (W0 a') (W0 b') -> arr (W0 (a, a')) (W0 (b, b'))
+f *** g = first f >>> second g
 
 public export
-second : Arrow arr => {a,b,c : _} -> arr a b -> arr (c, a) (c, b)
-second = mapr'
-
-public export
-(***) : Arrow arr => {a,a',b,b' : _} -> arr a b -> arr a' b' -> arr (a, a') (b, b')
-f *** g = mapl' f >>> mapr' g
-
-public export
-(&&&) : Arrow arr => {a,b,b' : _} -> arr a b -> arr a b' -> arr a (b, b')
+(&&&) : Arrow arr => arr (W0 a) (W0 b) -> arr (W0 a) (W0 b') -> arr (W0 a) (W0 (b, b'))
 f &&& g = arrow dup >>> f *** g
 
 public export
-liftA2 : Arrow arr => {a,b,c,d : _} -> (a -> b -> c) -> arr d a -> arr d b -> arr d c
+liftA2 : Arrow arr => (a -> b -> c) -> arr (W0 d) (W0 a) -> arr (W0 d) (W0 b) -> arr (W0 d) (W0 c)
 liftA2 op f g = (f &&& g) >>> arrow (uncurry op)
 
 
-public export
-left : ArrowChoice arr => {a,b,c : _} -> arr a b -> arr (Either a c) (Either b c)
-left = mapl'
+public export %inline
+left : ArrowChoice arr => arr (W0 a) (W0 b) -> arr (W0 $ Either a c) (W0 $ Either b c)
+left = mapl' {f=liftW2 Either,a=W0 _,b=W0 _,c=W0 _}
+
+public export %inline
+right : ArrowChoice arr => arr (W0 a) (W0 b) -> arr (W0 $ Either c a) (W0 $ Either c b)
+right = mapr' {f=liftW2 Either,a=W0 _,b=W0 _,c=W0 _}
 
 public export
-right : ArrowChoice arr => {a,b,c : _} -> arr a b -> arr (Either c a) (Either c b)
-right = mapr'
+(+++) : ArrowChoice arr => arr (W0 a) (W0 b) -> arr (W0 a') (W0 b') -> arr (W0 $ Either a a') (W0 $ Either b b')
+f +++ g = left f >>> right g
 
 public export
-(+++) : ArrowChoice arr => {a,a',b,b' : _} -> arr a b -> arr a' b' -> arr (Either a a') (Either b b')
-f +++ g = mapl' f >>> mapr' g
-
-public export
-(\|/) : ArrowChoice arr => {a,a',b : _} -> arr a b -> arr a' b -> arr (Either a a') b
+(\|/) : ArrowChoice arr => arr (W0 a) (W0 b) -> arr (W0 a') (W0 b) -> arr (W0 $ Either a a') (W0 b)
 f \|/ g = f +++ g >>> arrow fromEither
 
 
-public export
-loop : ArrowLoop arr => {a,b,c : _} -> arr (a, c) (b, c) -> arr a b
-loop = tracer
+public export %inline
+loop : ArrowLoop arr => arr (W0 (a, c)) (W0 (b, c)) -> arr (W0 a) (W0 b)
+loop = tracer {ten=liftW2 Pair,a=W0 _,b=W0 _,c=W0 _}

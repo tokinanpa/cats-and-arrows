@@ -54,6 +54,10 @@ public export %hint
 SemigroupoidTyp : Semigroupoid Typ
 SemigroupoidTyp = FromCategory
 
+public export
+Promonad0 Typ where
+  funitW = MkTyp
+
 namespace CatFunctor
   public export
   [FromFunctor] Functor f => CatFunctor Typ Typ (liftW f) where
