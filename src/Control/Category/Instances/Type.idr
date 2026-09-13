@@ -63,6 +63,11 @@ namespace CatFunctor
   [FromFunctor] Functor f => CatFunctor Typ Typ (liftW f) where
     map {a=W0 _,b=W0 _} (MkTyp f) = MkTyp (map f)
 
+namespace CatMonad
+  public export
+  FromMonad : Monad m => CatMonad Typ (liftW m)
+  FromMonad = MkCatMonad @{FromFunctor} (MkTyp Prelude.join) (MkTyp pure)
+
 namespace CatBifunctor
   public export
   [FromBifunctor] Bifunctor f => CatBifunctor Typ Typ Typ (liftW2 f) where
@@ -104,6 +109,24 @@ Monoidal Typ Either (W0 Void) where
   unitl' = MkTyp Right
   unitr = MkTyp $ either id absurd
   unitr' = MkTyp Left
+
+namespace StrongFunctor
+  public export
+  FromFunctor : Functor f => StrongFunctor Typ Pair (liftW f)
+  FromFunctor = MkStrongFunctor @{FromFunctor}
+    (MkTyp $ \(x,y) => map (x,) y)
+    (MkTyp $ \(x,y) => map (,y) x)
+
+  public export
+  FromApplicative : Applicative f => Bitraversable ten => StrongFunctor Typ (liftW2 ten) (liftW f)
+  FromApplicative = MkStrongFunctor @{FromFunctor}
+    (MkTyp $ bitraverse pure id)
+    (MkTyp $ bitraverse id pure)
+
+namespace StrongMonad
+  public export
+  FromMonad : Monad m => Bitraversable ten => StrongMonad Typ (liftW2 ten) (liftW m)
+  FromMonad = (FromMonad, FromApplicative)
 
 namespace Braided
   public export
