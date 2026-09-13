@@ -33,7 +33,7 @@
   - [ ] Free category constructions
 - [ ] String diagram notation:
   - [X] `Monoidal`
-  - [ ] `Braided`
+  - [X] `Braided`
   - [X] `Cartesian`
   - [ ] `CartesianClosed`
   - [ ] `Arrow`

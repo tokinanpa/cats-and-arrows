@@ -35,13 +35,17 @@ stringImpl obj impl t = do
     listImp Z = `(Prelude.Nil)
     listImp (S n) = `(Prelude.(::) ~obj ~(listImp n))
 
-    stringsToBack : List TTImp -> Nat -> List Nat -> SnocList TTImp
-    stringsToBack ts n [] = [<] <>< ts
+    stringsToBack : SnocList TTImp -> Nat -> List Nat -> SnocList TTImp
+    stringsToBack ts n [] = ts
     stringsToBack ts n (i :: is) =
-      stringsToBack
-        (`(Control.Category.Braided.sendToBack @{~impl}
-          {xs = ~(listImp i), x = ~obj, ys = ~(listImp $ pred (n `minus` i))})
-        :: ts) n $ assert_smaller (i::is) $ map (\i' => if i' > i then pred i' else i') is
+      let iminus = pred (n `minus` i)
+      in if isSucc iminus
+          then stringsToBack
+                (ts :<
+                  `(Control.Category.Braided.sendToBack @{~impl}
+                    {xs = ~(listImp i), x = ~obj, ys = ~(listImp iminus)}))
+                n $ assert_smaller (i::is) $ map (\i' => if i' > i then pred i' else i') is
+          else stringsToBack ts n is
 
     stringImpl' : SnocList TTImp -> TTImp ->
                   List (Maybe CatString) -> List CatString -> List SDiagramStep -> Elab (SnocList TTImp)
@@ -50,17 +54,18 @@ stringImpl obj impl t = do
                       finToNat <$> findIndex (== Just n) strings
         | Nothing => fail "Unrecognized string name"
       let rest = filter (maybe True $ \n => not $ elem n step.inputs) strings
-      let ts' = stringsToBack [] (length strings) is
+      let ts' = stringsToBack [<] (length strings) is
       stringImpl' (ts ++ ts' :<
         `(Control.Category.Monoidal.applyAssoc @{~mon}
           {xs = ~(listImp $ length rest), ys = ~(listImp $ length step.inputs),
            ys' = ~(listImp $ length step.outputs), zs = Prelude.Nil} ~(step.mor)))
         mon (rest ++ step.outputs) out steps
     stringImpl' ts _ strings out [] = do
+      when (length strings /= length out) $ fail "Return strings violate linearity"
       let Just is = for out $ \n =>
                       finToNat <$> findIndex (== Just n) strings
         | Nothing => fail "Unrecognized string name"
-      let ts' = stringsToBack [] (length strings) is
+      let ts' = stringsToBack [<] (length strings) is
       pure $ ts ++ ts'
 
     composeImp : TTImp -> SnocList TTImp -> TTImp
