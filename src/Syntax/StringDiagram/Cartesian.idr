@@ -50,7 +50,8 @@ stringImpl obj impl t = do
                   List (Maybe String) -> List String -> List SDiagramStep -> Elab (SnocList TTImp)
     stringImpl' ts mon strings out (step :: steps) = do
       let (us, used) = unzip $
-                        filter (usedInDiagram steps out . snd) $
+                        filter (\(_,name) => not (elem (Just name) step.outputs) &&
+                                              usedInDiagram steps out name) $
                         mapMaybe (\(i,n) => (i,) <$> n) $
                         zip [0..natToInteger (length strings) - 1] strings
       let Just is = for step.inputs $ \n =>
