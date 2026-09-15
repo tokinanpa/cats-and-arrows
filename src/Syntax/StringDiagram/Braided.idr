@@ -24,9 +24,11 @@ export
 stringImpl : (obj,impl : TTImp) -> TTImp -> Elab TTImp
 stringImpl obj impl t = do
   MkSDiagram inp steps out <- parseDiagram t
+  let Just inp' = the (Maybe _) $ sequence inp
+    | Nothing => fail "Strings cannot be discarded"
   mon <- genSym "mon"
   cat <- genSym "cat"
-  ts <- stringImpl' [<] (IVar EmptyFC mon) inp out steps
+  ts <- stringImpl' [<] (IVar EmptyFC mon) inp' out steps
   pure `(let Control.Category.Braided.MkBraided @{~(IBindVar EmptyFC mon)} {} = ~impl
              Control.Category.Monoidal.MkMonoidal @{~(IBindVar EmptyFC cat)} {} = ~(IVar EmptyFC mon)
         in ~(composeImp (IVar EmptyFC cat) ts))
@@ -48,23 +50,27 @@ stringImpl obj impl t = do
           else stringsToBack ts n is
 
     stringImpl' : SnocList TTImp -> TTImp ->
-                  List (Maybe CatString) -> List CatString -> List SDiagramStep -> Elab (SnocList TTImp)
+                  List String -> List String -> List SDiagramStep -> Elab (SnocList TTImp)
     stringImpl' ts mon strings out (step :: steps) = do
+      let Just o = the (Maybe _) $ sequence step.outputs
+        | Nothing => fail "Strings cannot be discarded"
+      let False = any (\name => elem name strings) o
+        | True => fail "Cannot shadow string name"
       let Just is = for step.inputs $ \n =>
-                      finToNat <$> findIndex (== Just n) strings
+                      finToNat <$> findIndex (== n) strings
         | Nothing => fail "Unrecognized string name"
-      let rest = filter (maybe True $ \n => not $ elem n step.inputs) strings
+      let rest = filter (\n => not $ elem n step.inputs) strings
       let ts' = stringsToBack [<] (length strings) is
       stringImpl' (ts ++ ts' :<
         `(Control.Category.Monoidal.applyAssoc @{~mon}
           {xs = ~(listImp $ length rest), ys = ~(listImp $ length step.inputs),
-           ys' = ~(listImp $ length step.outputs), zs = Prelude.Nil} ~(step.mor)))
-        mon (rest ++ step.outputs) out steps
+           ys' = ~(listImp $ length o), zs = Prelude.Nil} ~(step.mor)))
+        mon (rest ++ o) out steps
     stringImpl' ts _ strings out [] = do
-      when (length strings /= length out) $ fail "Return strings violate linearity"
       let Just is = for out $ \n =>
-                      finToNat <$> findIndex (== Just n) strings
+                      finToNat <$> findIndex (== n) strings
         | Nothing => fail "Unrecognized string name"
+      when (length strings /= length out) $ fail "Return strings violate linearity"
       let ts' = stringsToBack [<] (length strings) is
       pure $ ts ++ ts'
 

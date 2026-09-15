@@ -15,9 +15,11 @@ import public Syntax.StringDiagram.Util
 export infix 0 -<
 export prefix 0 =<
 
-usedInDiagram : List SDiagramStep -> List CatString -> CatString -> Bool
-usedInDiagram steps out n =
-  elem n out || any (\step => elem n step.inputs) steps
+usedInDiagram : List SDiagramStep -> List String -> String -> Bool
+usedInDiagram [] out n = elem n out
+usedInDiagram (step :: steps) out n =
+  elem n step.inputs ||
+    (not (elem (Just n) step.outputs) && usedInDiagram steps out n)
 
 ||| Expand shortened string diagram notation into a full expression.
 |||
@@ -45,7 +47,7 @@ stringImpl obj impl t = do
       `(Prelude.(::) (Data.Fin.fromInteger ~(IPrimVal EmptyFC (BI n))) ~(toFinList ns))
 
     stringImpl' : SnocList TTImp -> TTImp ->
-                  List (Maybe CatString) -> List CatString -> List SDiagramStep -> Elab (SnocList TTImp)
+                  List (Maybe String) -> List String -> List SDiagramStep -> Elab (SnocList TTImp)
     stringImpl' ts mon strings out (step :: steps) = do
       let (us, used) = unzip $
                         filter (usedInDiagram steps out . snd) $

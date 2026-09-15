@@ -63,41 +63,26 @@ parseLam t = failAt (getFC t) "Expected string pattern"
 
 
 public export
-record CatString where
-  constructor MkCatString
-  name : String
-  disamb : Nat
-
-export
-Eq CatString where
-  MkCatString n d == MkCatString n' d' = n == n' && d == d'
-
-export
-Show CatString where
-  showPrec p (MkCatString n d) =
-    showCon p "MkCatString" $ showArg n ++ showArg d
-
-public export
 record SDiagramStep where
   constructor MkSDStep
-  inputs : List CatString
+  inputs : List String
   mor : TTImp
-  outputs : List (Maybe CatString)
+  outputs : List (Maybe String)
 
 public export
 record SDiagram where
   constructor MkSDiagram
-  inputs : List (Maybe CatString)
+  inputs : List (Maybe String)
   steps : List SDiagramStep
-  outputs : List CatString
+  outputs : List String
 
 
 export
 parseDiagram : TTImp -> Elab SDiagram
 parseDiagram t = do
-  (inp, rest) <- mapFst (map $ map $ flip MkCatString Z) <$> parseLam t
+  (inp, rest) <- parseLam t
   let Nothing = findDup (catMaybes inp)
-    | Just n => failAt (getFC t) "Duplicate string name '\{n.name}'"
+    | Just n => failAt (getFC t) "Duplicate string name '\{n}'"
   (steps, out) <- parseDiagram' [<] (catMaybes inp) rest
   pure $ MkSDiagram inp steps out
   where
@@ -108,44 +93,32 @@ parseDiagram t = do
       then Just s
       else findDup ss
 
-    resolveString : FC -> List CatString -> String -> Elab CatString
-    resolveString fc names n = case find ((==n) . name) names of
-      Just (MkCatString _ d) => pure $ MkCatString n d
-      Nothing => failAt fc "Unknown string name \{n}"
-
-    resolveStringPat : List CatString -> String -> CatString
-    resolveStringPat names n = case find ((==n) . name) names of
-      Just (MkCatString _ d) => MkCatString n (S d)
-      Nothing => MkCatString n Z
-
-    parseDiagram' : SnocList SDiagramStep -> List CatString -> TTImp -> Elab (List SDiagramStep, List CatString)
+    parseDiagram' : SnocList SDiagramStep -> List String -> TTImp -> Elab (List SDiagramStep, List String)
     parseDiagram' steps names t@`((~(mor) -< ~(inp)) >>= ~(pat)) = do
-      (inp',o',names',rest) <- do
-        inp' <- parseListOrSing inp >>= traverse (resolveString (getFC inp) names)
+      (inp',o,names',rest) <- do
+        inp' <- parseListOrSing inp
         (o, rest) <- parseLam pat
-        let o' = map (resolveStringPat names) <$> o
-        let onames = catMaybes o'
+        let onames = catMaybes o
         let Nothing = findDup onames
-          | Just n => failAt (getFC pat) "Duplicate string name '\{n.name}'"
-        let names' = filter (\n => not $ any (\n' => n.name == n'.name) onames) names
-        pure (inp',o',onames ++ names',rest)
-      parseDiagram' (steps :< MkSDStep inp' mor o') names' (assert_smaller t rest)
+          | Just n => failAt (getFC pat) "Duplicate string name '\{n}'"
+        let names' = filter (\n => not $ elem n onames) names
+        pure (inp',o,onames ++ names',rest)
+      parseDiagram' (steps :< MkSDStep inp' mor o) names' (assert_smaller t rest)
     parseDiagram' steps names t@`((~(mor) -< ~(inp)) >> ~(rest)) = do
-      inp' <- parseListOrSing inp >>= traverse (resolveString (getFC inp) names)
+      inp' <- parseListOrSing inp
       parseDiagram' (steps :< MkSDStep inp' mor []) names (assert_smaller t rest)
     parseDiagram' steps names t@`(~(mor) >>= ~(pat)) = do
-      (o',names',rest) <- do
+      (o,names',rest) <- do
         (o, rest) <- parseLam pat
-        let o' = map (resolveStringPat names) <$> o
-        let onames = catMaybes o'
+        let onames = catMaybes o
         let Nothing = findDup onames
-          | Just n => failAt (getFC pat) "Duplicate string name '\{n.name}'"
-        let names' = filter (\n => not $ any (\n' => n.name == n'.name) onames) names
-        pure (o',onames ++ names',rest)
-      parseDiagram' (steps :< MkSDStep [] mor o') names' (assert_smaller t rest)
+          | Just n => failAt (getFC pat) "Duplicate string name '\{n}'"
+        let names' = filter (\n => not $ elem n onames) names
+        pure (o,onames ++ names',rest)
+      parseDiagram' (steps :< MkSDStep [] mor o) names' (assert_smaller t rest)
     parseDiagram' steps names t@`(~(mor) >> ~(rest)) =
       parseDiagram' (steps :< MkSDStep [] mor []) names (assert_smaller t rest)
     parseDiagram' steps names `(=< ~(out)) = do
-      out' <- parseListOrSing out >>= traverse (resolveString (getFC out) names)
+      out' <- parseListOrSing out
       pure (steps <>> [], out')
     parseDiagram' _ _ t = failAt (getFC t) "Could not parse expression as string diagram"
