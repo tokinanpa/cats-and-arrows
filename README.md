@@ -36,7 +36,7 @@
   - [X] `Braided`
   - [X] `Cartesian`
   - [ ] `CartesianClosed`
-  - [ ] `Arrow`
+  - [X] `Arrow`
 - [ ] Optimize performance
 
 ## What is this?
