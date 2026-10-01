@@ -9,8 +9,8 @@ object "Category cat" as Category {
   id : cat a a
 }
 object "Monoidal cat ten i" as Monoidal {
-  assoc : cat ((a `ten` b) `ten c) (a `ten` (b `ten` c))
-  assoc' : cat (a `ten` (b `ten` c)) ((a `ten` b) `ten c)
+  assoc : cat ((a `ten` b) `ten` c) (a `ten` (b `ten` c))
+  assoc' : cat (a `ten` (b `ten` c)) ((a `ten` b) `ten` c)
   ..
   unitl : cat (i `ten` a) a
   unitl' : cat a (i `ten` a)
