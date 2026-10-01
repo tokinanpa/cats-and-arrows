@@ -58,9 +58,9 @@ PreMonoidal : (cat : Hom obj) -> (ten : obj -> obj -> obj) -> (i : obj) -> Type
 PreMonoidal = Monoidal
 
 
--- ------------------------------------------------------------
--- -- Characterization
--- ------------------------------------------------------------
+------------------------------------------------------------
+-- Characterization
+------------------------------------------------------------
 
 ||| A *tensor product sequence*, meaning a right-associated nested
 ||| tensor product of objects. This structure is used by string

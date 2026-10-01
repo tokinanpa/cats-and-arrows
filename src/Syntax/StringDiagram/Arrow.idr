@@ -111,6 +111,10 @@ arrowImpl t = do
     stringLam [(v,True)] t = ILam EmptyFC MW ExplicitArg (Just $ UN $ Basic v.name) (Implicit EmptyFC False) t
     stringLam ns t = `(\ ~(stringBind ns) => ~t)
 
+    stringLamMN : Name -> List (ArrowVar, Bool) -> TTImp -> TTImp
+    stringLamMN mn [] t = ILam EmptyFC MW ExplicitArg (Just mn) (Implicit EmptyFC False) t
+    stringLamMN mn ns t = `(\ (Builtins.MkPair ~(IBindVar EmptyFC mn) ~(stringBind ns)) => ~t)
+
     mkEither : (i,n : Nat) -> TTImp -> TTImp
     mkEither Z (S (S _)) t = `(Prelude.Left ~t)
     mkEither (S n) (S n') t = `(Prelude.Right ~(mkEither n n' t))
@@ -141,101 +145,108 @@ arrowImpl t = do
     arrowImplLam ts strings (ILam fc {}) = failAt fc "Invalid lambda"
     arrowImplLam ts strings t = failAt (getFC t) "Expected lambda expression or binding pattern"
 
-    arrowImpl' ts [MkAVar _ ty] (ICase _ _ (IVar _ var@(MN {})) _ [PatClause _ lhs rhs]) = do
-      let names = bindVars lhs
-      let vars = map (`MkAVar` `(_)) names
-      arrowImpl'
-        (ts :< `(Control.Arrow.arrow {a=_,b = ~(pairTy vars)} (\ ~lhs : ~ty => ~(pair names))))
-        vars rhs
-    arrowImpl' ts (v :: strings) (ICase _ _ (IVar _ var@(MN {})) _ [PatClause _ lhs rhs]) = do
-      let names = bindVars lhs
-      let vars = map (`MkAVar` `(_)) names
-      rest <- genSym "vars"
-      arrowImpl'
-        (ts :< `(Control.Arrow.arrow {a = ~(pairTy $ v :: strings), b = ~(pairTy $ vars ++ strings)}
-          (\(Builtin.MkPair ~lhs ~(IBindVar EmptyFC rest)) =>
-            Builtin.MkPair ~(pair names) ~(IVar EmptyFC rest))))
-        (vars ++ strings) rhs
-    arrowImpl' ts strings (ICase _ _ exp ty clauses) = do
+    arrowImpl' ts (MkAVar v ty :: strings) (ICase fc _ (IVar _ var@(MN {})) _ clauses) = do
       let tot = length clauses
       (clauses', conts) <- map unzip $ evalStateT Z $ for clauses $ \case
-        PatClause _ lhs rhs => do
+        PatClause fc' lhs rhs => do
           let names = bindVars lhs
           let vars = map (`MkAVar` `(_)) names
-          let usedExp = map (usedInExpr exp . name) strings
           let usedLater = map (\v => not (elem v.name names) && usedInDiagram rhs v.name) strings
           let strings' = vars ++ zipFilter strings usedLater
           t <- lift $ assert_total $ arrowImpl' [<] strings' rhs
           i <- get
           modify S
-          pure (PatClause EmptyFC lhs $ mkEither i tot $ pair $ map name strings', Just $ composeImp $ optimize t)
-        ImpossibleClause _ lhs => pure (ImpossibleClause EmptyFC lhs, Nothing)
-        WithClause fc {} => failAt fc "Unrecognized case pattern"
+          pure (PatClause fc' lhs $ mkEither i tot $ pair $ map name strings', Just $ composeImp $ optimize t)
+        ImpossibleClause fc' lhs => pure (ImpossibleClause fc' lhs, Nothing)
+        WithClause fc' {} => failAt fc' "Unrecognized case pattern"
+      let conts' = catMaybes conts
+      case conts' of
+        [] =>
+          pure (ts :< `(Control.Arrow.arrow {a = ~(pairTy $ MkAVar v ty :: strings), b = _}
+                      ~(stringLamMN var (map (,False) strings)
+                        (ICase fc [] (IVar EmptyFC var) ty clauses'))))
+        _ :: _ =>
+          pure (ts :< `(Control.Arrow.arrow {a = ~(pairTy $ MkAVar v ty :: strings), b = _}
+                      ~(stringLamMN var (map (,False) strings)
+                        (ICase fc [] (IVar EmptyFC var) ty clauses')))
+                    :< foldr1 (\t,t' => `(Control.Arrow.(\|/) ~t ~t')) conts')
+    arrowImpl' ts strings (ICase fc _ exp ty clauses) = do
+      let tot = length clauses
+      (clauses', conts) <- map unzip $ evalStateT Z $ for clauses $ \case
+        PatClause fc' lhs rhs => do
+          let names = bindVars lhs
+          let vars = map (`MkAVar` `(_)) names
+          let usedLater = map (\v => not (elem v.name names) && usedInDiagram rhs v.name) strings
+          let strings' = vars ++ zipFilter strings usedLater
+          t <- lift $ assert_total $ arrowImpl' [<] strings' rhs
+          i <- get
+          modify S
+          pure (PatClause fc' lhs $ mkEither i tot $ pair $ map name strings', Just $ composeImp $ optimize t)
+        ImpossibleClause fc' lhs => pure (ImpossibleClause fc' lhs, Nothing)
+        WithClause fc' {} => failAt fc' "Unrecognized case pattern"
       let conts' = catMaybes conts
       case conts' of
         [] =>
           pure (ts :< `(Control.Arrow.arrow {a = ~(pairTy strings), b = _}
-                      ~(stringLam (map (,True) strings) (ICase EmptyFC [] exp ty clauses'))))
+                      ~(stringLam (map (,True) strings) (ICase fc [] exp ty clauses'))))
         _ :: _ =>
           pure (ts :< `(Control.Arrow.arrow {a = ~(pairTy strings), b = _}
-                      ~(stringLam (map (,True) strings) (ICase EmptyFC [] exp ty clauses')))
+                      ~(stringLam (map (,True) strings) (ICase fc [] exp ty clauses')))
                     :< foldr1 (\t,t' => `(Control.Arrow.(\|/) ~t ~t')) conts')
-    arrowImpl' ts strings `(~(ICase _ _ exp ty clauses) >> ~(rest)) = do
+    arrowImpl' ts strings `(~(ICase fc _ exp ty clauses) >> ~(rest)) = do
       let tot = length clauses
       (clauses', conts) <- map unzip $ evalStateT Z $ for clauses $ \case
-        PatClause _ lhs rhs => do
+        PatClause fc' lhs rhs => do
           let names = bindVars lhs
           let vars = map (`MkAVar` `(_)) names
-          let usedExp = map (usedInExpr exp . name) strings
           let usedLater = map (\v => not (elem v.name names) && usedInDiagram rhs v.name) strings
           let strings' = vars ++ zipFilter strings usedLater
           t <- lift $ assert_total $ arrowImpl' [<] strings' rhs
           i <- get
           modify S
-          pure (PatClause EmptyFC lhs $ mkEither i tot $ pair $ map name strings', Just $ composeImp $ optimize t)
-        ImpossibleClause _ lhs => pure (ImpossibleClause EmptyFC lhs, Nothing)
-        WithClause fc {} => failAt fc "Unrecognized case pattern"
+          pure (PatClause fc' lhs $ mkEither i tot $ pair $ map name strings', Just $ composeImp $ optimize t)
+        ImpossibleClause fc' lhs => pure (ImpossibleClause fc' lhs, Nothing)
+        WithClause fc' {} => failAt fc' "Unrecognized case pattern"
       let conts' = catMaybes conts
       case conts' of
         [] =>
           arrowImpl' (ts :< `(Control.Arrow.arrow {a = ~(pairTy strings), b = _}
-                      ~(stringLam (map (,True) strings) (ICase EmptyFC [] exp ty clauses'))))
+                      ~(stringLam (map (,True) strings) (ICase fc [] exp ty clauses'))))
             strings rest
         _ :: _ =>
           arrowImpl' (ts :< `(Control.Arrow.arrow {a = ~(pairTy strings), b = _}
                         ~(stringLam (map (,True) strings)
-                        `(Builtin.MkPair ~(ICase EmptyFC [] exp ty clauses') ~(pair $ map name strings))))
+                        `(Builtin.MkPair ~(ICase fc [] exp ty clauses') ~(pair $ map name strings))))
                       :< `(Control.Arrow.first ~(foldr1 (\t,t' => `(Control.Arrow.(\|/) ~t ~t')) conts'))
                       :< `(Control.Arrow.arrow {a=_,b=_} Builtin.snd))
             strings rest
-    arrowImpl' ts strings `(~(ICase _ _ exp ty clauses) >>= ~(rest)) = do
+    arrowImpl' ts strings `(~(ICase fc _ exp ty clauses) >>= ~(rest)) = do
       let tot = length clauses
       (clauses', conts) <- map unzip $ evalStateT Z $ for clauses $ \case
-        PatClause _ lhs rhs => do
+        PatClause fc' lhs rhs => do
           let names = bindVars lhs
           let vars = map (`MkAVar` `(_)) names
-          let usedExp = map (usedInExpr exp . name) strings
           let usedLater = map (\v => not (elem v.name names) && usedInDiagram rhs v.name) strings
           let strings' = vars ++ zipFilter strings usedLater
           t <- lift $ assert_total $ arrowImpl' [<] strings' rhs
           i <- get
           modify S
-          pure (PatClause EmptyFC lhs $ mkEither i tot $ pair $ map name strings', Just $ composeImp $ optimize t)
-        ImpossibleClause _ lhs => pure (ImpossibleClause EmptyFC lhs, Nothing)
-        WithClause fc {} => failAt fc "Unrecognized case pattern"
+          pure (PatClause fc' lhs $ mkEither i tot $ pair $ map name strings', Just $ composeImp $ optimize t)
+        ImpossibleClause fc' lhs => pure (ImpossibleClause fc' lhs, Nothing)
+        WithClause fc' {} => failAt fc' "Unrecognized case pattern"
       let conts' = catMaybes conts
       case conts' of
         [] =>
           arrowImplLam (ts :< `(Control.Arrow.arrow {a = ~(pairTy strings), b = _}
-                      ~(stringLam (map (,True) strings) (ICase EmptyFC [] exp ty clauses'))))
+                      ~(stringLam (map (,True) strings) (ICase fc [] exp ty clauses'))))
             strings rest
         _ :: _ =>
           arrowImplLam (ts :< `(Control.Arrow.arrow {a = ~(pairTy strings), b = _}
                         ~(stringLam (map (,True) strings)
-                        `(Builtin.MkPair ~(ICase EmptyFC [] exp ty clauses') ~(pair $ map name strings))))
+                        `(Builtin.MkPair ~(ICase fc [] exp ty clauses') ~(pair $ map name strings))))
                       :< `(Control.Arrow.first ~(foldr1 (\t,t' => `(Control.Arrow.(\|/) ~t ~t')) conts')))
             strings rest
-    arrowImpl' ts strings (ILet _ _ MW (UN $ Basic var) ty exp rest) = do
+    arrowImpl' ts strings (ILet fc fc' MW (UN $ Basic var) ty exp rest) = do
       (usedExp,usedLater,strings') <- do
         let usedExp = map (usedInExpr exp . name) strings
         let usedLater = map (\v => v.name /= var && usedInDiagram rest v.name) strings
@@ -244,7 +255,7 @@ arrowImpl t = do
       arrowImpl'
         (ts :< `(Control.Arrow.arrow {a = ~(pairTy strings), b = ~(pairTy strings')}
           ~(stringLam (zip strings $ zipWith (\x,y => x || y) usedExp usedLater)
-            (ILet EmptyFC EmptyFC MW (UN $ Basic var) ty exp (pair $ map name strings')))))
+            (ILet fc fc' MW (UN $ Basic var) ty exp (pair $ map name strings')))))
         strings' rest
     arrowImpl' ts strings (ILet fc {}) = failAt fc "Let binding must be unrestricted"
     arrowImpl' ts strings `((~(mor) -< ~(inp)) >>= ~(rest)) =
@@ -272,8 +283,10 @@ arrowImpl t = do
                 strings' rest
     arrowImpl' ts strings `((~(mor) -< ~(inp)) >> ~(rest)) =
       case strings of
-        [] => arrowImpl' (ts :<
-                `(Control.Arrow.arrow {a=_,b=_} (\_ => ~inp)) :< mor :< `(Control.Arrow.arrow {a=_,b=_} Builtin.snd)) [] rest
+        [] => arrowImpl' (ts
+          :< `(Control.Arrow.arrow {a=Builtin.Unit,b=_} (\_ => ~inp))
+          :< mor
+          :< `(Control.Arrow.arrow {a=_,b=Builtin.Unit} (\_ => Builtin.MkUnit))) [] rest
         _ :: _ => do
           (usedInp,usedLater,strings') <- do
             let usedInp = map (usedInExpr inp . name) strings
@@ -294,10 +307,15 @@ arrowImpl t = do
                           `(Builtin.MkPair ~inp ~(pair $ map name strings'))))
                     :< `(Control.Arrow.first ~mor) :< `(Control.Arrow.arrow {a=_,b=_} Builtin.snd))
                 strings' rest
+    arrowImpl' ts strings `(~(mor) -< ~(inp)) =
+      pure (ts :< `(Control.Arrow.arrow {a = ~(pairTy strings), b = _}
+                    ~(stringLam (map (,True) strings) inp))
+                :< mor)
     arrowImpl' ts strings `(=< ~(out)) =
       pure (ts :< `(Control.Arrow.arrow {a = ~(pairTy strings),b=_}
         ~(stringLam (map (,True) strings) out)))
 
+    arrowImpl' _ _ (IHole fc _) = failAt fc "Holes are not allowed as top-level commands"
     arrowImpl' ts strings (ILam fc {}) = failAt (getFC t) "Lambda not allowed here"
     arrowImpl' ts strings t = failAt (getFC t) "Could not parse expression"
 
@@ -306,5 +324,5 @@ arrowImpl t = do
 ||| This elaboration script must be specifically invoked with
 ||| `%runElab`. The category is inferred from the return type.
 export
-arrowDo : {0 arr : Hom Type0} -> Arrow arr => TTImp -> Elab (arr (W0 a) (W0 b))
+arrowDo : {0 arr : Hom Type0} -> (0 _ : Arrow arr) => TTImp -> Elab (arr (W0 a) (W0 b))
 arrowDo t = check !(arrowImpl t)
