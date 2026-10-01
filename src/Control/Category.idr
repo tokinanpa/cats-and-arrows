@@ -4,7 +4,9 @@ import public Control.Category.Core as Control.Category
 import public Control.Category.Semigroupoid
 import public Control.Category.Functor
 import public Control.Category.NatTrans
+import public Control.Category.MonFunctor
 import public Control.Category.Monad
+import public Control.Category.Comonad
 import public Control.Category.Monoidal
 import public Control.Category.Braided
 import public Control.Category.Cartesian

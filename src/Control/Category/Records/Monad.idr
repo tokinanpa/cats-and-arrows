@@ -4,7 +4,7 @@ import Control.Category
 import Control.Category.Records.Category
 import Control.Category.Records.Monoidal
 import Control.Category.Records.Functor
-import Data.Morphisms
+import Control.Category.Records.MonFunctor
 
 %default total
 %prefix_record_projections off
@@ -48,41 +48,6 @@ namespace MonadR
   (.unit) : (rec : MonadR cat) -> {a : _} ->
             cat.hom a (rec.fun a)
   (.unit) rec = unit @{rec.impl}
-
-||| An endofunctor has *tensorial strength* if it is compatible with a
-||| monoidal category's tensor product.
-|||
-||| See `StrongFunctor` for required laws.
-public export
-record StrongFunctorR (cat : MonoidalR) where
-  constructor MkStrongFunctorR
-  fun : cat.obj -> cat.obj
-  {auto impl : StrongFunctor cat.hom cat.tensor fun}
-
-namespace StrongFunctorR
-  ||| Convert this into a `FunctorR`.
-  public export %inline
-  (.functorR) : (rec : StrongFunctorR cat) -> EndofunctorR cat.categoryR
-  (.functorR) {cat=MkMonoidalR{}} (MkStrongFunctorR {} {fun}) = MkFunctorR fun
-
-  ||| Apply the functor to a morphism in `cat`.
-  public export %inline
-  (.map) : (rec : StrongFunctorR cat) -> {a,b : _} ->
-           cat.hom a b -> cat.hom (rec.fun a) (rec.fun b)
-  (.map) {cat=MkMonoidalR{}} rec@(MkStrongFunctorR {}) = rec.functorR.map
-
-  ||| The left tensor strength.
-  public export %inline
-  (.strongl) : (rec : StrongFunctorR cat) -> {a,b : _} ->
-               cat.hom (cat.tensor a (rec.fun b)) (rec.fun (cat.tensor a b))
-  (.strongl) rec = strongl @{rec.impl}
-
-  ||| The right tensor strength.
-  public export %inline
-  (.strongr) : (rec : StrongFunctorR cat) -> {a,b : _} ->
-               cat.hom (cat.tensor (rec.fun a) b) (rec.fun (cat.tensor a b))
-  (.strongr) rec = strongr @{rec.impl}
-
 
 ||| A strong monad is a monad that is also a strong functor.
 |||

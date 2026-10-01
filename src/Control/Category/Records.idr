@@ -15,7 +15,9 @@ import public Control.Category.Records.Semigroupoid as Control.Category.Records
 import public Control.Category.Records.Category as Control.Category.Records
 import public Control.Category.Records.Functor as Control.Category.Records
 import public Control.Category.Records.NatTrans as Control.Category.Records
+import public Control.Category.Records.MonFunctor as Control.Category.Records
 import public Control.Category.Records.Monad as Control.Category.Records
+import public Control.Category.Records.Comonad as Control.Category.Records
 import public Control.Category.Records.Monoidal as Control.Category.Records
 import public Control.Category.Records.Braided as Control.Category.Records
 import public Control.Category.Records.Cartesian as Control.Category.Records

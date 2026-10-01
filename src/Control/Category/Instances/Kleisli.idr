@@ -11,9 +11,9 @@ import Data.Wrap0
 
 ||| The Kleisli category of a category `cat` with monad `m`. This
 ||| forms another category with the same objects. In addition, if
-||| `cat` is a premonoidal category, then this category inherits its
-||| premonoidal structure. (Note that this is NOT the case for
-||| monoidal structure.)
+||| `cat` is a premonoidal category and `m` has tensorial strength,
+||| then this category inherits its premonoidal structure.
+||| (Note that this is NOT the case for monoidal structure.)
 public export
 record Kleisli (cat : Hom obj) (m : obj -> obj) (a,b : obj) where
   constructor MkKleisli

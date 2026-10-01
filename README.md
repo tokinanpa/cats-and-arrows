@@ -28,7 +28,7 @@
   - [X] Category of categories
   - [X] Functor categories
   - [X] Generalized Kleisli categories
-  - [ ] Co-Kleisli categories
+  - [X] Co-Kleisli categories
   - [ ] Eilenberg-Moore categories
   - [ ] Free category constructions
 - [ ] String diagram notation:

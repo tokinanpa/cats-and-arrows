@@ -71,6 +71,16 @@ object "CatFunctor cat cat' f" as CatFunctor {
   map : cat a b <U+2192> cat' (f a) (f b)
 }
 object "<color:blue>CatEndofunctor cat f" as CatEndofunctor
+object "LaxMonFunctor cat ten i cat' ten' i' f" as LaxMonFunctor {
+  mjoin : cat' (f a `ten'` f b) (f (a `ten` b))
+  munit : cat' i' (f i)
+}
+object "<color:blue>LaxMonEndofunctor cat ten i f" as LaxMonEndofunctor
+object "MonFunctor cat ten i cat' ten' i' f" as MonFunctor {
+  mjoin' : cat' (f (a `ten` b)) (f a `ten'` f b)
+  munit' : cat' (f i) i'
+}
+object "<color:blue>MonEndofunctor cat ten i f" as MonEndofunctor
 object "CatMonad cat m" as CatMonad {
   join : cat (m (m a)) (m a)
   unit : cat a (m a)
@@ -79,11 +89,21 @@ object "StrongFunctor cat ten f" as StrongFunctor {
   strongl : cat (a `ten` f b) (f (a `ten` b))
   strongr : cat (f a `ten` b) (f (a `ten` b))
 }
+object "<color:blue>StrongMonad cat ten m" as StrongMonad
+object "CatComonad cat w" as CatComonad {
+  cojoin : cat (w a) (w (w a))
+  counit : cat (w a) a
+}
+object "CostrongFunctor cat ten f" as CostrongFunctor {
+  costrongl : cat (f (a `ten` b)) (a `ten` f b)
+  costrongr : cat (f (a `ten` b)) (f a `ten` b)
+}
+object "<color:blue>StrongComonad cat ten w" as StrongComonad
+
 object "CatBifunctor catA catB cat' f" as CatBifunctor {
   bimap : catA a b <U+2192> catB a' b' <U+2192> cat' (f a a') (f b b')
 }
 object "<color:blue>CatEndoBifunctor cat f" as CatEndoBifunctor
-object "<color:blue>StrongMonad cat ten m" as StrongMonad
 
 
 
@@ -124,10 +144,21 @@ Category <-- Promonad
 
 CatFunctor .. CatEndofunctor : cat,cat,f
 CatBifunctor .. CatEndoBifunctor : cat,cat,cat,f
+LaxMonFunctor .. LaxMonEndofunctor : cat,ten,i,cat,ten,i,f
+MonFunctor .. MonEndofunctor : cat,ten,i,cat,ten,i,f
+LaxMonEndofunctor .. MonEndofunctor
+
+CatFunctor <-- LaxMonFunctor
+LaxMonFunctor <-- MonFunctor
 
 CatEndofunctor <-- CatMonad
 CatEndofunctor <-- StrongFunctor
+CatEndofunctor <-- CatComonad
+CatEndofunctor <-- CostrongFunctor
 
 CatMonad .. StrongMonad
 StrongFunctor .. StrongMonad
+
+CatComonad .. StrongComonad
+CostrongFunctor .. StrongComonad
 @enduml
