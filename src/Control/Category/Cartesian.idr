@@ -157,8 +157,8 @@ namespace Cartesian
 
 ||| WARNING: This is a premonoidal category, not truly monoidal.
 public export %hint
-PreCartesianKleisliPair : Monad m => PreCartesian (Kleislimorphism m) Pair ()
-PreCartesianKleisliPair = Impl
+PreCartesianKleisli : Monad m => PreCartesian (Kleislimorphism m) Pair ()
+PreCartesianKleisli = Impl
   where
     [Impl] Cartesian (Kleislimorphism m) Pair () where
       projl = Kleisli $ pure . fst

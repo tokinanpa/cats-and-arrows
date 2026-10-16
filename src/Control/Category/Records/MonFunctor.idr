@@ -44,14 +44,14 @@ namespace LaxMonFunctorR
 
   ||| The lax monoidal functor action on the tensor product.
   public export %inline
-  (.mjoin) : (rec : LaxMonFunctorR cat cat') -> {a,b : _} ->
+  (.fjoin) : (rec : LaxMonFunctorR cat cat') -> {a,b : _} ->
              cat'.hom (cat'.tensor (rec.fun a) (rec.fun b)) (rec.fun (cat.tensor a b))
-  (.mjoin) rec = mjoin @{rec.impl}
+  (.fjoin) rec = fjoin @{rec.impl}
 
   ||| The lax monoidal functor action on the unit object.
   public export %inline
-  (.munit) : (rec : LaxMonFunctorR cat cat') -> cat'.hom cat'.unit (rec.fun cat.unit)
-  (.munit) rec = munit @{rec.impl}
+  (.funit) : (rec : LaxMonFunctorR cat cat') -> cat'.hom cat'.unit (rec.fun cat.unit)
+  (.funit) rec = funit @{rec.impl}
 
 
 ||| A (strong) monoidal functor from `cat` to `cat'`.
@@ -90,16 +90,16 @@ namespace MonFunctorR
 
   ||| The monoidal functor action on the tensor product.
   public export %inline
-  (.mjoin) : (rec : MonFunctorR cat cat') -> {a,b : _} ->
+  (.fjoin) : (rec : MonFunctorR cat cat') -> {a,b : _} ->
              cat'.hom (cat'.tensor (rec.fun a) (rec.fun b)) (rec.fun (cat.tensor a b))
-  (.mjoin) {cat=MkMonoidalR {} {hom=cat,tensor=ten},cat'=MkMonoidalR {} {hom=cat',tensor=ten'}}
-    rec@(MkMonFunctorR {}) = mjoin {cat,ten,cat',ten'}
+  (.fjoin) {cat=MkMonoidalR {} {hom=cat,tensor=ten},cat'=MkMonoidalR {} {hom=cat',tensor=ten'}}
+    rec@(MkMonFunctorR {}) = fjoin {cat,ten,cat',ten'}
 
   ||| The monoidal functor action on the unit object.
   public export %inline
-  (.munit) : (rec : MonFunctorR cat cat') -> cat'.hom cat'.unit (rec.fun cat.unit)
-  (.munit) {cat=MkMonoidalR {} {hom=cat,tensor=ten},cat'=MkMonoidalR {} {hom=cat',tensor=ten'}}
-    rec@(MkMonFunctorR {}) = munit {cat,ten,cat',ten'}
+  (.funit) : (rec : MonFunctorR cat cat') -> cat'.hom cat'.unit (rec.fun cat.unit)
+  (.funit) {cat=MkMonoidalR {} {hom=cat,tensor=ten},cat'=MkMonoidalR {} {hom=cat',tensor=ten'}}
+    rec@(MkMonFunctorR {}) = funit {cat,ten,cat',ten'}
 
 
   ||| Convert this into a `MonFunctorR`.
@@ -109,14 +109,14 @@ namespace MonFunctorR
 
   ||| The inverse monoidal functor action on the tensor product.
   public export %inline
-  (.mjoin') : (rec : MonFunctorR cat cat') -> {a,b : _} ->
+  (.fjoin') : (rec : MonFunctorR cat cat') -> {a,b : _} ->
              cat'.hom (rec.fun (cat.tensor a b)) (cat'.tensor (rec.fun a) (rec.fun b))
-  (.mjoin') rec = mjoin' @{rec.impl}
+  (.fjoin') rec = fjoin' @{rec.impl}
 
   ||| The inverse monoidal functor action on the unit object.
   public export %inline
-  (.munit') : (rec : MonFunctorR cat cat') -> cat'.hom (rec.fun cat.unit) cat'.unit
-  (.munit') rec = munit' @{rec.impl}
+  (.funit') : (rec : MonFunctorR cat cat') -> cat'.hom (rec.fun cat.unit) cat'.unit
+  (.funit') rec = funit' @{rec.impl}
 
 
 ||| An endofunctor has *tensorial strength* if it is compatible with a

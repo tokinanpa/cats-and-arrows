@@ -34,7 +34,7 @@ public export
 
 public export
 {w : _} -> Promonad0 cat => CatComonad cat w => Promonad0 (Cokleisli cat w) where
-  funitW f = MkCokleisli (funitW f . counit)
+  fromFuncW f = MkCokleisli (fromFuncW f . counit)
 
 ||| WARNING: This is typically a binoidal functor, not a true bifunctor.
 ||| It is only a bifunctor if the comonad `m` is commutative over `ten`.

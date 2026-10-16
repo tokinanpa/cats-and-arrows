@@ -28,22 +28,24 @@ import Data.Wrap0
 ||| Equivalently, a promonad is a category equipped with an
 ||| identity-on-objects functor from the category `Typ`.
 |||
-||| Laws - `funit` is functorial (see `CatFunctor`), meaning:
-||| * `funit id = id`
-||| * `funit f . funit g = funit (f . g)`
+||| Laws - `fromFunc` is functorial (see `CatFunctor`), meaning:
+||| * `fromFunc id = id`
+||| * `fromFunc f . fromFunc g = fromFunc (f . g)`
 public export
 interface Category cat => Promonad (0 cat : Hom Type) where
   ||| The unit transformation of the promonad.
   ||| Equivalently, the action of the unit functor on morphisms.
-  funit : (a -> b) -> cat a b
+  fromFunc : (a -> b) -> cat a b
 
 ||| Like `Promonad`, but allows the category's objects to be wrapped
 ||| using `Wrap0`. This is typically the more practical option.
+|||
+||| See `Promonad` for required laws.
 public export
 interface Category cat => Promonad0 (0 cat : Hom Type0) where
   ||| The unit transformation of the promonad.
   ||| Equivalently, the action of the unit functor on morphisms.
-  funitW : (a -> b) -> cat (W0 a) (W0 b)
+  fromFuncW : (a -> b) -> cat (W0 a) (W0 b)
 
 ------------------------------------------------------------
 -- Existing Instances
@@ -52,31 +54,31 @@ interface Category cat => Promonad0 (0 cat : Hom Type0) where
 ||| The unit identity-on-objects functor of a promonad.
 public export
 [PromonadUnit] Promonad cat => CatFunctor Morphism cat Prelude.id where
-  map = funit . applyMor
+  map = fromFunc . applyMor
 
 ||| The unit identity-on-objects functor of a promonad.
 public export
 [PromonadUnit0] Promonad0 cat => CatFunctor Morphism cat (\x => W0 x) where
-  map = funitW . applyMor
+  map = fromFuncW . applyMor
 
 namespace Monoidal
   ||| Convert a promonad into a (pre)monoidal category.
   public export
   [FromPromonad] {ten,i : _} -> (Promonad cat, CatEndoBifunctor cat ten, Monoidal Morphism ten i) =>
       Monoidal cat ten i where
-    assoc = funit $ applyMor assoc
-    assoc' = funit $ applyMor assoc'
-    unitl = funit $ applyMor unitl
-    unitl' = funit $ applyMor unitl'
-    unitr = funit $ applyMor unitr
-    unitr' = funit $ applyMor unitr'
+    assoc = fromFunc $ applyMor assoc
+    assoc' = fromFunc $ applyMor assoc'
+    unitl = fromFunc $ applyMor unitl
+    unitl' = fromFunc $ applyMor unitl'
+    unitr = fromFunc $ applyMor unitr
+    unitr' = fromFunc $ applyMor unitr'
 
 namespace Braided
   ||| Convert a promonad into a braided (pre)monoidal category.
   public export
   [FromPromonad] {ten,i : _} -> (Promonad cat, CatEndoBifunctor cat ten, Braided Morphism ten i) =>
       Braided cat ten i using Monoidal.FromPromonad where
-    braid = funit $ applyMor braid
+    braid = fromFunc $ applyMor braid
 
 namespace MonSymmetric
   ||| Convert a promonad into a symmetric (pre)monoidal category.
@@ -89,22 +91,22 @@ namespace Cartesian
   public export
   [FromPromonad] {ten,i : _} -> (Promonad cat, CatEndoBifunctor cat ten, Cartesian Morphism ten i) =>
       Cartesian cat ten i using Monoidal.FromPromonad where
-    projl = funit $ applyMor projl
-    projr = funit $ applyMor projr
+    projl = fromFunc $ applyMor projl
+    projr = fromFunc $ applyMor projr
     prod f g = Core.(.) {cat} (bimap' f g) (split {cat,ten,i})
-    split = funit $ applyMor split
-    elim = funit $ applyMor $ elim {ten}
+    split = fromFunc $ applyMor split
+    elim = fromFunc $ applyMor $ elim {ten}
 
 namespace Cocartesian
   ||| Convert a promonad into a cocartesian (pre)monoidal category.
   public export
   [FromPromonad] {ten,i : _} -> (Promonad cat, CatEndoBifunctor cat ten, Cocartesian Morphism ten i) =>
       Cocartesian cat ten i using Monoidal.FromPromonad where
-    injl = funit $ applyMor injl
-    injr = funit $ applyMor injr
+    injl = fromFunc $ applyMor injl
+    injr = fromFunc $ applyMor injr
     coprod f g = Core.(.) {cat} (merge {cat,ten,i}) (bimap' f g)
-    merge = funit $ applyMor merge
-    intro = funit $ applyMor $ intro {ten}
+    merge = fromFunc $ applyMor merge
+    intro = fromFunc $ applyMor $ intro {ten}
 
 namespace Bimonoidal
   ||| Convert a promonad into a (pre)bimonoidal category.
@@ -112,14 +114,14 @@ namespace Bimonoidal
   [FromPromonad] {add,mul,z,i : _} -> (Promonad cat, CatEndoBifunctor cat add, CatEndoBifunctor cat mul,
                   Bimonoidal Morphism add mul z i) => Bimonoidal cat add mul z i
       using Monoidal.FromPromonad where
-    distribl = funit $ applyMor distribl
-    distribl' = funit $ applyMor distribl'
-    distribr = funit $ applyMor distribr
-    distribr' = funit $ applyMor distribr'
-    absorbl = funit $ applyMor $ absorbl {add,mul}
-    absorbl' = funit $ applyMor $ absorbl' {add,mul}
-    absorbr = funit $ applyMor $ absorbr {add,mul}
-    absorbr' = funit $ applyMor $ absorbr' {add,mul}
+    distribl = fromFunc $ applyMor distribl
+    distribl' = fromFunc $ applyMor distribl'
+    distribr = fromFunc $ applyMor distribr
+    distribr' = fromFunc $ applyMor distribr'
+    absorbl = fromFunc $ applyMor $ absorbl {add,mul}
+    absorbl' = fromFunc $ applyMor $ absorbl' {add,mul}
+    absorbr = fromFunc $ applyMor $ absorbr {add,mul}
+    absorbr' = fromFunc $ applyMor $ absorbr' {add,mul}
 
 
 -- These instances should not be used unless necessary, as they have
@@ -128,13 +130,13 @@ namespace Bimonoidal
 
 public export
 Promonad Morphism where
-  funit = Mor
+  fromFunc = Mor
 
 namespace Promonad
   public export
   [Function] Promonad (~~>) using Category.Function where
-    funit = id
+    fromFunc = id
 
 public export
 Monad m => Promonad (Kleislimorphism m) where
-  funit f = Kleisli $ pure . f
+  fromFunc f = Kleisli $ pure . f

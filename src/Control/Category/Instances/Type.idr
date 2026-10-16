@@ -57,7 +57,7 @@ SemigroupoidTyp = FromCategory
 
 public export
 Promonad0 Typ where
-  funitW = MkTyp
+  fromFuncW = MkTyp
 
 namespace CatFunctor
   public export

@@ -17,9 +17,9 @@ import Data.Morphisms
 ||| For the record-style definition, see `Control.Category.Records.LaxMonFunctorR`.
 |||
 ||| Laws:
-||| * `map assoc . mjoin . mapl mjoin = mjoin . mapr mjoin . assoc`
-||| * `map unitl . mjoin . mapl munit = unitl`
-||| * `map unitr . mjoin . mapr munit = unitr`
+||| * `map assoc . fjoin . mapl fjoin = fjoin . mapr fjoin . assoc`
+||| * `map unitl . fjoin . mapl funit = unitl`
+||| * `map unitr . fjoin . mapr funit = unitr`
 public export
 interface CatFunctor cat cat' f => LaxMonFunctor
     (0 cat : Hom obj) (0 ten : obj -> obj -> obj) (0 i : obj)
@@ -27,9 +27,9 @@ interface CatFunctor cat cat' f => LaxMonFunctor
     (0 f : obj -> obj') | cat,ten,cat',ten',f where
   constructor MkLaxMonFunctor
   ||| The lax monoidal functor action on the tensor product.
-  mjoin : {a,b : _} -> cat' (f a `ten'` f b) (f (a `ten` b))
+  fjoin : {a,b : _} -> cat' (f a `ten'` f b) (f (a `ten` b))
   ||| The lax monoidal functor action on the unit object.
-  munit : cat' i' (f i)
+  funit : cat' i' (f i)
 
 ||| A type synonym for a lax monoidal endofunctor, a lax monoidal
 ||| functor from a monoidal category to itself.
@@ -48,8 +48,8 @@ LaxMonEndofunctor cat ten i = LaxMonFunctor cat ten i cat ten i
 ||| the record-style definition, see `Control.Category.Records.MonFunctorR`.
 |||
 ||| Laws:
-||| * `munit . munit' = munit' . munit = id`
-||| * `mjoin . mjoin' = mjoin' . mjoin = id`
+||| * `funit . funit' = funit' . funit = id`
+||| * `fjoin . fjoin' = fjoin' . fjoin = id`
 public export
 interface LaxMonFunctor cat ten i cat' ten' i' f => MonFunctor
     (0 cat : Hom obj) (0 ten : obj -> obj -> obj) (0 i : obj)
@@ -58,12 +58,12 @@ interface LaxMonFunctor cat ten i cat' ten' i' f => MonFunctor
   constructor MkMonFunctor
   ||| The inverse monoidal functor action on the tensor product.
   |||
-  ||| This is the inverse of `mjoin`.
-  mjoin' : {a,b : _} -> cat' (f (a `ten` b)) (f a `ten'` f b)
+  ||| This is the inverse of `fjoin`.
+  fjoin' : {a,b : _} -> cat' (f (a `ten` b)) (f a `ten'` f b)
   ||| The inverse monoidal functor action on the unit object.
   |||
-  ||| This is the inverse of `munit`.
-  munit' : cat' (f i) i'
+  ||| This is the inverse of `funit`.
+  funit' : cat' (f i) i'
 
 ||| A type synonym for a monoidal endofunctor, a monoidal functor from
 ||| a monoidal category to itself.
@@ -138,15 +138,15 @@ namespace LaxMonFunctor
   public export
   [Id] {ten,i : _} -> Category cat => LaxMonFunctor cat ten i cat ten i Prelude.id
       using CatFunctor.Id where
-    mjoin = id
-    munit = id
+    fjoin = id
+    funit = id
 
 namespace MonFunctor
   public export
   [Id] {ten,i : _} -> Category cat => MonFunctor cat ten i cat ten i Prelude.id
       using LaxMonFunctor.Id where
-    mjoin' = id
-    munit' = id
+    fjoin' = id
+    funit' = id
 
 namespace StrongFunctor
   public export
@@ -173,16 +173,16 @@ namespace LaxMonFunctor
   public export
   [MorFromApplicative] Applicative f => LaxMonFunctor Morphism Pair () Morphism Pair () f
       using CatFunctor.MorFromFunctor where
-    mjoin = Mor $ \(x,y) => (,) <$> x <*> y
-    munit = Mor $ const $ pure ()
+    fjoin = Mor $ \(x,y) => (,) <$> x <*> y
+    funit = Mor $ const $ pure ()
 
   ||| Convert a Prelude `Applicative` into a lax monoidal endofunctor
   ||| over the function category.
   public export
   [FuncFromApplicative] Applicative f => LaxMonFunctor (~~>) Pair () (~~>) Pair () f
       using CatFunctor.FuncFromFunctor where
-    mjoin (x,y) = (,) <$> x <*> y
-    munit = const $ pure ()
+    fjoin (x,y) = (,) <$> x <*> y
+    funit = const $ pure ()
 
 namespace StrongFunctor
   ||| Convert a Prelude `Functor` into a strong functor over

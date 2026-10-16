@@ -49,7 +49,7 @@ ArrowLoop arr = (Promonad0 arr, Traced arr (liftW2 Pair) (W0 ()))
 
 public export %inline
 arrow : Arrow arr => (a -> b) -> arr (W0 a) (W0 b)
-arrow = funitW
+arrow = fromFuncW
 
 public export %inline
 first : Arrow arr => arr (W0 a) (W0 b) -> arr (W0 (a, c)) (W0 (b, c))

@@ -52,7 +52,7 @@ object "Closed cat ten hom i" as Closed {
 }
 object "<color:blue>CartesianClosed cat ten hom i" as CartesianClosed
 object "Promonad cat" as Promonad {
-  funit : (a <U+2192> b) <U+2192> cat a b
+  fromFunc : (a <U+2192> b) <U+2192> cat a b
 }
 object "Bimonoidal cat add mul z i" as Bimonoidal {
   distribl : cat (a `mul` (b `add` c)) ((a `mul` b) `add` (a `mul` c))
@@ -76,13 +76,13 @@ object "CatFunctor cat cat' f" as CatFunctor {
 }
 object "<color:blue>CatEndofunctor cat f" as CatEndofunctor
 object "LaxMonFunctor cat ten i cat' ten' i' f" as LaxMonFunctor {
-  mjoin : cat' (f a `ten'` f b) (f (a `ten` b))
-  munit : cat' i' (f i)
+  fjoin : cat' (f a `ten'` f b) (f (a `ten` b))
+  funit : cat' i' (f i)
 }
 object "<color:blue>LaxMonEndofunctor cat ten i f" as LaxMonEndofunctor
 object "MonFunctor cat ten i cat' ten' i' f" as MonFunctor {
-  mjoin' : cat' (f (a `ten` b)) (f a `ten'` f b)
-  munit' : cat' (f i) i'
+  fjoin' : cat' (f (a `ten` b)) (f a `ten'` f b)
+  funit' : cat' (f i) i'
 }
 object "<color:blue>MonEndofunctor cat ten i f" as MonEndofunctor
 object "CatMonad cat m" as CatMonad {

@@ -73,13 +73,13 @@ CatFunctor Linear Typ Prelude.id where
 
 public export
 LaxMonFunctor Linear LPair (W0 ()) Typ Pair (W0 ()) Prelude.id where
-  munit = MkTyp id
-  mjoin = MkTyp $ \(x,y) => x # y
+  funit = MkTyp id
+  fjoin = MkTyp $ \(x,y) => x # y
 
 public export
 MonFunctor Linear LPair (W0 ()) Typ Pair (W0 ()) Prelude.id where
-  munit' = MkTyp id
-  mjoin' = MkTyp $ \(x # y) => (x,y)
+  funit' = MkTyp id
+  fjoin' = MkTyp $ \(x # y) => (x,y)
 
 
 -- NOTE: Functors defined on `Linear` can be thought of as "weak"

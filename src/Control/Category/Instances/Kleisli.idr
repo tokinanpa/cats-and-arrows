@@ -35,7 +35,7 @@ public export
 
 public export
 {m : _} -> Promonad0 cat => CatMonad cat m => Promonad0 (Kleisli cat m) where
-  funitW f = MkKleisli (unit . funitW f)
+  fromFuncW f = MkKleisli (unit . fromFuncW f)
 
 
 ||| WARNING: This is typically a binoidal functor, not a true bifunctor.
