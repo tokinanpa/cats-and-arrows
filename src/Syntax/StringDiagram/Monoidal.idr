@@ -40,10 +40,10 @@ checkDiagram (MkSDiagram inp steps out) = do
     checkDiagram' diag strings (MkSDStep i m o :: steps) = do
       let Just o' = the (Maybe _) $ sequence o
         | Nothing => fail "Strings cannot be discarded"
-      let False = any (\name => elem name strings) o'
-        | True => fail "Cannot shadow string name"
       let Just (l,r) = findSublist i strings
         | Nothing => fail "Strings are not contiguous"
+      let False = any (\name => elem name l || elem name r) o'
+        | True => fail "Cannot shadow string name"
       checkDiagram'
         (diag :< MkMDStep (length l) (length i) (length o) (length r) m)
         (l ++ o' ++ r) steps

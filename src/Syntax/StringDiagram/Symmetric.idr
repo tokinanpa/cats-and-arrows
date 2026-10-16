@@ -57,9 +57,9 @@ stringImpl obj impl t = do
     stringImpl' ts mon strings out (step :: steps) = do
       let Just o = the (Maybe _) $ sequence step.outputs
         | Nothing => fail "Strings cannot be discarded"
-      let False = any (`elem` strings) o
-        | True => fail "Cannot shadow string name"
       let rest = filter (\n => not $ elem n step.inputs) strings
+      let False = any (`elem` rest) o
+        | True => fail "Cannot shadow string name"
       let perm = stringsToBack [<] (natToInteger $ length rest) step.inputs strings
       stringImpl' (ts :<
         `(Control.Category.Braided.permute @{~impl} {xs = ~(listImp $ length strings)} ~perm) :<
@@ -68,15 +68,15 @@ stringImpl obj impl t = do
            ys' = ~(listImp $ length o), zs = Prelude.Nil} ~(step.mor)))
         mon (rest ++ o) out steps
     stringImpl' ts _ strings out [] = do
-      let Just is = for out $ \n =>
+      perm <- do
+        let Just is = for out $ \n =>
                       findIndex (== n) strings
-        | Nothing => fail "Unrecognized string name"
-      let Just perm = fromPermSeq =<< toVect (length strings) is
-        | Nothing => fail "Return strings violate linearity"
-      let perm' = permutation $ natToInteger <$> toList perm
-      logMsg "debug" 0 (show perm')
+          | Nothing => fail "Unrecognized string name"
+        let Just p = fromPermSeq =<< toVect (length strings) is
+          | Nothing => fail "Return strings violate linearity"
+        pure $ permutation $ natToInteger <$> toList p
       pure $ ts :< `(Control.Category.Braided.permute @{~impl}
-                      {xs = ~(listImp $ length strings)} ~perm')
+                      {xs = ~(listImp $ length strings)} ~perm)
 
     composeImp : TTImp -> SnocList TTImp -> TTImp
     composeImp cat [<] = `(Control.Category.Core.id {a = ~obj})
