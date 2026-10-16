@@ -4,7 +4,7 @@ import public Control.Category.Core
 import public Control.Category.Functor
 import public Control.Category.Monoidal
 import public Control.Category.Braided
-import public Data.Fin
+import public Data.Vect
 import Data.Wrap0
 import public Language.Reflection
 import public Syntax.StringDiagram.Util
@@ -39,42 +39,44 @@ stringImpl obj impl t = do
     listImp Z = `(Prelude.Nil)
     listImp (S n) = `(Prelude.(::) ~obj ~(listImp n))
 
-    stringsToBack : SnocList TTImp -> Nat -> List Nat -> SnocList TTImp
-    stringsToBack ts n [] = ts
-    stringsToBack ts n (i :: is) =
-      let iminus = pred (n `minus` i)
-      in if isSucc iminus
-          then stringsToBack
-                (ts :<
-                  `(Control.Category.Braided.sendToBack @{~impl}
-                    {xs = ~(listImp i), x = ~obj, ys = ~(listImp iminus)}))
-                n $ assert_smaller (i::is) $ map (\i' => if i' > i then pred i' else i') is
-          else stringsToBack ts n is
+    permutation : List Integer -> TTImp
+    permutation [] = `(Data.Permutation.Nil)
+    permutation (x :: xs) =
+      `(Data.Permutation.(::) (Data.Fin.fromInteger ~(IPrimVal EmptyFC (BI x))) ~(permutation xs))
+
+    stringsToBack : Eq a => SnocList Integer -> Integer -> List a -> List a -> TTImp
+    stringsToBack xs _ _ [] = permutation (xs <>> [])
+    stringsToBack xs r inp (str :: strings) =
+      case findIndex (==str) inp of
+        Just i => stringsToBack (xs :< r + finToInteger i) r (filter (/=str) inp) strings
+        Nothing => stringsToBack (xs :< 0) (r - 1) inp strings
+
 
     stringImpl' : SnocList TTImp -> TTImp ->
                   List String -> List String -> List SDiagramStep -> Elab (SnocList TTImp)
     stringImpl' ts mon strings out (step :: steps) = do
       let Just o = the (Maybe _) $ sequence step.outputs
         | Nothing => fail "Strings cannot be discarded"
-      let False = any (\name => elem name strings) o
+      let False = any (`elem` strings) o
         | True => fail "Cannot shadow string name"
-      let Just is = for step.inputs $ \n =>
-                      finToNat <$> findIndex (== n) strings
-        | Nothing => fail "Unrecognized string name"
       let rest = filter (\n => not $ elem n step.inputs) strings
-      let ts' = stringsToBack [<] (length strings) is
-      stringImpl' (ts ++ ts' :<
+      let perm = stringsToBack [<] (natToInteger $ length rest) step.inputs strings
+      stringImpl' (ts :<
+        `(Control.Category.Braided.permute @{~impl} {xs = ~(listImp $ length strings)} ~perm) :<
         `(Control.Category.Monoidal.applyAssoc @{~mon}
           {xs = ~(listImp $ length rest), ys = ~(listImp $ length step.inputs),
            ys' = ~(listImp $ length o), zs = Prelude.Nil} ~(step.mor)))
         mon (rest ++ o) out steps
     stringImpl' ts _ strings out [] = do
       let Just is = for out $ \n =>
-                      finToNat <$> findIndex (== n) strings
+                      findIndex (== n) strings
         | Nothing => fail "Unrecognized string name"
-      when (length strings /= length out) $ fail "Return strings violate linearity"
-      let ts' = stringsToBack [<] (length strings) is
-      pure $ ts ++ ts'
+      let Just perm = fromPermSeq =<< toVect (length strings) is
+        | Nothing => fail "Return strings violate linearity"
+      let perm' = permutation $ natToInteger <$> toList perm
+      logMsg "debug" 0 (show perm')
+      pure $ ts :< `(Control.Category.Braided.permute @{~impl}
+                      {xs = ~(listImp $ length strings)} ~perm')
 
     composeImp : TTImp -> SnocList TTImp -> TTImp
     composeImp cat [<] = `(Control.Category.Core.id {a = ~obj})
