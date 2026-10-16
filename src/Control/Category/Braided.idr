@@ -195,6 +195,10 @@ insertFromBack' @{c@(MkBraided{})} {ys=_::_} =
 -- This definition cheats HARD, but it only uses `believe_me` for
 -- unifying expressions that are actually equal, so it *should* work.
 -- TODO: Replace this with something far, far less jank
+permuteDefault @{c@(MkBraided{})} {xs=[]} [] = id
+permuteDefault @{c@(MkBraided{})} {xs=[_]} [_] = id
+permuteDefault @{c@(MkBraided{})} {xs=[_,_]} [FZ,FZ] = id
+permuteDefault @{c@(MkBraided{})} {xs=[_,_]} [FS FZ,FZ] = braid
 permuteDefault @{c@(MkBraided{})} {xs} p = go (toList $ inverse p)
   where
     believeFst : forall a,b,c. cat a c -> cat b c
@@ -313,6 +317,10 @@ namespace MonSymmetric
 
 public export
 MonSymmetric Morphism Pair () where
+  permute {xs=[]} [] = id
+  permute {xs=[_]} [_] = id
+  permute {xs=[_,_]} [FZ,FZ] = id
+  permute {xs=[_,_]} [FS FZ,FZ] = braid
   permute p = Mor $ \xs => pairFromHList $ permuteHList p $ pairToHList xs
 
 public export %hint
@@ -325,6 +333,10 @@ SymmetricKleisliPair : Monad m => PreSymmetric (Kleislimorphism m) Pair ()
 SymmetricKleisliPair = Impl
   where
     [Impl] MonSymmetric (Kleislimorphism m) Pair () where
+      permute {xs=[]} [] = id
+      permute {xs=[_]} [_] = id
+      permute {xs=[_,_]} [FZ,FZ] = id
+      permute {xs=[_,_]} [FS FZ,FZ] = braid
       permute p = Kleisli $ \xs => pure $ pairFromHList $ permuteHList p $ pairToHList xs
 
 public export %hint

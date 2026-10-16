@@ -128,6 +128,8 @@ Braided Linear LEither (W0 Void) where
 
 public export
 MonSymmetric Linear LPair (W0 ()) where
+  permute {xs=[]} [] = id
+  permute {xs=[_]} [_] = id
   permute p = MkLinear $ assert_linear $ \xs => fromHList $ permuteHList p $ toHList xs
     where
       toHList : {ts : _} -> (TenSeq LPair (W0 ()) ts).runW0 -> All Wrap0.runW0 ts

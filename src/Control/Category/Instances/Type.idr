@@ -6,6 +6,7 @@ module Control.Category.Instances.Type
 import Control.Category
 import Control.Category.Records
 import Data.Either
+import Data.Fin
 import Data.Tensor
 import Data.List.Quantifiers
 import Data.Wrap0
@@ -149,6 +150,8 @@ namespace MonSymmetric
 
 public export
 MonSymmetric Typ Pair (W0 ()) where
+  permute {xs=[]} [] = id
+  permute {xs=[_]} [_] = id
   permute p = MkTyp $ \xs => fromHList $ permuteHList p $ toHList xs
     where
       toHList : {ts : _} -> (TenSeq Pair (W0 ()) ts).runW0 -> All Wrap0.runW0 ts
