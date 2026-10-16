@@ -100,8 +100,7 @@ coswizzle : Cocartesian cat ten i => {xs : _} ->
             (sw : Swizzle (length xs)) -> cat (TenSeq ten i $ swizzleList xs sw) (TenSeq ten i xs)
 coswizzle @{c@(MkCocartesian{})} [] = intro {ten}
 coswizzle @{c@(MkCocartesian{})} {xs=_::_} [i] = inj i
-coswizzle @{c@(MkCocartesian{})} {xs=_::_} (i::is@(_::_)) =
-  merge . bimap' (inj {ten} i) (coswizzle is)
+coswizzle @{c@(MkCocartesian{})} {xs=_::_} (i::is@(_::_)) = coprod (inj {ten} i) (coswizzle is)
 
 
 ------------------------------------------------------------

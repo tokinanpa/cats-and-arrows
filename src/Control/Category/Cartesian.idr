@@ -107,8 +107,7 @@ swizzle : Cartesian cat ten i => {xs : _} ->
           (sw : Swizzle (length xs)) -> cat (TenSeq ten i xs) (TenSeq ten i $ swizzleList xs sw)
 swizzle @{c@(MkCartesian{})} [] = elim {ten}
 swizzle @{c@(MkCartesian{})} {xs=_::_} [i] = proj i
-swizzle @{c@(MkCartesian{})} {xs=_::_} (i::is@(_::_)) =
-  bimap' (proj {ten} i) (swizzle is) . split
+swizzle @{c@(MkCartesian{})} {xs=_::_} (i::is@(_::_)) = prod (proj {ten} i) (swizzle is)
 
 
 ------------------------------------------------------------
