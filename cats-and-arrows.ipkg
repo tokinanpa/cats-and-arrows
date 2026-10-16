@@ -57,7 +57,7 @@ modules = Control.Category,
           Data.Permutation,
           Data.Wrap0,
           Syntax.StringDiagram.Arrow,
-          Syntax.StringDiagram.Braided,
           Syntax.StringDiagram.Cartesian,
           Syntax.StringDiagram.Monoidal,
+          Syntax.StringDiagram.Symmetric,
           Syntax.StringDiagram.Util

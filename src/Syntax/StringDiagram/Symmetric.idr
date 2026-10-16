@@ -1,4 +1,4 @@
-module Syntax.StringDiagram.Braided
+module Syntax.StringDiagram.Symmetric
 
 import public Control.Category.Core
 import public Control.Category.Functor
@@ -26,10 +26,12 @@ stringImpl obj impl t = do
   MkSDiagram inp steps out <- parseDiagram t
   let Just inp' = the (Maybe _) $ sequence inp
     | Nothing => fail "Strings cannot be discarded"
+  brd <- genSym "brd"
   mon <- genSym "mon"
   cat <- genSym "cat"
   ts <- stringImpl' [<] (IVar EmptyFC mon) inp' out steps
-  pure `(let Control.Category.Braided.MkBraided @{~(IBindVar EmptyFC mon)} {} = ~impl
+  pure `(let Control.Category.Braided.MkMonSymmetric @{~(IBindVar EmptyFC brd)} {} = ~impl
+             Control.Category.Braided.MkBraided @{~(IBindVar EmptyFC mon)} {} = ~(IVar EmptyFC brd)
              Control.Category.Monoidal.MkMonoidal @{~(IBindVar EmptyFC cat)} {} = ~(IVar EmptyFC mon)
         in ~(composeImp (IVar EmptyFC cat) ts))
   where
@@ -82,19 +84,13 @@ stringImpl obj impl t = do
         {a = ~obj, b = ~obj, c = ~obj}
         ~t ~(composeImp cat ts))
 
-||| Enter string diagram notation (for `Braided`).
+||| Enter string diagram notation (for `MonSymmetric`).
 |||
 ||| This elaboration script must be specifically invoked with
 ||| `%runElab`. The category is inferred from the return type, but
 ||| the tensor product must be passed as an explicit argument.
-|||
-||| NOTE: This notation is intended for use with symmetric monoidal
-||| categories, and may be confusing if used in the non-symmetric
-||| braided case. If your category is non-symmetric, it may be better
-||| to use the string diagram notation for `Monoidal` and insert
-||| explicit braiding calls.
 export
 string : {obj : _} -> {0 cat : Hom obj} -> (0 ten : obj -> obj -> obj) -> {0 i,a,b : obj} ->
-         Braided cat ten i => TTImp -> Elab (cat a b)
+         MonSymmetric cat ten i => TTImp -> Elab (cat a b)
 string {obj = obj@(Wrap0 _)} _ @{impl} t = check !(stringImpl `(W0 _) !(quote impl) t)
 string {obj = _} @{impl} _ t = check !(stringImpl `(_) !(quote impl) t)

@@ -4,9 +4,11 @@ import Control.Category.Core
 import Control.Category.Functor
 import Control.Category.Monoidal
 import Control.Category.Braided
+import Control.Category.Cartesian
 import Data.Either
 import Data.Fin
 import Data.List
+import Data.Vect
 import Data.Morphisms
 
 %default total
@@ -81,6 +83,7 @@ PreCocartesian = Cocartesian
 -- Characterization
 ------------------------------------------------------------
 
+||| Inject a single value into a coproduct sequence by index.
 public export
 inj : Cocartesian cat ten i => {xs : _} -> (x : Fin (length xs)) -> cat (index' xs x) (TenSeq ten i xs)
 inj @{c@(MkCocartesian{})} {xs=[_]} FZ = id
@@ -89,17 +92,39 @@ inj @{c@(MkCocartesian{})} {xs=_::_::_} FZ = injl
 inj @{c@(MkCocartesian{})} {xs=_::_::_} (FS x) = injr . inj x
 
 
+||| Apply a `Swizzle` to a coproduct sequence in reverse.
+|||
+||| This function is dual to `swizzle`.
+public export
+coswizzle : Cocartesian cat ten i => {xs : _} ->
+            (sw : Swizzle (length xs)) -> cat (TenSeq ten i $ swizzleList xs sw) (TenSeq ten i xs)
+coswizzle @{c@(MkCocartesian{})} [] = intro {ten}
+coswizzle @{c@(MkCocartesian{})} {xs=_::_} [i] = inj i
+coswizzle @{c@(MkCocartesian{})} {xs=_::_} (i::is@(_::_)) =
+  merge . bimap' (inj {ten} i) (coswizzle is)
+
+
 ------------------------------------------------------------
 -- Existing Instances
 ------------------------------------------------------------
 
 namespace Braided
   ||| Convert a cocartesian monoidal category into a
-  ||| symmetric monoidal category.
+  ||| braided monoidal category.
   public export
   [FromCocartesian] {ten,i : _} -> Cocartesian cat ten i => Braided cat ten i where
     braid = coprod injr injl
-    permute = permuteDefault {ten} (coprod injr injl)
+
+namespace MonSymmetric
+  ||| Convert a cartesian monoidal category into a
+  ||| symmetric monoidal category.
+  public export
+  [FromCocartesian] {ten,i : _} -> Cocartesian cat ten i => MonSymmetric cat ten i
+      using Braided.FromCocartesian where
+    permute p =
+      let tb = toList $ permSeq p
+      in replace {p = flip cat _ . TenSeq ten i} (believe_me $ Refl {x=()}) $
+          coswizzle {xs = permuteList xs p} $ rewrite permuteListLength xs p in tb
 
 
 -- These instances should not be used unless necessary, as they have

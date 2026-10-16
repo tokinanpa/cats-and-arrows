@@ -30,7 +30,7 @@ namespace ComonadR
   public export %inline
   (.map) : (rec : ComonadR cat) -> {a,b : _} ->
            cat.hom a b -> cat.hom (rec.fun a) (rec.fun b)
-  (.map) rec@(MkComonadR {}) = rec.functorR.map
+  (.map) rec@(MkComonadR {}) = map' {cat=cat.hom}
 
 
   ||| Convert this into a `ComonadR`.
@@ -70,7 +70,7 @@ namespace StrongComonadR
   public export %inline
   (.map) : (rec : StrongComonadR cat) -> {a,b : _} ->
            cat.hom a b -> cat.hom (rec.fun a) (rec.fun b)
-  (.map) {cat=MkMonoidalR{}} rec@(MkStrongComonadR {}) = rec.functorR.map
+  (.map) {cat=MkMonoidalR{}} (MkStrongComonadR {}) = map
 
 
   ||| Convert this into a `ComonadR`.
@@ -82,13 +82,13 @@ namespace StrongComonadR
   public export %inline
   (.cojoin) : (rec : StrongComonadR cat) -> {a : _} ->
               cat.hom (rec.fun a) (rec.fun (rec.fun a))
-  (.cojoin) {cat=MkMonoidalR{}} rec@(MkStrongComonadR {}) = rec.comonadR.cojoin
+  (.cojoin) {cat=MkMonoidalR{}} (MkStrongComonadR {}) = cojoin
 
   ||| The counit transformation of the comonad.
   public export %inline
   (.counit) : (rec : StrongComonadR cat) -> {a : _} ->
               cat.hom (rec.fun a) a
-  (.counit) {cat=MkMonoidalR{}} rec@(MkStrongComonadR {}) = rec.comonadR.counit
+  (.counit) {cat=MkMonoidalR{}} (MkStrongComonadR {}) = counit
 
 
   ||| Convert this into a `CostrongFunctorR`.
@@ -100,13 +100,13 @@ namespace StrongComonadR
   public export %inline
   (.costrongl) : (rec : StrongComonadR cat) -> {a,b : _} ->
                  cat.hom (rec.fun (cat.tensor a b)) (cat.tensor a (rec.fun b))
-  (.costrongl) rec@(MkStrongComonadR {}) = rec.costrongFunctorR.costrongl
+  (.costrongl) {cat=MkMonoidalR{}} (MkStrongComonadR {}) = costrongl
 
   ||| The right tensor costrength.
   public export %inline
   (.costrongr) : (rec : StrongComonadR cat) -> {a,b : _} ->
                  cat.hom (rec.fun (cat.tensor a b)) (cat.tensor (rec.fun a) b)
-  (.costrongr) rec@(MkStrongComonadR {}) = rec.costrongFunctorR.costrongr
+  (.costrongr) {cat=MkMonoidalR{}} (MkStrongComonadR {}) = costrongr
 
 
   ||| Convert this into a `StrongComonadR`.

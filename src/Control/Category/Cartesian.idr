@@ -7,6 +7,7 @@ import Control.Category.Braided
 import Data.Morphisms
 import Data.Fin
 import Data.List
+import Data.Vect
 
 %default total
 
@@ -116,11 +117,20 @@ swizzle @{c@(MkCartesian{})} {xs=_::_} (i::is@(_::_)) =
 
 namespace Braided
   ||| Convert a cartesian monoidal category into a
-  ||| symmetric monoidal category.
+  ||| braided monoidal category.
   public export
   [FromCartesian] {ten,i : _} -> Cartesian cat ten i => Braided cat ten i where
     braid = prod projr projl
-    permute = permuteDefault {ten} (prod projr projl)
+
+namespace MonSymmetric
+  ||| Convert a cartesian monoidal category into a
+  ||| symmetric monoidal category.
+  public export
+  [FromCartesian] {ten,i : _} -> Cartesian cat ten i => MonSymmetric cat ten i
+      using Braided.FromCartesian where
+    permute p =
+      let invt = toList $ permSeq $ inverse p
+      in replace {p = cat _ . TenSeq ten i} (believe_me $ Refl {x=()}) (swizzle invt)
 
 
 -- These instances should not be used unless necessary, as they have

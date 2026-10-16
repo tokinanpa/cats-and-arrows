@@ -16,10 +16,6 @@ import Data.Vect
 -- Interface
 ------------------------------------------------------------
 
-public export
-permuteDefault : Monoidal cat ten i => ({a,b : _} -> cat (a `ten` b) (b `ten` a)) ->
-                  {xs : _} -> (p : Permutation (length xs)) -> cat (TenSeq ten i xs) (TenSeq ten i $ permuteList xs p)
-
 ||| A monoidal category is *braided* when it is possible to flip the
 ||| order of the tensor product in a coherent way, determined by the
 ||| braiding isomorphism.
@@ -31,10 +27,6 @@ permuteDefault : Monoidal cat ten i => ({a,b : _} -> cat (a `ten` b) (b `ten` a)
 ||| * `braid . braid' = braid' . braid = id`
 ||| * `assoc . braid . assoc = mapr braid . assoc . mapl braid`
 ||| * `assoc' . braid . assoc' = mapl braid . assoc' . mapr braid`
-|||
-||| Additionally, a braided monoidal category may be *symmetric*,
-||| requiring that `braid = braid'`. Since the only difference is in
-||| laws, the same interface is used for this case.
 public export
 interface Monoidal cat ten i =>
     Braided (0 cat : Hom obj) (ten : obj -> obj -> obj) (i : obj) | cat,ten where
@@ -50,14 +42,45 @@ interface Monoidal cat ten i =>
   braid' : {a,b : _} -> cat (b `ten` a) (a `ten` b)
   braid' = braid
 
-  permute : {xs : _} -> (p : Permutation (length xs)) ->
-            cat (TenSeq ten i xs) (TenSeq ten i $ permuteList xs p)
-  permute = permuteDefault (braid {ten})
-
 ||| See `PreMonoidal`.
 public export
 PreBraided : (cat : Hom obj) -> (ten : obj -> obj -> obj) -> (i : obj) -> Type
 PreBraided = Braided
+
+
+||| The default implementation of `permute`. Note that this may be
+||| horribly inefficient on large tensor product sequences.
+public export
+permuteDefault : Braided cat ten i => {xs : _} -> (p : Permutation (length xs)) ->
+                  cat (TenSeq ten i xs) (TenSeq ten i $ permuteList xs p)
+
+||| A monoidal category is *symmetric* when it has a braiding that is
+||| equal to its own inverse.
+|||
+||| This is the interface-style definition of a symmetric monoidal category.
+||| For the record-style definition, see `Control.Category.Records.SymmetricR`.
+|||
+||| Laws:
+||| * `braid = braid'`
+||| * `permute identity = id`
+||| * `permute (compose p q) = permute p . permute q`
+public export
+interface Braided cat ten i =>
+    MonSymmetric (0 cat : Hom obj) (ten : obj -> obj -> obj) (i : obj) | cat,ten where
+  constructor MkMonSymmetric
+  ||| Rearrange the values of a tensor product sequence by applying a
+  ||| permutation to its objects.
+  |||
+  ||| This function exists purely for runtime efficiency. There is a
+  ||| default implementation of this function, `permuteDefault`.
+  permute : {xs : _} -> (p : Permutation (length xs)) ->
+            cat (TenSeq ten i xs) (TenSeq ten i $ permuteList xs p)
+  permute = permuteDefault
+
+||| See `PreMonoidal`.
+public export
+PreSymmetric : (cat : Hom obj) -> (ten : obj -> obj -> obj) -> (i : obj) -> Type
+PreSymmetric = MonSymmetric
 
 
 ------------------------------------------------------------
@@ -172,11 +195,8 @@ insertFromBack' @{c@(MkBraided{})} {ys=_::_} =
 -- This definition cheats HARD, but it only uses `believe_me` for
 -- unifying expressions that are actually equal, so it *should* work.
 -- TODO: Replace this with something far, far less jank
-permuteDefault @{c@(MkMonoidal{})} {xs} br p = go (toList $ inverse p)
+permuteDefault @{c@(MkBraided{})} {xs} p = go (toList $ inverse p)
   where
-    brc : Braided cat ten i
-    brc = MkBraided br br (believe_me ())
-
     believeFst : forall a,b,c. cat a c -> cat b c
     believeFst x = replace {p = flip cat _} (believe_me $ Refl {x=()}) x
     believeSnd : forall a,b,c. cat a b -> cat a c
@@ -191,7 +211,7 @@ permuteDefault @{c@(MkMonoidal{})} {xs} br p = go (toList $ inverse p)
             is)
       .
       believeFst
-        (sendToBack @{brc}
+        (sendToBack
           {xs = take i xs',
           x = index' xs' (natToFinLt i @{believe_me Oh}),
           ys = drop (S i) xs'})
@@ -208,45 +228,40 @@ namespace Braided
   [FlipBraid] {ten,i : _} -> Braided cat ten i => Braided cat ten i where
     braid = braid'
     braid' = braid
-    permute = permuteDefault {ten} braid
 
 -- These instances should not be used unless necessary, as they have
 -- poor runtime quantity behavior. Prefer `Typ` over base's `Morphism`
 -- and `Kleisli` over base's `Kleislimorphism`.
 
 namespace Braided
-  ||| Convert a `Symmetric` `Tensor` into a braided monoidal structure
+  ||| Convert a `MonSymmetric` `Tensor` into a braided monoidal structure
   ||| on `Morphism`.
   public export
-  [MorFromTensor] {ten,i : _} -> (Tensor.Symmetric ten, Tensor ten i) =>
+  [MorFromTensor] {ten,i : _} -> (Symmetric ten, Tensor ten i) =>
       Braided Morphism ten i using Monoidal.MorFromTensor where
     braid = Mor swap'
-    permute = permuteDefault @{MorFromTensor} (Mor swap')
 
-  ||| Convert a `Symmetric` `Tensor` into a braided monoidal structure
+  ||| Convert a `MonSymmetric` `Tensor` into a braided monoidal structure
   ||| on the function category.
   public export
-  [FuncFromTensor] {ten,i : _} -> (Tensor.Symmetric ten, Tensor ten i) =>
+  [FuncFromTensor] {ten,i : _} -> (Symmetric ten, Tensor ten i) =>
       Braided (~~>) ten i using Category.Function Monoidal.FuncFromTensor where
     braid = swap'
-    permute = permuteDefault @{FuncFromTensor} swap'
 
-  ||| Convert a `Symmetric` `Tensor` into a braided monoidal structure
+  ||| Convert a `MonSymmetric` `Tensor` into a braided monoidal structure
   ||| on the Kleisli category.
   |||
   ||| WARNING: Whether this forms a proper monoidal category is
   ||| dependent on the behavior of the `Bitraversable` implementation.
   ||| In particular, this is usually a premonoidal category.
   public export
-  [KleisliFromTensor] {ten,i : _} -> (Tensor.Symmetric ten, Tensor ten i, Bitraversable ten, Monad m) =>
+  [KleisliFromTensor] {ten,i : _} -> (Symmetric ten, Tensor ten i, Bitraversable ten, Monad m) =>
       Braided (Kleislimorphism m) ten i using Monoidal.KleisliFromTensor where
     braid = Kleisli $ pure . swap'
-    permute p = Kleisli $ Prelude.(.) pure $ permute @{FuncFromTensor} p
 
-public export
-Braided Morphism Pair () where
-  braid = Mor swap
-  permute p = Mor $ \xs => pairFromHList $ permuteHList p $ pairToHList xs
+public export %hint
+BraidedMorPair : Braided Morphism Pair ()
+BraidedMorPair = MorFromTensor
 
 public export %hint
 BraidedMorEither : Braided Morphism Either Void
@@ -255,10 +270,7 @@ BraidedMorEither = MorFromTensor
 ||| WARNING: This is a premonoidal category, not truly monoidal.
 public export %hint
 BraidedKleisliPair : Monad m => PreBraided (Kleislimorphism m) Pair ()
-BraidedKleisliPair = MkBraided
-  (Kleisli $ pure . swap)
-  (Kleisli $ pure . swap)
-  (\p => Kleisli $ \xs => pure $ pairFromHList $ permuteHList p $ pairToHList xs)
+BraidedKleisliPair = KleisliFromTensor
 
 public export %hint
 BraidedKleisliEither : Monad m => Braided (Kleislimorphism m) Either Void
@@ -266,10 +278,64 @@ BraidedKleisliEither = KleisliFromTensor
 
 namespace Braided
   public export
-  [FuncPair] Braided (~~>) Pair () using Monoidal.FuncPair where
-    braid = swap
-    permute p xs = pairFromHList $ permuteHList p $ pairToHList xs
+  FuncPair : Braided (~~>) Pair ()
+  FuncPair = FuncFromTensor
 
   public export
   FuncEither : Braided (~~>) Either Void
+  FuncEither = FuncFromTensor
+
+
+namespace MonSymmetric
+  ||| Convert a `MonSymmetric` `Tensor` into a braided monoidal structure
+  ||| on `Morphism`.
+  public export
+  [MorFromTensor] {ten,i : _} -> (Symmetric ten, Tensor ten i) =>
+      MonSymmetric Morphism ten i using Braided.MorFromTensor where
+
+  ||| Convert a `MonSymmetric` `Tensor` into a braided monoidal structure
+  ||| on the function category.
+  public export
+  [FuncFromTensor] {ten,i : _} -> (Symmetric ten, Tensor ten i) =>
+      MonSymmetric (~~>) ten i using Category.Function Braided.FuncFromTensor where
+    permute = permuteDefault {cat=(~~>),ten}
+
+  ||| Convert a `MonSymmetric` `Tensor` into a braided monoidal structure
+  ||| on the Kleisli category.
+  |||
+  ||| WARNING: Whether this forms a proper monoidal category is
+  ||| dependent on the behavior of the `Bitraversable` implementation.
+  ||| In particular, this is usually a premonoidal category.
+  public export
+  [KleisliFromTensor] {ten,i : _} -> (Symmetric ten, Tensor ten i, Bitraversable ten, Monad m) =>
+      MonSymmetric (Kleislimorphism m) ten i using Braided.KleisliFromTensor where
+    permute p = Kleisli $ Prelude.(.) pure $ permute @{FuncFromTensor} p
+
+public export
+MonSymmetric Morphism Pair () where
+  permute p = Mor $ \xs => pairFromHList $ permuteHList p $ pairToHList xs
+
+public export %hint
+SymmetricMorEither : MonSymmetric Morphism Either Void
+SymmetricMorEither = MorFromTensor
+
+||| WARNING: This is a premonoidal category, not truly monoidal.
+public export %hint
+SymmetricKleisliPair : Monad m => PreSymmetric (Kleislimorphism m) Pair ()
+SymmetricKleisliPair = Impl
+  where
+    [Impl] MonSymmetric (Kleislimorphism m) Pair () where
+      permute p = Kleisli $ \xs => pure $ pairFromHList $ permuteHList p $ pairToHList xs
+
+public export %hint
+SymmetricKleisliEither : Monad m => MonSymmetric (Kleislimorphism m) Either Void
+SymmetricKleisliEither = KleisliFromTensor
+
+namespace MonSymmetric
+  public export
+  FuncPair : MonSymmetric (~~>) Pair ()
+  FuncPair = MkMonSymmetric @{FuncPair} (\p,xs => pairFromHList $ permuteHList p $ pairToHList xs)
+
+  public export
+  FuncEither : MonSymmetric (~~>) Either Void
   FuncEither = FuncFromTensor

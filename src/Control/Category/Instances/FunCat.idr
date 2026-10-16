@@ -76,13 +76,18 @@ MonoidalFunCat {cat'=cat'@(MkCategoryR{})} =
 public export %hint
 BraidedFunCat : {cat' : _} -> {ten : cat'.obj -> cat'.obj -> cat'.obj} -> {i : cat'.obj} ->
                   Braided cat'.hom ten i => Braided (FunCat cat cat') (FunProd ten) (FunUnit i)
-BraidedFunCat {cat'=cat'@(MkCategoryR{})} = MkBraided @{MonoidalFunCat} braid_ braid'_ (permuteDefault @{MonoidalFunCat} braid_)
+BraidedFunCat {cat'=cat'@(MkCategoryR{})} = MkBraided @{MonoidalFunCat} braid_ braid'_
   where
     braid_ : {f,g : _} -> NatTransR {cat'} (FunProd ten f g) (FunProd ten g f)
     braid_ {f=MkFunctorR{},g=MkFunctorR{}} = MkNatTransR braid
 
     braid'_ : {f,g : _} -> NatTransR {cat'} (FunProd ten g f) (FunProd ten f g)
     braid'_ {f=MkFunctorR{},g=MkFunctorR{}} = MkNatTransR braid'
+
+public export %hint
+SymmetricFunCat : {cat' : _} -> {ten : cat'.obj -> cat'.obj -> cat'.obj} -> {i : cat'.obj} ->
+                  MonSymmetric cat'.hom ten i => MonSymmetric (FunCat cat cat') (FunProd ten) (FunUnit i)
+SymmetricFunCat {cat'=cat'@(MkCategoryR{})} = MkMonSymmetric @{BraidedFunCat} (permuteDefault @{BraidedFunCat})
 
 public export %hint
 CartesianFunCat : {cat' : _} -> {ten : cat'.obj -> cat'.obj -> cat'.obj} -> {i : cat'.obj} ->
@@ -160,6 +165,13 @@ namespace BraidedR
   FunCat cat cat'@(MkBraidedR {}) =
     MkBraidedR (FunCat cat cat'.categoryR) (FunProd cat'.tensor) (FunUnit cat'.unit)
       {impl = BraidedFunCat}
+
+namespace SymmetricR
+  public export
+  FunCat : (cat : CategoryR) -> (cat' : SymmetricR) -> SymmetricR
+  FunCat cat cat'@(MkSymmetricR {}) =
+    MkSymmetricR (FunCat cat cat'.categoryR) (FunProd cat'.tensor) (FunUnit cat'.unit)
+      {impl = SymmetricFunCat}
 
 namespace CartesianR
   public export

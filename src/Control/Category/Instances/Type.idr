@@ -132,11 +132,23 @@ namespace StrongMonad
 namespace Braided
   public export
   FromTensor : {ten,i : _} -> (Tensor ten i, Symmetric ten) => Braided Typ (liftW2 ten) (W0 i)
-  FromTensor = MkBraided @{FromTensor} (MkTyp swap') (MkTyp swap') (permuteDefault @{FromTensor} $ MkTyp swap')
+  FromTensor = MkBraided @{FromTensor} (MkTyp swap') (MkTyp swap')
 
 public export
 Braided Typ Pair (W0 ()) where
   braid = MkTyp swap
+
+public export
+Braided Typ Either (W0 Void) where
+  braid = MkTyp mirror
+
+namespace MonSymmetric
+  public export
+  FromTensor : {ten,i : _} -> (Tensor ten i, Symmetric ten) => MonSymmetric Typ (liftW2 ten) (W0 i)
+  FromTensor = MkMonSymmetric @{FromTensor} (permuteDefault @{FromTensor})
+
+public export
+MonSymmetric Typ Pair (W0 ()) where
   permute p = MkTyp $ \xs => fromHList $ permuteHList p $ toHList xs
     where
       toHList : {ts : _} -> (TenSeq Pair (W0 ()) ts).runW0 -> All Wrap0.runW0 ts
@@ -148,10 +160,6 @@ Braided Typ Pair (W0 ()) where
       fromHList [] = ()
       fromHList [x] = x
       fromHList (x :: xs@(_ :: _)) = (x, fromHList xs)
-
-public export
-Braided Typ Either (W0 Void) where
-  braid = MkTyp mirror
 
 public export
 Cartesian Typ Pair (W0 ()) where
@@ -168,6 +176,10 @@ Cocartesian Typ Either (W0 Void) where
   coprod (MkTyp f) (MkTyp g) = MkTyp $ either f g
   merge = MkTyp fromEither
   intro = MkTyp absurd
+
+public export %hint
+SymmetricTypEither : MonSymmetric Typ Either (W0 Void)
+SymmetricTypEither = FromCocartesian
 
 public export
 Closed Typ Pair TypHom (W0 ()) where
@@ -226,6 +238,15 @@ namespace BraidedR
   public export
   TypEither : BraidedR
   TypEither = MkBraidedR Typ Either (W0 Void)
+
+namespace SymmetricR
+  public export
+  TypPair : SymmetricR
+  TypPair = MkSymmetricR Typ Pair (W0 ())
+
+  public export
+  TypEither : SymmetricR
+  TypEither = MkSymmetricR Typ Either (W0 Void)
 
 namespace CartesianR
   public export

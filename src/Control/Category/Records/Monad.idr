@@ -29,7 +29,7 @@ namespace MonadR
   public export %inline
   (.map) : (rec : MonadR cat) -> {a,b : _} ->
            cat.hom a b -> cat.hom (rec.fun a) (rec.fun b)
-  (.map) rec@(MkMonadR {}) = rec.functorR.map
+  (.map) (MkMonadR {}) = map' {cat=cat.hom}
 
 
   ||| Convert this into a `MonadR`.
@@ -41,13 +41,13 @@ namespace MonadR
   public export %inline
   (.join) : (rec : MonadR cat) -> {a : _} ->
             cat.hom (rec.fun (rec.fun a)) (rec.fun a)
-  (.join) rec = join @{rec.impl}
+  (.join) (MkMonadR {} {impl}) = join @{impl}
 
   ||| The unit transformation of the monad.
   public export %inline
   (.unit) : (rec : MonadR cat) -> {a : _} ->
             cat.hom a (rec.fun a)
-  (.unit) rec = unit @{rec.impl}
+  (.unit) (MkMonadR {} {impl}) = unit @{impl}
 
 ||| A strong monad is a monad that is also a strong functor.
 |||
@@ -68,7 +68,7 @@ namespace StrongMonadR
   public export %inline
   (.map) : (rec : StrongMonadR cat) -> {a,b : _} ->
            cat.hom a b -> cat.hom (rec.fun a) (rec.fun b)
-  (.map) {cat=MkMonoidalR{}} rec@(MkStrongMonadR {}) = rec.functorR.map
+  (.map) {cat=MkMonoidalR {} {hom=cat}} (MkStrongMonadR {}) = map {cat}
 
 
   ||| Convert this into a `MonadR`.
@@ -80,13 +80,13 @@ namespace StrongMonadR
   public export %inline
   (.join) : (rec : StrongMonadR cat) -> {a : _} ->
             cat.hom (rec.fun (rec.fun a)) (rec.fun a)
-  (.join) {cat=MkMonoidalR{}} rec@(MkStrongMonadR {}) = rec.monadR.join
+  (.join) {cat=MkMonoidalR{}} (MkStrongMonadR {}) = join
 
   ||| The unit transformation of the monad.
   public export %inline
   (.unit) : (rec : StrongMonadR cat) -> {a : _} ->
             cat.hom a (rec.fun a)
-  (.unit) {cat=MkMonoidalR{}} rec@(MkStrongMonadR {}) = rec.monadR.unit
+  (.unit) {cat=MkMonoidalR{}} (MkStrongMonadR {}) = unit
 
 
   ||| Convert this into a `StrongFunctorR`.
@@ -98,13 +98,13 @@ namespace StrongMonadR
   public export %inline
   (.strongl) : (rec : StrongMonadR cat) -> {a,b : _} ->
                cat.hom (cat.tensor a (rec.fun b)) (rec.fun (cat.tensor a b))
-  (.strongl) rec@(MkStrongMonadR {}) = rec.strongFunctorR.strongl
+  (.strongl) (MkStrongMonadR {}) = strongl {cat=cat.hom,ten=cat.tensor}
 
   ||| The right tensor strength.
   public export %inline
   (.strongr) : (rec : StrongMonadR cat) -> {a,b : _} ->
                cat.hom (cat.tensor (rec.fun a) b) (rec.fun (cat.tensor a b))
-  (.strongr) rec@(MkStrongMonadR {}) = rec.strongFunctorR.strongr
+  (.strongr) (MkStrongMonadR {}) = strongr {cat=cat.hom,ten=cat.tensor}
 
 
   ||| Convert this into a `StrongMonadR`.

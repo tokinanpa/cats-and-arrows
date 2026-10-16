@@ -37,13 +37,13 @@ namespace BimonoidalR
   ||| The identity morphism of an object `a`.
   public export %inline
   (.id) : (rec : BimonoidalR) -> {a : _} -> rec.hom a a
-  (.id) rec@(MkBimonoidalR {}) = rec.categoryR.id
+  (.id) (MkBimonoidalR {}) = id
 
   ||| Binary right-to-left composition of morphisms.
   public export %inline
   (.comp) : (rec : BimonoidalR) -> {a,b,c : _} ->
             rec.hom b c -> rec.hom a b -> rec.hom a c
-  (.comp) rec@(MkBimonoidalR {}) = rec.categoryR.comp
+  (.comp) (MkBimonoidalR {}) = (.)
 
 
   ||| The additive tensor product as a `BifunctorR`.
@@ -76,45 +76,45 @@ namespace BimonoidalR
   public export %inline
   (.distribl) : (rec : BimonoidalR) -> {a,b,c : _} ->
                 rec.hom (rec.mul a (rec.add b c)) (rec.add (rec.mul a b) (rec.mul a c))
-  (.distribl) rec = distribl @{rec.impl}
+  (.distribl) (MkBimonoidalR {}) = distribl
 
   ||| The inverse of `(.distribl)`, the left distributor.
   public export %inline
   (.distribl') : (rec : BimonoidalR) -> {a,b,c : _} ->
                  rec.hom (rec.add (rec.mul a b) (rec.mul a c)) (rec.mul a (rec.add b c))
-  (.distribl') rec = distribl' @{rec.impl}
+  (.distribl') (MkBimonoidalR {}) = distribl'
 
   ||| The right distributor.
   public export %inline
   (.distribr) : (rec : BimonoidalR) -> {a,b,c : _} ->
                 rec.hom (rec.mul (rec.add a b) c) (rec.add (rec.mul a c) (rec.mul b c))
-  (.distribr) rec = distribr @{rec.impl}
+  (.distribr) (MkBimonoidalR {}) = distribr
 
   ||| The inverse of `(.distribr)`, the right distributor.
   public export %inline
   (.distribr') : (rec : BimonoidalR) -> {a,b,c : _} ->
                  rec.hom (rec.add (rec.mul a c) (rec.mul b c)) (rec.mul (rec.add a b) c)
-  (.distribr') rec = distribr' @{rec.impl}
+  (.distribr') (MkBimonoidalR {}) = distribr'
 
   ||| The left absorbor.
   public export %inline
   (.absorbl) : (rec : BimonoidalR) -> {a : _} -> rec.hom (rec.mul a rec.zero) rec.zero
-  (.absorbl) rec = absorbl @{rec.impl}
+  (.absorbl) (MkBimonoidalR {} {impl}) = absorbl @{impl}
 
   ||| The inverse of `(.absorbl)`, the left absorbor.
   public export %inline
   (.absorbl') : (rec : BimonoidalR) -> {a : _} -> rec.hom rec.zero (rec.mul a rec.zero)
-  (.absorbl') rec = absorbl' @{rec.impl}
+  (.absorbl') (MkBimonoidalR {} {impl}) = absorbl' @{impl}
 
   ||| The right absorbor.
   public export %inline
   (.absorbr) : (rec : BimonoidalR) -> {a : _} -> rec.hom (rec.mul rec.zero a) rec.zero
-  (.absorbr) rec = absorbr @{rec.impl}
+  (.absorbr) (MkBimonoidalR {} {impl}) = absorbr @{impl}
 
   ||| The inverse of `(.absorbr)`, the right absorbor.
   public export %inline
   (.absorbr') : (rec : BimonoidalR) -> {a : _} -> rec.hom rec.zero (rec.mul rec.zero a)
-  (.absorbr') rec = absorbr' @{rec.impl}
+  (.absorbr') (MkBimonoidalR {} {impl}) = absorbr' @{impl}
 
 
 ||| A rig category is a bimonoidal category whose additive structure
@@ -142,13 +142,13 @@ namespace RigCategoryR
   ||| The identity morphism of an object `a`.
   public export %inline
   (.id) : (rec : RigCategoryR) -> {a : _} -> rec.hom a a
-  (.id) rec@(MkRigCategoryR {}) = rec.categoryR.id
+  (.id) (MkRigCategoryR {}) = id
 
   ||| Binary right-to-left composition of morphisms.
   public export %inline
   (.comp) : (rec : RigCategoryR) -> {a,b,c : _} ->
             rec.hom b c -> rec.hom a b -> rec.hom a c
-  (.comp) rec@(MkRigCategoryR {}) = rec.categoryR.comp
+  (.comp) (MkRigCategoryR {}) = (.)
 
 
   ||| The additive tensor product as a `BifunctorR`.
@@ -161,10 +161,10 @@ namespace RigCategoryR
   (.mulR) : (rec : RigCategoryR) -> EndoBifunctorR rec.categoryR
   (.mulR) (MkRigCategoryR {} {mul}) = MkBifunctorR mul
 
-  ||| Convert this into a `BraidedR` with the additive tensor product.
+  ||| Convert this into a `SymmetricR` with the additive tensor product.
   public export %inline
-  (.addCatR) : (rec : RigCategoryR) -> BraidedR
-  (.addCatR) (MkRigCategoryR {} {hom,add,zero}) = MkBraidedR hom add zero
+  (.addCatR) : (rec : RigCategoryR) -> SymmetricR
+  (.addCatR) (MkRigCategoryR {} {hom,add,zero}) = MkSymmetricR hom add zero
 
   ||| Convert this into a `MonoidalR` with the multiplicative tensor product.
   public export %inline
@@ -181,45 +181,45 @@ namespace RigCategoryR
   public export %inline
   (.distribl) : (rec : RigCategoryR) -> {a,b,c : _} ->
                 rec.hom (rec.mul a (rec.add b c)) (rec.add (rec.mul a b) (rec.mul a c))
-  (.distribl) rec@(MkRigCategoryR {}) = rec.bimonoidalR.distribl
+  (.distribl) (MkRigCategoryR {}) = distribl
 
   ||| The inverse of `(.distribl)`, the left distributor.
   public export %inline
   (.distribl') : (rec : RigCategoryR) -> {a,b,c : _} ->
                  rec.hom (rec.add (rec.mul a b) (rec.mul a c)) (rec.mul a (rec.add b c))
-  (.distribl') rec@(MkRigCategoryR {}) = rec.bimonoidalR.distribl'
+  (.distribl') (MkRigCategoryR {}) = distribl'
 
   ||| The right distributor.
   public export %inline
   (.distribr) : (rec : RigCategoryR) -> {a,b,c : _} ->
                 rec.hom (rec.mul (rec.add a b) c) (rec.add (rec.mul a c) (rec.mul b c))
-  (.distribr) rec@(MkRigCategoryR {}) = rec.bimonoidalR.distribr
+  (.distribr) (MkRigCategoryR {}) = distribr
 
   ||| The inverse of `(.distribr)`, the right distributor.
   public export %inline
   (.distribr') : (rec : RigCategoryR) -> {a,b,c : _} ->
                  rec.hom (rec.add (rec.mul a c) (rec.mul b c)) (rec.mul (rec.add a b) c)
-  (.distribr') rec@(MkRigCategoryR {}) = rec.bimonoidalR.distribr'
+  (.distribr') (MkRigCategoryR {}) = distribr'
 
   ||| The left absorbor.
   public export %inline
   (.absorbl) : (rec : RigCategoryR) -> {a : _} -> rec.hom (rec.mul a rec.zero) rec.zero
-  (.absorbl) rec@(MkRigCategoryR {}) = rec.bimonoidalR.absorbl
+  (.absorbl) (MkRigCategoryR {} {add,mul}) = absorbl {add,mul}
 
   ||| The inverse of `(.absorbl)`, the left absorbor.
   public export %inline
   (.absorbl') : (rec : RigCategoryR) -> {a : _} -> rec.hom rec.zero (rec.mul a rec.zero)
-  (.absorbl') rec@(MkRigCategoryR {}) = rec.bimonoidalR.absorbl'
+  (.absorbl') (MkRigCategoryR {} {add,mul}) = absorbl' {add,mul}
 
   ||| The right absorbor.
   public export %inline
   (.absorbr) : (rec : RigCategoryR) -> {a : _} -> rec.hom (rec.mul rec.zero a) rec.zero
-  (.absorbr) rec@(MkRigCategoryR {}) = rec.bimonoidalR.absorbr
+  (.absorbr) (MkRigCategoryR {} {add,mul}) = absorbr {add,mul}
 
   ||| The inverse of `(.absorbr)`, the right absorbor.
   public export %inline
   (.absorbr') : (rec : RigCategoryR) -> {a : _} -> rec.hom rec.zero (rec.mul rec.zero a)
-  (.absorbr') rec@(MkRigCategoryR {}) = rec.bimonoidalR.absorbr'
+  (.absorbr') (MkRigCategoryR {} {add,mul}) = absorbr' {add,mul}
 
 
   ||| Convert this into a `RigCategoryR`.
@@ -249,13 +249,13 @@ namespace SymRigCategoryR
   ||| The identity morphism of an object `a`.
   public export %inline
   (.id) : (rec : SymRigCategoryR) -> {a : _} -> rec.hom a a
-  (.id) rec@(MkSymRigCategoryR {}) = rec.categoryR.id
+  (.id) (MkSymRigCategoryR {}) = id
 
   ||| Binary right-to-left composition of morphisms.
   public export %inline
   (.comp) : (rec : SymRigCategoryR) -> {a,b,c : _} ->
             rec.hom b c -> rec.hom a b -> rec.hom a c
-  (.comp) rec@(MkSymRigCategoryR {}) = rec.categoryR.comp
+  (.comp) (MkSymRigCategoryR {}) = (.)
 
 
   ||| The additive tensor product as a `BifunctorR`.
@@ -268,15 +268,15 @@ namespace SymRigCategoryR
   (.mulR) : (rec : SymRigCategoryR) -> EndoBifunctorR rec.categoryR
   (.mulR) (MkSymRigCategoryR {} {mul}) = MkBifunctorR mul
 
-  ||| Convert this into a `BraidedR` with the additive tensor product.
+  ||| Convert this into a `SymmetricR` with the additive tensor product.
   public export %inline
-  (.addCatR) : (rec : SymRigCategoryR) -> BraidedR
-  (.addCatR) (MkSymRigCategoryR {} {hom,add,zero}) = MkBraidedR hom add zero
+  (.addCatR) : (rec : SymRigCategoryR) -> SymmetricR
+  (.addCatR) (MkSymRigCategoryR {} {hom,add,zero}) = MkSymmetricR hom add zero
 
-  ||| Convert this into a `BraidedR` with the multiplicative tensor product.
+  ||| Convert this into a `SymmetricR` with the multiplicative tensor product.
   public export %inline
-  (.mulCatR) : (rec : SymRigCategoryR) -> BraidedR
-  (.mulCatR) (MkSymRigCategoryR {} {hom,mul,one}) = MkBraidedR hom mul one
+  (.mulCatR) : (rec : SymRigCategoryR) -> SymmetricR
+  (.mulCatR) (MkSymRigCategoryR {} {hom,mul,one}) = MkSymmetricR hom mul one
 
 
   ||| Convert this into a `BimonoidalR`.
@@ -288,45 +288,46 @@ namespace SymRigCategoryR
   public export %inline
   (.distribl) : (rec : SymRigCategoryR) -> {a,b,c : _} ->
                 rec.hom (rec.mul a (rec.add b c)) (rec.add (rec.mul a b) (rec.mul a c))
-  (.distribl) rec@(MkSymRigCategoryR {}) = rec.bimonoidalR.distribl
+  (.distribl) (MkSymRigCategoryR {}) = distribl
 
   ||| The inverse of `(.distribl)`, the left distributor.
   public export %inline
   (.distribl') : (rec : SymRigCategoryR) -> {a,b,c : _} ->
                  rec.hom (rec.add (rec.mul a b) (rec.mul a c)) (rec.mul a (rec.add b c))
-  (.distribl') rec@(MkSymRigCategoryR {}) = rec.bimonoidalR.distribl'
+  (.distribl') (MkSymRigCategoryR {}) = distribl'
 
   ||| The right distributor.
   public export %inline
   (.distribr) : (rec : SymRigCategoryR) -> {a,b,c : _} ->
                 rec.hom (rec.mul (rec.add a b) c) (rec.add (rec.mul a c) (rec.mul b c))
-  (.distribr) rec@(MkSymRigCategoryR {}) = rec.bimonoidalR.distribr
+  (.distribr) (MkSymRigCategoryR {}) = distribr
 
   ||| The inverse of `(.distribr)`, the right distributor.
   public export %inline
   (.distribr') : (rec : SymRigCategoryR) -> {a,b,c : _} ->
                  rec.hom (rec.add (rec.mul a c) (rec.mul b c)) (rec.mul (rec.add a b) c)
-  (.distribr') rec@(MkSymRigCategoryR {}) = rec.bimonoidalR.distribr'
+  (.distribr') (MkSymRigCategoryR {}) = distribr'
 
   ||| The left absorbor.
   public export %inline
   (.absorbl) : (rec : SymRigCategoryR) -> {a : _} -> rec.hom (rec.mul a rec.zero) rec.zero
-  (.absorbl) rec@(MkSymRigCategoryR {}) = rec.bimonoidalR.absorbl
+  (.absorbl) (MkSymRigCategoryR {} {add,mul}) = absorbl {add,mul}
 
   ||| The inverse of `(.absorbl)`, the left absorbor.
   public export %inline
   (.absorbl') : (rec : SymRigCategoryR) -> {a : _} -> rec.hom rec.zero (rec.mul a rec.zero)
-  (.absorbl') rec@(MkSymRigCategoryR {}) = rec.bimonoidalR.absorbl'
+  (.absorbl') (MkSymRigCategoryR {} {add,mul}) = absorbl' {add,mul}
 
   ||| The right absorbor.
   public export %inline
   (.absorbr) : (rec : SymRigCategoryR) -> {a : _} -> rec.hom (rec.mul rec.zero a) rec.zero
-  (.absorbr) rec@(MkSymRigCategoryR {}) = rec.bimonoidalR.absorbr
+  (.absorbr) (MkSymRigCategoryR {} {add,mul}) = absorbr {add,mul}
 
   ||| The inverse of `(.absorbr)`, the right absorbor.
   public export %inline
   (.absorbr') : (rec : SymRigCategoryR) -> {a : _} -> rec.hom rec.zero (rec.mul rec.zero a)
-  (.absorbr') rec@(MkSymRigCategoryR {}) = rec.bimonoidalR.absorbr'
+  (.absorbr') (MkSymRigCategoryR {} {add,mul}) = absorbr' {add,mul}
+
 
   ||| Convert this into a `RigCategoryR`.
   public export %inline
@@ -360,13 +361,13 @@ namespace DistributiveR
   ||| The identity morphism of an object `a`.
   public export %inline
   (.id) : (rec : DistributiveR) -> {a : _} -> rec.hom a a
-  (.id) rec@(MkDistributiveR {}) = rec.categoryR.id
+  (.id) (MkDistributiveR {}) = id
 
   ||| Binary right-to-left composition of morphisms.
   public export %inline
   (.comp) : (rec : DistributiveR) -> {a,b,c : _} ->
             rec.hom b c -> rec.hom a b -> rec.hom a c
-  (.comp) rec@(MkDistributiveR {}) = rec.categoryR.comp
+  (.comp) (MkDistributiveR {}) = (.)
 
 
   ||| The additive tensor product as a `BifunctorR`.
@@ -399,45 +400,46 @@ namespace DistributiveR
   public export %inline
   (.distribl) : (rec : DistributiveR) -> {a,b,c : _} ->
                 rec.hom (rec.mul a (rec.add b c)) (rec.add (rec.mul a b) (rec.mul a c))
-  (.distribl) rec@(MkDistributiveR {}) = rec.bimonoidalR.distribl
+  (.distribl) (MkDistributiveR {}) = distribl
 
   ||| The inverse of `(.distribl)`, the left distributor.
   public export %inline
   (.distribl') : (rec : DistributiveR) -> {a,b,c : _} ->
                  rec.hom (rec.add (rec.mul a b) (rec.mul a c)) (rec.mul a (rec.add b c))
-  (.distribl') rec@(MkDistributiveR {}) = rec.bimonoidalR.distribl'
+  (.distribl') (MkDistributiveR {}) = distribl'
 
   ||| The right distributor.
   public export %inline
   (.distribr) : (rec : DistributiveR) -> {a,b,c : _} ->
                 rec.hom (rec.mul (rec.add a b) c) (rec.add (rec.mul a c) (rec.mul b c))
-  (.distribr) rec@(MkDistributiveR {}) = rec.bimonoidalR.distribr
+  (.distribr) (MkDistributiveR {}) = distribr
 
   ||| The inverse of `(.distribr)`, the right distributor.
   public export %inline
   (.distribr') : (rec : DistributiveR) -> {a,b,c : _} ->
                  rec.hom (rec.add (rec.mul a c) (rec.mul b c)) (rec.mul (rec.add a b) c)
-  (.distribr') rec@(MkDistributiveR {}) = rec.bimonoidalR.distribr'
+  (.distribr') (MkDistributiveR {}) = distribr'
 
   ||| The left absorbor.
   public export %inline
   (.absorbl) : (rec : DistributiveR) -> {a : _} -> rec.hom (rec.mul a rec.zero) rec.zero
-  (.absorbl) rec@(MkDistributiveR {}) = rec.bimonoidalR.absorbl
+  (.absorbl) (MkDistributiveR {} {add,mul}) = absorbl {add,mul}
 
   ||| The inverse of `(.absorbl)`, the left absorbor.
   public export %inline
   (.absorbl') : (rec : DistributiveR) -> {a : _} -> rec.hom rec.zero (rec.mul a rec.zero)
-  (.absorbl') rec@(MkDistributiveR {}) = rec.bimonoidalR.absorbl'
+  (.absorbl') (MkDistributiveR {} {add,mul}) = absorbl' {add,mul}
 
   ||| The right absorbor.
   public export %inline
   (.absorbr) : (rec : DistributiveR) -> {a : _} -> rec.hom (rec.mul rec.zero a) rec.zero
-  (.absorbr) rec@(MkDistributiveR {}) = rec.bimonoidalR.absorbr
+  (.absorbr) (MkDistributiveR {} {add,mul}) = absorbr {add,mul}
 
   ||| The inverse of `(.absorbr)`, the right absorbor.
   public export %inline
   (.absorbr') : (rec : DistributiveR) -> {a : _} -> rec.hom rec.zero (rec.mul rec.zero a)
-  (.absorbr') rec@(MkDistributiveR {}) = rec.bimonoidalR.absorbr'
+  (.absorbr') (MkDistributiveR {} {add,mul}) = absorbr' {add,mul}
+
 
   ||| Convert this into a `RigCategoryR`.
   public export %inline
@@ -449,7 +451,6 @@ namespace DistributiveR
   (.symRigCategoryR) : (rec : DistributiveR) -> SymRigCategoryR
   (.symRigCategoryR) (MkDistributiveR hom add mul z i) = MkSymRigCategoryR hom add mul z i
 
-
   ||| Convert this into a `DistributiveR`.
   public export %inline
   (.distributiveR) : (rec : DistributiveR) -> DistributiveR
@@ -459,58 +460,58 @@ namespace DistributiveR
   public export %inline
   (.projl) : (rec : DistributiveR) -> {a,b : _} ->
              rec.hom (rec.mul a b) a
-  (.projl) rec@(MkDistributiveR {}) = rec.mulCatR.projl
+  (.projl) (MkDistributiveR {}) = projl
 
   ||| The right projection of the product.
   public export %inline
   (.projr) : (rec : DistributiveR) -> {a,b : _} ->
              rec.hom (rec.mul a b) b
-  (.projr) rec@(MkDistributiveR {}) = rec.mulCatR.projr
+  (.projr) (MkDistributiveR {}) = projr
 
   ||| The universal property of the product.
   public export %inline
   (.prod) : (rec : DistributiveR) -> {a,b,b' : _} ->
             rec.hom a b -> rec.hom a b' -> rec.hom a (rec.mul b b')
-  (.prod) rec@(MkDistributiveR {}) = rec.mulCatR.prod
+  (.prod) (MkDistributiveR {}) = prod
 
   ||| The cojoin of the universal comonoid structure.
   public export %inline
   (.split) : (rec : DistributiveR) -> {a : _} ->
              rec.hom a (rec.mul a a)
-  (.split) rec@(MkDistributiveR {}) = rec.mulCatR.split
+  (.split) (MkDistributiveR {}) = split
 
   ||| The counit of the universal comonoid structure.
   public export %inline
   (.elim) : (rec : DistributiveR) -> {a : _} ->
             rec.hom a rec.one
-  (.elim) rec@(MkDistributiveR {}) = rec.mulCatR.elim
+  (.elim) (MkDistributiveR {} {mul}) = elim {ten=mul}
 
   ||| The left injection of the coproduct.
   public export %inline
   (.injl) : (rec : DistributiveR) -> {a,b : _} ->
             rec.hom a (rec.add a b)
-  (.injl) rec@(MkDistributiveR {}) = rec.addCatR.injl
+  (.injl) (MkDistributiveR {}) = injl
 
   ||| The right injection of the coproduct.
   public export %inline
   (.injr) : (rec : DistributiveR) -> {a,b : _} ->
             rec.hom b (rec.add a b)
-  (.injr) rec@(MkDistributiveR {}) = rec.addCatR.injr
+  (.injr) (MkDistributiveR {}) = injr
 
   ||| The universal property of the coproduct.
   public export %inline
   (.coprod) : (rec : DistributiveR) -> {a,a',b : _} ->
               rec.hom a b -> rec.hom a' b -> rec.hom (rec.add a a') b
-  (.coprod) rec@(MkDistributiveR {}) = rec.addCatR.coprod
+  (.coprod) (MkDistributiveR {}) = coprod
 
   ||| The join of the universal monoid structure.
   public export %inline
   (.merge) : (rec : DistributiveR) -> {a : _} ->
              rec.hom (rec.add a a) a
-  (.merge) rec@(MkDistributiveR {}) = rec.addCatR.merge
+  (.merge) (MkDistributiveR {}) = merge
 
   ||| The unit of the universal monoid structure.
   public export %inline
   (.intro) : (rec : DistributiveR) -> {a : _} ->
              rec.hom rec.zero a
-  (.intro) rec@(MkDistributiveR {}) = rec.addCatR.intro
+  (.intro) (MkDistributiveR {} {add}) = intro {ten=add}

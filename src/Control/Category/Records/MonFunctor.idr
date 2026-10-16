@@ -34,7 +34,7 @@ namespace LaxMonFunctorR
   public export %inline
   (.map) : (rec : LaxMonFunctorR cat cat') -> {a,b : _} ->
            cat.hom a b -> cat'.hom (rec.fun a) (rec.fun b)
-  (.map) {cat=MkMonoidalR{},cat'=MkMonoidalR{}} rec@(MkLaxMonFunctorR {}) = rec.functorR.map
+  (.map) {cat=MkMonoidalR{},cat'=MkMonoidalR{}} (MkLaxMonFunctorR {}) = map
 
 
   ||| Convert this into a `LaxMonFunctorR`.
@@ -80,7 +80,7 @@ namespace MonFunctorR
   public export %inline
   (.map) : (rec : MonFunctorR cat cat') -> {a,b : _} ->
            cat.hom a b -> cat'.hom (rec.fun a) (rec.fun b)
-  (.map) {cat=MkMonoidalR{},cat'=MkMonoidalR{}} rec@(MkMonFunctorR {}) = rec.functorR.map
+  (.map) {cat=MkMonoidalR{},cat'=MkMonoidalR{}} rec@(MkMonFunctorR {}) = map
 
 
   ||| Convert this into a `LaxMonFunctorR`.
@@ -92,12 +92,14 @@ namespace MonFunctorR
   public export %inline
   (.mjoin) : (rec : MonFunctorR cat cat') -> {a,b : _} ->
              cat'.hom (cat'.tensor (rec.fun a) (rec.fun b)) (rec.fun (cat.tensor a b))
-  (.mjoin) {cat=MkMonoidalR{},cat'=MkMonoidalR{}} rec@(MkMonFunctorR {}) = rec.laxMonFunctorR.mjoin
+  (.mjoin) {cat=MkMonoidalR {} {hom=cat,tensor=ten},cat'=MkMonoidalR {} {hom=cat',tensor=ten'}}
+    rec@(MkMonFunctorR {}) = mjoin {cat,ten,cat',ten'}
 
   ||| The monoidal functor action on the unit object.
   public export %inline
   (.munit) : (rec : MonFunctorR cat cat') -> cat'.hom cat'.unit (rec.fun cat.unit)
-  (.munit) {cat=MkMonoidalR{},cat'=MkMonoidalR{}} rec@(MkMonFunctorR {}) = rec.laxMonFunctorR.munit
+  (.munit) {cat=MkMonoidalR {} {hom=cat,tensor=ten},cat'=MkMonoidalR {} {hom=cat',tensor=ten'}}
+    rec@(MkMonFunctorR {}) = munit {cat,ten,cat',ten'}
 
 
   ||| Convert this into a `MonFunctorR`.
@@ -137,7 +139,7 @@ namespace StrongFunctorR
   public export %inline
   (.map) : (rec : StrongFunctorR cat) -> {a,b : _} ->
            cat.hom a b -> cat.hom (rec.fun a) (rec.fun b)
-  (.map) {cat=MkMonoidalR{}} rec@(MkStrongFunctorR {}) = rec.functorR.map
+  (.map) {cat=MkMonoidalR{}} rec@(MkStrongFunctorR {}) = map
 
   ||| The left tensor strength.
   public export %inline
@@ -173,7 +175,7 @@ namespace CostrongFunctorR
   public export %inline
   (.map) : (rec : CostrongFunctorR cat) -> {a,b : _} ->
            cat.hom a b -> cat.hom (rec.fun a) (rec.fun b)
-  (.map) {cat=MkMonoidalR{}} rec@(MkCostrongFunctorR {}) = rec.functorR.map
+  (.map) {cat=MkMonoidalR{}} rec@(MkCostrongFunctorR {}) = map
 
   ||| The left tensor costrength.
   public export %inline

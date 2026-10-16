@@ -30,7 +30,13 @@
   - [X] Generalized Kleisli categories
   - [X] Co-Kleisli categories
   - [ ] Eilenberg-Moore categories
-  - [ ] Free category constructions
+- [ ] Free category constructions:
+  - [X] `FreeMonoidal`
+  - [ ] `FreeBraided`
+  - [ ] `FreeCartesian`
+  - [ ] `FreeCocartesian`
+  - [ ] `FreeCartesianClosed`
+  - [ ] `FreeBimonoidal`
 - [ ] String diagram notation:
   - [X] `Monoidal`
   - [X] `Braided`

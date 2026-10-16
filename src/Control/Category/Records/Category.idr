@@ -32,10 +32,10 @@ namespace CategoryR
   ||| The identity morphism of an object `a`.
   public export %inline
   (.id) : (rec : CategoryR) -> {a : _} -> rec.hom a a
-  (.id) rec = id @{rec.impl}
+  (.id) (MkCategoryR {}) = id
 
   ||| Binary right-to-left composition of morphisms.
   public export %inline
   (.comp) : (rec : CategoryR) -> {a,b,c : _} ->
             rec.hom b c -> rec.hom a b -> rec.hom a c
-  (.comp) rec = (.) @{rec.impl}
+  (.comp) (MkCategoryR {}) = (.)

@@ -67,7 +67,7 @@ PreBimonoidal = Bimonoidal
 ||| record-style definition, see `Control.Category.Records.RigCategoryR`.
 public export
 RigCategory : (cat : Hom obj) -> (add,mul : obj -> obj -> obj) -> (z,i : obj) -> Type
-RigCategory cat add mul z i = (Bimonoidal cat add mul z i, Braided cat add z)
+RigCategory cat add mul z i = (Bimonoidal cat add mul z i, MonSymmetric cat add z)
 
 ||| A pre-bimonoidal category has a multiplicative structure that is
 ||| premonoidal. See `PreMonoidal`.
@@ -82,7 +82,7 @@ PreRigCategory = RigCategory
 ||| For the record-style definition, see `Control.Category.Records.SymRigCategoryR`.
 public export
 SymRigCategory : (cat : Hom obj) -> (add,mul : obj -> obj -> obj) -> (z,i : obj) -> Type
-SymRigCategory cat add mul z i = (RigCategory cat add mul z i, Braided cat mul i)
+SymRigCategory cat add mul z i = (RigCategory cat add mul z i, MonSymmetric cat mul i)
 
 ||| A pre-bimonoidal category has a multiplicative structure that is
 ||| premonoidal. See `PreMonoidal`.

@@ -153,6 +153,10 @@ Cartesian Cat Prod One where
   elim {a=MkCategoryR{}} =
     MkFunctorR (const ()) {impl = MkCatFunctor $ const MkOne}
 
+public export %hint
+SymmetricCatProd : MonSymmetric Cat Prod One
+SymmetricCatProd = FromCartesian
+
 public export
 Cocartesian Cat Sum Zero where
   injl {a=MkCategoryR{},b=MkCategoryR{}} = MkFunctorR Left {impl = MkCatFunctor Left}
@@ -168,6 +172,10 @@ Cocartesian Cat Sum Zero where
       Left f => f
       Right f => f}
   intro {a=MkCategoryR{}} = MkFunctorR absurd {impl = MkCatFunctor absurd}
+
+public export %hint
+SymmetricCatSum : MonSymmetric Cat Sum Zero
+SymmetricCatSum = FromCocartesian
 
 public export
 Bimonoidal Cat Sum Prod Zero One where
@@ -376,6 +384,10 @@ Cartesian Cat0 Cat0Prod (W0 One) where
         MkFunctorR (\x => (f x, g x))
             {impl = MkCatFunctor $ \m => MkProd (map m) (map m)}
 
+public export %hint
+SymmetricCat0Prod : MonSymmetric Cat0 Cat0Prod (W0 One)
+SymmetricCat0Prod = FromCartesian
+
 public export
 Cocartesian Cat0 Cat0Sum (W0 Zero) where
   injl {a=W0 a,b=W0 b} = MkCat0 $ injl_ {a,b}
@@ -395,6 +407,10 @@ Cocartesian Cat0 Cat0Sum (W0 Zero) where
             {impl = MkCatFunctor $ \case
               Left f => map f
               Right f => map f}
+
+public export %hint
+SymmetricCat0Sum : MonSymmetric Cat0 Cat0Sum (W0 Zero)
+SymmetricCat0Sum = FromCocartesian
 
 public export
 Bimonoidal Cat0 Cat0Sum Cat0Prod (W0 Zero) (W0 One) where
@@ -515,6 +531,23 @@ namespace BraidedR
   public export
   Cat0Sum : BraidedR
   Cat0Sum = MkBraidedR Cat0 Cat0Sum (W0 Zero)
+
+namespace SymmetricR
+  public export
+  CatProd : SymmetricR
+  CatProd = MkSymmetricR Cat Prod One
+
+  public export
+  CatSum : SymmetricR
+  CatSum = MkSymmetricR Cat Sum Zero
+
+  public export
+  Cat0Prod : SymmetricR
+  Cat0Prod = MkSymmetricR Cat0 Cat0Prod (W0 One)
+
+  public export
+  Cat0Sum : SymmetricR
+  Cat0Sum = MkSymmetricR Cat0 Cat0Sum (W0 Zero)
 
 namespace CartesianR
   public export

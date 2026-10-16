@@ -67,7 +67,12 @@ CokleisliPreBraided : {w,ten,i : _} -> PreBraided cat ten i => StrongComonad cat
 CokleisliPreBraided =
   MkBraided (MkCokleisli $ braid . counit)
             (MkCokleisli $ braid' . counit)
-            (\p => MkCokleisli $ Core.(.) (permute p) counit)
+
+public export %hint
+CokleisliPreSymmetric : {w,ten,i : _} -> PreSymmetric cat ten i => StrongComonad cat ten w =>
+                        PreSymmetric (Cokleisli cat w) ten i
+CokleisliPreSymmetric =
+  MkMonSymmetric (\p => MkCokleisli $ Core.(.) (permute p) counit)
 
 public export %hint
 CokleisliPreCartesian : {w,ten,i : _} -> PreCartesian cat ten i => StrongComonad cat ten w =>
@@ -127,6 +132,11 @@ namespace BraidedR
   public export
   Cokleisli : (cat : PreBraidedR) -> (w : StrongComonadR cat.monoidalR) -> PreBraidedR
   Cokleisli (MkBraidedR cat ten i) (MkStrongComonadR w) = MkBraidedR (Cokleisli cat w) ten i
+
+namespace SymmetricR
+  public export
+  Cokleisli : (cat : PreSymmetricR) -> (w : StrongComonadR cat.monoidalR) -> PreSymmetricR
+  Cokleisli (MkSymmetricR cat ten i) (MkStrongComonadR w) = MkSymmetricR (Cokleisli cat w) ten i
 
 namespace CartesianR
   public export

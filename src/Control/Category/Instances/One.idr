@@ -66,6 +66,9 @@ public export
 Braided One UnitOp2 () where
   braid = MkOne
   braid' = MkOne
+
+public export
+MonSymmetric One UnitOp2 () where
   permute _ = mkOne
 
 public export
@@ -129,6 +132,11 @@ namespace BraidedR
   public export
   One : BraidedR
   One = MkBraidedR One UnitOp2 ()
+
+namespace SymmetricR
+  public export
+  One : SymmetricR
+  One = MkSymmetricR One UnitOp2 ()
 
 namespace CartesianR
   public export

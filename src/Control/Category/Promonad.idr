@@ -77,7 +77,12 @@ namespace Braided
   [FromPromonad] {ten,i : _} -> (Promonad cat, CatEndoBifunctor cat ten, Braided Morphism ten i) =>
       Braided cat ten i using Monoidal.FromPromonad where
     braid = funit $ applyMor braid
-    permute = permuteDefault {ten} (funit $ applyMor braid)
+
+namespace MonSymmetric
+  ||| Convert a promonad into a symmetric (pre)monoidal category.
+  public export
+  [FromPromonad] {ten,i : _} -> (Promonad cat, CatEndoBifunctor cat ten, MonSymmetric Morphism ten i) =>
+      MonSymmetric cat ten i using Braided.FromPromonad where
 
 namespace Cartesian
   ||| Convert a promonad into a cartesian (pre)monoidal category.

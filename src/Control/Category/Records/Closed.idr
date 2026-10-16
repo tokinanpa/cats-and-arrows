@@ -37,13 +37,13 @@ namespace ClosedR
   ||| The identity morphism of an object `a`.
   public export %inline
   (.id) : (rec : ClosedR) -> {a : _} -> rec.hom a a
-  (.id) rec@(MkClosedR {}) = rec.categoryR.id
+  (.id) (MkClosedR {}) = id
 
   ||| Binary right-to-left composition of morphisms.
   public export %inline
   (.comp) : (rec : ClosedR) -> {a,b,c : _} ->
             rec.hom b c -> rec.hom a b -> rec.hom a c
-  (.comp) rec@(MkClosedR {}) = rec.categoryR.comp
+  (.comp) (MkClosedR {}) = (.)
 
 
   ||| Return the tensor product as a `BifunctorR`.
@@ -61,37 +61,37 @@ namespace ClosedR
   public export %inline
   (.assoc) : (rec : ClosedR) -> {a,b,c : _} ->
              rec.hom (rec.tensor (rec.tensor a b) c) (rec.tensor a (rec.tensor b c))
-  (.assoc) rec@(MkClosedR {}) = rec.monoidalR.assoc
+  (.assoc) (MkClosedR {}) = assoc
 
   ||| The right-biased associator. This must be the inverse of `(.assoc)`.
   public export %inline
   (.assoc') : (rec : ClosedR) -> {a,b,c : _} ->
               rec.hom (rec.tensor a (rec.tensor b c)) (rec.tensor (rec.tensor a b) c)
-  (.assoc') rec@(MkClosedR {}) = rec.monoidalR.assoc'
+  (.assoc') (MkClosedR {}) = assoc'
 
   ||| The left unitor.
   public export %inline
   (.unitl) : (rec : ClosedR) -> {a : _} ->
              rec.hom (rec.tensor rec.unit a) a
-  (.unitl) rec@(MkClosedR {}) = rec.monoidalR.unitl
+  (.unitl) (MkClosedR {}) = unitl
 
   ||| The inverse of `(.unitl)`, the left unitor.
   public export %inline
   (.unitl') : (rec : ClosedR) -> {a : _} ->
               rec.hom a (rec.tensor rec.unit a)
-  (.unitl') rec@(MkClosedR {}) = rec.monoidalR.unitl'
+  (.unitl') (MkClosedR {}) = unitl'
 
   ||| The right unitor.
   public export %inline
   (.unitr) : (rec : ClosedR) -> {a : _} ->
              rec.hom (rec.tensor a rec.unit) a
-  (.unitr) rec@(MkClosedR {}) = rec.monoidalR.unitr
+  (.unitr) (MkClosedR {}) = unitr
 
   ||| The inverse of `(.unitr)`, the right unitor.
   public export %inline
   (.unitr') : (rec : ClosedR) -> {a : _} ->
               rec.hom a (rec.tensor a rec.unit)
-  (.unitr') rec@(MkClosedR {}) = rec.monoidalR.unitr'
+  (.unitr') (MkClosedR {}) = unitr'
 
 
   ||| Convert this into a `ClosedR`.
@@ -103,25 +103,25 @@ namespace ClosedR
   public export %inline
   (.curry) : (rec : ClosedR) -> {a,b,c : _} ->
              rec.hom (rec.tensor a b) c -> rec.hom a (rec.ihom b c)
-  (.curry) rec = curry @{rec.impl}
+  (.curry) (MkClosedR {}) = curry
 
   ||| The uncurrying transformation.
   public export %inline
   (.uncurry) : (rec : ClosedR) -> {a,b,c : _} ->
                rec.hom a (rec.ihom b c) -> rec.hom (rec.tensor a b) c
-  (.uncurry) rec = uncurry @{rec.impl}
+  (.uncurry) (MkClosedR {}) = uncurry
 
   ||| The evaluation map.
   public export %inline
   (.eval) : (rec : ClosedR) -> {a,b : _} ->
             rec.hom (rec.tensor (rec.ihom a b) a) b
-  (.eval) rec = eval @{rec.impl}
+  (.eval) (MkClosedR {}) = eval
 
   ||| The coevaluation map.
   public export %inline
   (.coeval) : (rec : ClosedR) -> {a,b : _} ->
             rec.hom a (rec.ihom b (rec.tensor a b))
-  (.coeval) rec = coeval @{rec.impl}
+  (.coeval) (MkClosedR {} {tensor}) = coeval {ten=tensor}
 
 
 ||| A monoidal category that is both cartesian and closed.
@@ -147,13 +147,13 @@ namespace CartesianClosedR
   ||| The identity morphism of an object `a`.
   public export %inline
   (.id) : (rec : CartesianClosedR) -> {a : _} -> rec.hom a a
-  (.id) rec@(MkCartesianClosedR {}) = rec.categoryR.id
+  (.id) (MkCartesianClosedR {}) = id
 
   ||| Binary right-to-left composition of morphisms.
   public export %inline
   (.comp) : (rec : CartesianClosedR) -> {a,b,c : _} ->
             rec.hom b c -> rec.hom a b -> rec.hom a c
-  (.comp) rec@(MkCartesianClosedR {}) = rec.categoryR.comp
+  (.comp) (MkCartesianClosedR {}) = (.)
 
 
   ||| Return the tensor product as a `BifunctorR`.
@@ -171,37 +171,37 @@ namespace CartesianClosedR
   public export %inline
   (.assoc) : (rec : CartesianClosedR) -> {a,b,c : _} ->
              rec.hom (rec.tensor (rec.tensor a b) c) (rec.tensor a (rec.tensor b c))
-  (.assoc) rec@(MkCartesianClosedR {}) = rec.monoidalR.assoc
+  (.assoc) (MkCartesianClosedR {}) = assoc
 
   ||| The right-biased associator. This must be the inverse of `(.assoc)`.
   public export %inline
   (.assoc') : (rec : CartesianClosedR) -> {a,b,c : _} ->
               rec.hom (rec.tensor a (rec.tensor b c)) (rec.tensor (rec.tensor a b) c)
-  (.assoc') rec@(MkCartesianClosedR {}) = rec.monoidalR.assoc'
+  (.assoc') (MkCartesianClosedR {}) = assoc'
 
   ||| The left unitor.
   public export %inline
   (.unitl) : (rec : CartesianClosedR) -> {a : _} ->
              rec.hom (rec.tensor rec.unit a) a
-  (.unitl) rec@(MkCartesianClosedR {}) = rec.monoidalR.unitl
+  (.unitl) (MkCartesianClosedR {}) = unitl
 
   ||| The inverse of `(.unitl)`, the left unitor.
   public export %inline
   (.unitl') : (rec : CartesianClosedR) -> {a : _} ->
               rec.hom a (rec.tensor rec.unit a)
-  (.unitl') rec@(MkCartesianClosedR {}) = rec.monoidalR.unitl'
+  (.unitl') (MkCartesianClosedR {}) = unitl'
 
   ||| The right unitor.
   public export %inline
   (.unitr) : (rec : CartesianClosedR) -> {a : _} ->
              rec.hom (rec.tensor a rec.unit) a
-  (.unitr) rec@(MkCartesianClosedR {}) = rec.monoidalR.unitr
+  (.unitr) (MkCartesianClosedR {}) = unitr
 
   ||| The inverse of `(.unitr)`, the right unitor.
   public export %inline
   (.unitr') : (rec : CartesianClosedR) -> {a : _} ->
               rec.hom a (rec.tensor a rec.unit)
-  (.unitr') rec@(MkCartesianClosedR {}) = rec.monoidalR.unitr'
+  (.unitr') (MkCartesianClosedR {}) = unitr'
 
 
   ||| Convert this into a `BraidedR`.
@@ -210,17 +210,17 @@ namespace CartesianClosedR
   (.braidedR) (MkCartesianClosedR {} {hom,tensor,unit}) =
     MkBraidedR {hom,tensor,unit,impl = FromCartesian}
 
+  ||| Convert this into a `SymmetricR`.
+  public export %inline
+  (.symmetricR) : (rec : CartesianClosedR) -> SymmetricR
+  (.symmetricR) (MkCartesianClosedR {} {hom,tensor,unit}) =
+    MkSymmetricR {hom,tensor,unit,impl = FromCartesian}
+
   ||| The braiding of the category.
   public export %inline
   (.braid) : (rec : CartesianClosedR) -> {a,b : _} ->
              rec.hom (rec.tensor a b) (rec.tensor b a)
-  (.braid) rec@(MkCartesianClosedR {}) = rec.braidedR.braid
-
-  ||| The inverse of `(.braid)`, the braiding of the category.
-  public export %inline
-  (.braid') : (rec : CartesianClosedR) -> {a,b : _} ->
-              rec.hom (rec.tensor b a) (rec.tensor a b)
-  (.braid') rec@(MkCartesianClosedR {}) = rec.braidedR.braid'
+  (.braid) (MkCartesianClosedR {}) = prod projr projl
 
 
   ||| Convert this into a `CartesianR`.
@@ -232,31 +232,31 @@ namespace CartesianClosedR
   public export %inline
   (.projl) : (rec : CartesianClosedR) -> {a,b : _} ->
              rec.hom (rec.tensor a b) a
-  (.projl) rec@(MkCartesianClosedR {}) = rec.cartesianR.projl
+  (.projl) (MkCartesianClosedR {}) = projl
 
   ||| The right projection of the product.
   public export %inline
   (.projr) : (rec : CartesianClosedR) -> {a,b : _} ->
              rec.hom (rec.tensor a b) b
-  (.projr) rec@(MkCartesianClosedR {}) = rec.cartesianR.projr
+  (.projr) (MkCartesianClosedR {}) = projr
 
   ||| The universal property of the product.
   public export %inline
   (.prod) : (rec : CartesianClosedR) -> {a,b,b' : _} ->
             rec.hom a b -> rec.hom a b' -> rec.hom a (rec.tensor b b')
-  (.prod) rec@(MkCartesianClosedR {}) = rec.cartesianR.prod
+  (.prod) (MkCartesianClosedR {}) = prod
 
   ||| The cojoin of the universal comonoid structure.
   public export %inline
   (.split) : (rec : CartesianClosedR) -> {a : _} ->
              rec.hom a (rec.tensor a a)
-  (.split) rec@(MkCartesianClosedR {}) = rec.cartesianR.split
+  (.split) (MkCartesianClosedR {}) = split
 
   ||| The counit of the universal comonoid structure.
   public export %inline
   (.elim) : (rec : CartesianClosedR) -> {a : _} ->
             rec.hom a rec.unit
-  (.elim) rec@(MkCartesianClosedR {}) = rec.cartesianR.elim
+  (.elim) (MkCartesianClosedR {} {tensor}) = elim {ten=tensor}
 
 
   ||| Convert this into a `ClosedR`.
@@ -269,22 +269,22 @@ namespace CartesianClosedR
   public export %inline
   (.curry) : (rec : CartesianClosedR) -> {a,b,c : _} ->
              rec.hom (rec.tensor a b) c -> rec.hom a (rec.ihom b c)
-  (.curry) rec@(MkCartesianClosedR {}) = rec.closedR.curry
+  (.curry) (MkCartesianClosedR {}) = curry
 
   ||| The uncurrying transformation.
   public export %inline
   (.uncurry) : (rec : CartesianClosedR) -> {a,b,c : _} ->
                rec.hom a (rec.ihom b c) -> rec.hom (rec.tensor a b) c
-  (.uncurry) rec@(MkCartesianClosedR {}) = rec.closedR.uncurry
+  (.uncurry) (MkCartesianClosedR {}) = uncurry
 
   ||| The evaluation map.
   public export %inline
   (.eval) : (rec : CartesianClosedR) -> {a,b : _} ->
             rec.hom (rec.tensor (rec.ihom a b) a) b
-  (.eval) rec@(MkCartesianClosedR {}) = rec.closedR.eval
+  (.eval) (MkCartesianClosedR {}) = eval
 
   ||| The coevaluation map.
   public export %inline
   (.coeval) : (rec : CartesianClosedR) -> {a,b : _} ->
               rec.hom a (rec.ihom b (rec.tensor a b))
-  (.coeval) rec@(MkCartesianClosedR {}) = rec.closedR.coeval
+  (.coeval) (MkCartesianClosedR {} {tensor}) = coeval {ten=tensor}

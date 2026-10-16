@@ -37,13 +37,13 @@ namespace CocartesianR
   ||| The identity morphism of an object `a`.
   public export %inline
   (.id) : (rec : CocartesianR) -> {a : _} -> rec.hom a a
-  (.id) rec@(MkCocartesianR {}) = rec.categoryR.id
+  (.id) (MkCocartesianR {}) = id
 
   ||| Binary right-to-left composition of morphisms.
   public export %inline
   (.comp) : (rec : CocartesianR) -> {a,b,c : _} ->
             rec.hom b c -> rec.hom a b -> rec.hom a c
-  (.comp) rec@(MkCocartesianR {}) = rec.categoryR.comp
+  (.comp) (MkCocartesianR {}) = (.)
 
 
   ||| Return the tensor product as a `BifunctorR`.
@@ -61,37 +61,37 @@ namespace CocartesianR
   public export %inline
   (.assoc) : (rec : CocartesianR) -> {a,b,c : _} ->
              rec.hom (rec.tensor (rec.tensor a b) c) (rec.tensor a (rec.tensor b c))
-  (.assoc) rec@(MkCocartesianR {}) = rec.monoidalR.assoc
+  (.assoc) (MkCocartesianR {}) = assoc
 
   ||| The right-biased associator. This must be the inverse of `(.assoc)`.
   public export %inline
   (.assoc') : (rec : CocartesianR) -> {a,b,c : _} ->
               rec.hom (rec.tensor a (rec.tensor b c)) (rec.tensor (rec.tensor a b) c)
-  (.assoc') rec@(MkCocartesianR {}) = rec.monoidalR.assoc'
+  (.assoc') (MkCocartesianR {}) = assoc'
 
   ||| The left unitor.
   public export %inline
   (.unitl) : (rec : CocartesianR) -> {a : _} ->
              rec.hom (rec.tensor rec.unit a) a
-  (.unitl) rec@(MkCocartesianR {}) = rec.monoidalR.unitl
+  (.unitl) (MkCocartesianR {}) = unitl
 
   ||| The inverse of `(.unitl)`, the left unitor.
   public export %inline
   (.unitl') : (rec : CocartesianR) -> {a : _} ->
               rec.hom a (rec.tensor rec.unit a)
-  (.unitl') rec@(MkCocartesianR {}) = rec.monoidalR.unitl'
+  (.unitl') (MkCocartesianR {}) = unitl'
 
   ||| The right unitor.
   public export %inline
   (.unitr) : (rec : CocartesianR) -> {a : _} ->
              rec.hom (rec.tensor a rec.unit) a
-  (.unitr) rec@(MkCocartesianR {}) = rec.monoidalR.unitr
+  (.unitr) (MkCocartesianR {}) = unitr
 
   ||| The inverse of `(.unitr)`, the right unitor.
   public export %inline
   (.unitr') : (rec : CocartesianR) -> {a : _} ->
               rec.hom a (rec.tensor a rec.unit)
-  (.unitr') rec@(MkCocartesianR {}) = rec.monoidalR.unitr'
+  (.unitr') (MkCocartesianR {}) = unitr'
 
 
   ||| Convert this into a `BraidedR`.
@@ -100,17 +100,17 @@ namespace CocartesianR
   (.braidedR) (MkCocartesianR {} {hom,tensor,unit}) =
     MkBraidedR {hom,tensor,unit,impl = FromCocartesian}
 
+  ||| Convert this into a `SymmetricR`.
+  public export %inline
+  (.symmetricR) : (rec : CocartesianR) -> SymmetricR
+  (.symmetricR) (MkCocartesianR {} {hom,tensor,unit}) =
+    MkSymmetricR {hom,tensor,unit,impl = FromCocartesian}
+
   ||| The braiding of the category.
   public export %inline
   (.braid) : (rec : CocartesianR) -> {a,b : _} ->
              rec.hom (rec.tensor a b) (rec.tensor b a)
-  (.braid) rec@(MkCocartesianR {}) = rec.braidedR.braid
-
-  ||| The inverse of `(.braid)`, the braiding of the category.
-  public export %inline
-  (.braid') : (rec : CocartesianR) -> {a,b : _} ->
-              rec.hom (rec.tensor b a) (rec.tensor a b)
-  (.braid') rec@(MkCocartesianR {}) = rec.braidedR.braid'
+  (.braid) (MkCocartesianR {}) = coprod injr injl
 
 
   ||| Convert this into a `CocartesianR`.
@@ -122,28 +122,28 @@ namespace CocartesianR
   public export %inline
   (.injl) : (rec : CocartesianR) -> {a,b : _} ->
             rec.hom a (rec.tensor a b)
-  (.injl) rec = injl @{rec.impl}
+  (.injl) (MkCocartesianR {}) = injl
 
   ||| The right injection of the coproduct.
   public export %inline
   (.injr) : (rec : CocartesianR) -> {a,b : _} ->
             rec.hom b (rec.tensor a b)
-  (.injr) rec = injr @{rec.impl}
+  (.injr) (MkCocartesianR {}) = injr
 
   ||| The universal property of the coproduct.
   public export %inline
   (.coprod) : (rec : CocartesianR) -> {a,a',b : _} ->
             rec.hom a b -> rec.hom a' b -> rec.hom (rec.tensor a a') b
-  (.coprod) rec = coprod @{rec.impl}
+  (.coprod) (MkCocartesianR {}) = coprod
 
   ||| The join of the universal monoid structure.
   public export %inline
   (.merge) : (rec : CocartesianR) -> {a : _} ->
              rec.hom (rec.tensor a a) a
-  (.merge) rec = merge @{rec.impl}
+  (.merge) (MkCocartesianR {}) = merge
 
   ||| The unit of the universal monoid structure.
   public export %inline
   (.intro) : (rec : CocartesianR) -> {a : _} ->
              rec.hom rec.unit a
-  (.intro) rec = intro @{rec.impl}
+  (.intro) (MkCocartesianR {} {tensor}) = intro {ten=tensor}

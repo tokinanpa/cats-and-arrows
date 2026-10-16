@@ -9,6 +9,8 @@ import Control.Category.Instances.Type
 import public Data.Linear
 import Data.Linear.LEither
 import Data.Linear.LMaybe
+import Data.List
+import Data.List.Quantifiers
 import Data.Morphisms
 import Data.Wrap0
 
@@ -65,13 +67,26 @@ LinearSemigroupoid : Semigroupoid Linear
 LinearSemigroupoid = FromCategory
 
 
+public export
+CatFunctor Linear Typ Prelude.id where
+  map (MkLinear f) = MkTyp $ \x => f x
+
+public export
+LaxMonFunctor Linear LPair (W0 ()) Typ Pair (W0 ()) Prelude.id where
+  munit = MkTyp id
+  mjoin = MkTyp $ \(x,y) => x # y
+
+public export
+MonFunctor Linear LPair (W0 ()) Typ Pair (W0 ()) Prelude.id where
+  munit' = MkTyp id
+  mjoin' = MkTyp $ \(x # y) => (x,y)
+
+
 -- NOTE: Functors defined on `Linear` can be thought of as "weak"
 -- linear functors, as in they have the type `(a -@ b) -> (f a -@ f b)`
 -- rather than `(a -@ b) -@ (f a -@ f b)`
 
-public export
-CatFunctor Linear Typ Prelude.id where
-  map (MkLinear f) = MkTyp $ \x => f x
+-- Some examples of linear functors:
 
 public export
 CatFunctor Linear Linear (liftW LMaybe) where
@@ -110,6 +125,23 @@ Braided Linear LPair (W0 ()) where
 public export
 Braided Linear LEither (W0 Void) where
   braid = MkLinear $ leither Right Left
+
+public export
+MonSymmetric Linear LPair (W0 ()) where
+  permute p = MkLinear $ assert_linear $ \xs => fromHList $ permuteHList p $ toHList xs
+    where
+      toHList : {ts : _} -> (TenSeq LPair (W0 ()) ts).runW0 -> All Wrap0.runW0 ts
+      toHList {ts=[]} () = []
+      toHList {ts=[_]} x = [x]
+      toHList {ts=_::_::_} (x # y) = x :: toHList y
+
+      fromHList : All Wrap0.runW0 ts -> (TenSeq LPair (W0 ()) ts).runW0
+      fromHList [] = ()
+      fromHList [x] = x
+      fromHList (x :: xs@(_ :: _)) = x # fromHList xs
+
+public export
+MonSymmetric Linear LEither (W0 Void) where
 
 public export
 Bimonoidal Linear LEither LPair (W0 Void) (W0 ()) where
@@ -182,6 +214,15 @@ namespace BraidedR
   public export
   LinearLEither : BraidedR
   LinearLEither = MkBraidedR Linear LEither (W0 Void)
+
+namespace SymmetricR
+  public export
+  LinearLPair : SymmetricR
+  LinearLPair = MkSymmetricR Linear LPair (W0 ())
+
+  public export
+  LinearLEither : SymmetricR
+  LinearLEither = MkSymmetricR Linear LEither (W0 Void)
 
 namespace BimonoidalR
   public export

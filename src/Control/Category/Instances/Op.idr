@@ -49,7 +49,14 @@ public export
 {ten,i : _} -> Braided cat ten i => Braided (Op cat) ten i where
   braid = MkOp braid'
   braid' = MkOp braid
-  permute = permuteDefault (MkOp braid)
+
+public export
+{ten,i : _} -> MonSymmetric cat ten i => MonSymmetric (Op cat) ten i where
+  permute p = MkOp $ replace {p = cat _ . TenSeq ten i}
+    (trans (sym $ permuteListComp xs (inverse p) p) $
+      trans (cong (permuteList xs) (compInvLeft p)) $
+        permuteListId xs) $
+    permute {cat,ten,xs = permuteList xs p} $ inverse $ rewrite permuteListLength xs p in p
 
 public export
 {ten,i : _} -> Cocartesian cat ten i => Cartesian (Op cat) ten i where

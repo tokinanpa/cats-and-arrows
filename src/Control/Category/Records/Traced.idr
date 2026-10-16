@@ -37,13 +37,13 @@ namespace TracedR
   ||| The identity morphism of an object `a`.
   public export %inline
   (.id) : (rec : TracedR) -> {a : _} -> rec.hom a a
-  (.id) rec@(MkTracedR {}) = rec.categoryR.id
+  (.id) (MkTracedR {}) = id
 
   ||| Binary right-to-left composition of morphisms.
   public export %inline
   (.comp) : (rec : TracedR) -> {a,b,c : _} ->
             rec.hom b c -> rec.hom a b -> rec.hom a c
-  (.comp) rec@(MkTracedR {}) = rec.categoryR.comp
+  (.comp) (MkTracedR {}) = (.)
 
 
   ||| Return the tensor product as a `BifunctorR`.
@@ -61,37 +61,37 @@ namespace TracedR
   public export %inline
   (.assoc) : (rec : TracedR) -> {a,b,c : _} ->
              rec.hom (rec.tensor (rec.tensor a b) c) (rec.tensor a (rec.tensor b c))
-  (.assoc) rec@(MkTracedR {}) = rec.monoidalR.assoc
+  (.assoc) (MkTracedR {}) = assoc
 
   ||| The right-biased associator. This must be the inverse of `(.assoc)`.
   public export %inline
   (.assoc') : (rec : TracedR) -> {a,b,c : _} ->
               rec.hom (rec.tensor a (rec.tensor b c)) (rec.tensor (rec.tensor a b) c)
-  (.assoc') rec@(MkTracedR {}) = rec.monoidalR.assoc'
+  (.assoc') (MkTracedR {}) = assoc'
 
   ||| The left unitor.
   public export %inline
   (.unitl) : (rec : TracedR) -> {a : _} ->
              rec.hom (rec.tensor rec.unit a) a
-  (.unitl) rec@(MkTracedR {}) = rec.monoidalR.unitl
+  (.unitl) (MkTracedR {}) = unitl
 
   ||| The inverse of `(.unitl)`, the left unitor.
   public export %inline
   (.unitl') : (rec : TracedR) -> {a : _} ->
               rec.hom a (rec.tensor rec.unit a)
-  (.unitl') rec@(MkTracedR {}) = rec.monoidalR.unitl'
+  (.unitl') (MkTracedR {}) = unitl'
 
   ||| The right unitor.
   public export %inline
   (.unitr) : (rec : TracedR) -> {a : _} ->
              rec.hom (rec.tensor a rec.unit) a
-  (.unitr) rec@(MkTracedR {}) = rec.monoidalR.unitr
+  (.unitr) (MkTracedR {}) = unitr
 
   ||| The inverse of `(.unitr)`, the right unitor.
   public export %inline
   (.unitr') : (rec : TracedR) -> {a : _} ->
               rec.hom a (rec.tensor a rec.unit)
-  (.unitr') rec@(MkTracedR {}) = rec.monoidalR.unitr'
+  (.unitr') (MkTracedR {}) = unitr'
 
 
   ||| Convert this into a `TracedR`.
@@ -103,13 +103,13 @@ namespace TracedR
   public export %inline
   (.tracel) : (rec : TracedR) -> {a,b,c : _} ->
               rec.hom (rec.tensor a b) (rec.tensor a c) -> rec.hom b c
-  (.tracel) rec = tracel @{rec.impl}
+  (.tracel) (MkTracedR {}) = tracel
 
   ||| The right trace.
   public export %inline
   (.tracer) : (rec : TracedR) -> {a,b,c : _} ->
               rec.hom (rec.tensor a c) (rec.tensor b c) -> rec.hom a b
-  (.tracer) rec = tracer @{rec.impl}
+  (.tracer) (MkTracedR {}) = tracer
 
   ||| Take the trace of an endomorphism, returning an endomorphism in
   ||| the unit object. Depending on what the unit object is, this may
@@ -121,4 +121,4 @@ namespace TracedR
   public export %inline
   (.trace) : (rec : TracedR) -> {a : _} ->
              rec.hom a a -> rec.hom rec.unit rec.unit
-  (.trace) rec = trace @{rec.impl}
+  (.trace) (MkTracedR {} {tensor}) = trace {ten=tensor}

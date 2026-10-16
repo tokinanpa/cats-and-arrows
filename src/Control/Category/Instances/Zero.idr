@@ -60,6 +60,9 @@ public export
 {ten,i : _} -> Braided Zero ten i where
   braid = void i
   braid' = void i
+
+public export
+{ten,i : _} -> MonSymmetric Zero ten i where
   permute = void i
 
 public export

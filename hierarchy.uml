@@ -22,6 +22,10 @@ object "Braided cat ten i" as Braided {
   braid : cat (a `ten` b) (b `ten` a)
   braid' : cat (b `ten` a) (a `ten` b)
 }
+object "MonSymmetric cat ten i" as MonSymmetric {
+  permute : (p : Permutation (length xs)) ->
+    <U+0020><U+0020>cat (TenSeq ten i xs) (TenSeq ten i (permuteList xs p))
+}
 object "Cartesian cat ten i" as Cartesian {
   projl : cat (a `ten` b) a
   projr : cat (a `ten` b) b
@@ -113,12 +117,13 @@ Category <-- Monoidal
 CatEndoBifunctor <-- Monoidal : cat,ten
 
 Monoidal <-- Braided
+Braided <-- MonSymmetric
 
 Monoidal <-- Cartesian
-Braided <.. Cartesian
+MonSymmetric <.. Cartesian
 
 Monoidal <-- Cocartesian
-Braided <.. Cocartesian
+MonSymmetric <.. Cocartesian
 
 Monoidal <-- Traced
 
@@ -130,10 +135,10 @@ Monoidal <-- Bimonoidal : cat,mul,i
 Monoidal <-- Bimonoidal : cat,add,z
 
 Bimonoidal .. RigCategory
-Braided .. RigCategory : cat,add,z
+MonSymmetric .. RigCategory : cat,add,z
 
 RigCategory .. SymRigCategory
-Braided .. SymRigCategory : cat,mul,i
+MonSymmetric .. SymRigCategory : cat,mul,i
 
 SymRigCategory .. Distributive
 Cartesian .. Distributive : cat,mul,i

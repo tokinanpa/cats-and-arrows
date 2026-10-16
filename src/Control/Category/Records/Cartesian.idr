@@ -37,13 +37,13 @@ namespace CartesianR
   ||| The identity morphism of an object `a`.
   public export %inline
   (.id) : (rec : CartesianR) -> {a : _} -> rec.hom a a
-  (.id) rec@(MkCartesianR {}) = rec.categoryR.id
+  (.id) (MkCartesianR {}) = id
 
   ||| Binary right-to-left composition of morphisms.
   public export %inline
   (.comp) : (rec : CartesianR) -> {a,b,c : _} ->
             rec.hom b c -> rec.hom a b -> rec.hom a c
-  (.comp) rec@(MkCartesianR {}) = rec.categoryR.comp
+  (.comp) (MkCartesianR {}) = (.)
 
 
   ||| Return the tensor product as a `BifunctorR`.
@@ -61,37 +61,37 @@ namespace CartesianR
   public export %inline
   (.assoc) : (rec : CartesianR) -> {a,b,c : _} ->
              rec.hom (rec.tensor (rec.tensor a b) c) (rec.tensor a (rec.tensor b c))
-  (.assoc) rec@(MkCartesianR {}) = rec.monoidalR.assoc
+  (.assoc) (MkCartesianR {}) = assoc
 
   ||| The right-biased associator. This must be the inverse of `(.assoc)`.
   public export %inline
   (.assoc') : (rec : CartesianR) -> {a,b,c : _} ->
               rec.hom (rec.tensor a (rec.tensor b c)) (rec.tensor (rec.tensor a b) c)
-  (.assoc') rec@(MkCartesianR {}) = rec.monoidalR.assoc'
+  (.assoc') (MkCartesianR {}) = assoc'
 
   ||| The left unitor.
   public export %inline
   (.unitl) : (rec : CartesianR) -> {a : _} ->
              rec.hom (rec.tensor rec.unit a) a
-  (.unitl) rec@(MkCartesianR {}) = rec.monoidalR.unitl
+  (.unitl) (MkCartesianR {}) = unitl
 
   ||| The inverse of `(.unitl)`, the left unitor.
   public export %inline
   (.unitl') : (rec : CartesianR) -> {a : _} ->
               rec.hom a (rec.tensor rec.unit a)
-  (.unitl') rec@(MkCartesianR {}) = rec.monoidalR.unitl'
+  (.unitl') (MkCartesianR {}) = unitl'
 
   ||| The right unitor.
   public export %inline
   (.unitr) : (rec : CartesianR) -> {a : _} ->
              rec.hom (rec.tensor a rec.unit) a
-  (.unitr) rec@(MkCartesianR {}) = rec.monoidalR.unitr
+  (.unitr) (MkCartesianR {}) = unitr
 
   ||| The inverse of `(.unitr)`, the right unitor.
   public export %inline
   (.unitr') : (rec : CartesianR) -> {a : _} ->
               rec.hom a (rec.tensor a rec.unit)
-  (.unitr') rec@(MkCartesianR {}) = rec.monoidalR.unitr'
+  (.unitr') (MkCartesianR {}) = unitr'
 
 
   ||| Convert this into a `BraidedR`.
@@ -100,17 +100,17 @@ namespace CartesianR
   (.braidedR) (MkCartesianR {} {hom,tensor,unit}) =
     MkBraidedR {hom,tensor,unit,impl = FromCartesian}
 
+  ||| Convert this into a `SymmetricR`.
+  public export %inline
+  (.symmetricR) : (rec : CartesianR) -> SymmetricR
+  (.symmetricR) (MkCartesianR {} {hom,tensor,unit}) =
+    MkSymmetricR {hom,tensor,unit,impl = FromCartesian}
+
   ||| The braiding of the category.
   public export %inline
   (.braid) : (rec : CartesianR) -> {a,b : _} ->
              rec.hom (rec.tensor a b) (rec.tensor b a)
-  (.braid) rec@(MkCartesianR {}) = rec.braidedR.braid
-
-  ||| The inverse of `(.braid)`, the braiding of the category.
-  public export %inline
-  (.braid') : (rec : CartesianR) -> {a,b : _} ->
-              rec.hom (rec.tensor b a) (rec.tensor a b)
-  (.braid') rec@(MkCartesianR {}) = rec.braidedR.braid'
+  (.braid) (MkCartesianR {}) = prod projr projl
 
 
   ||| Convert this into a `CartesianR`.
@@ -122,28 +122,28 @@ namespace CartesianR
   public export %inline
   (.projl) : (rec : CartesianR) -> {a,b : _} ->
              rec.hom (rec.tensor a b) a
-  (.projl) rec = projl @{rec.impl}
+  (.projl) (MkCartesianR {}) = projl
 
   ||| The right projection of the product.
   public export %inline
   (.projr) : (rec : CartesianR) -> {a,b : _} ->
              rec.hom (rec.tensor a b) b
-  (.projr) rec = projr @{rec.impl}
+  (.projr) (MkCartesianR {}) = projr
 
   ||| The universal property of the product.
   public export %inline
   (.prod) : (rec : CartesianR) -> {a,b,b' : _} ->
             rec.hom a b -> rec.hom a b' -> rec.hom a (rec.tensor b b')
-  (.prod) rec = prod @{rec.impl}
+  (.prod) (MkCartesianR {}) = prod
 
   ||| The cojoin of the universal comonoid structure.
   public export %inline
   (.split) : (rec : CartesianR) -> {a : _} ->
              rec.hom a (rec.tensor a a)
-  (.split) rec = split @{rec.impl}
+  (.split) (MkCartesianR {}) = split
 
   ||| The counit of the universal comonoid structure.
   public export %inline
   (.elim) : (rec : CartesianR) -> {a : _} ->
             rec.hom a rec.unit
-  (.elim) rec = elim @{rec.impl}
+  (.elim) (MkCartesianR {} {tensor}) = elim {ten=tensor}
