@@ -377,7 +377,8 @@ namespace BraidedR
   Thin : (rel : Rel ty) -> Preorder ty rel => RelCommMonoid ty rel -> BraidedR
   Thin rel cm@(MkRelCommMonoid {}) =
     MkBraidedR rel (<+>) neutral
-      {impl = MkBraided @{(Thin rel cm.relMonoid).impl} cm.comm cm.comm}
+      {impl = MkBraided @{(Thin rel cm.relMonoid).impl} cm.comm cm.comm
+        (permuteDefault @{(Thin rel cm.relMonoid).impl} cm.comm)}
 
 namespace BimonoidalR
   public export

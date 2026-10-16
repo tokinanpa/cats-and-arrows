@@ -7,6 +7,7 @@ import Control.Category
 import Control.Category.Records
 import Data.Either
 import Data.Tensor
+import Data.List.Quantifiers
 import Data.Wrap0
 
 %default total
@@ -131,11 +132,22 @@ namespace StrongMonad
 namespace Braided
   public export
   FromTensor : {ten,i : _} -> (Tensor ten i, Symmetric ten) => Braided Typ (liftW2 ten) (W0 i)
-  FromTensor = MkBraided @{FromTensor} (MkTyp swap') (MkTyp swap')
+  FromTensor = MkBraided @{FromTensor} (MkTyp swap') (MkTyp swap') (permuteDefault @{FromTensor} $ MkTyp swap')
 
 public export
 Braided Typ Pair (W0 ()) where
   braid = MkTyp swap
+  permute p = MkTyp $ \xs => fromHList $ permuteHList p $ toHList xs
+    where
+      toHList : {ts : _} -> (TenSeq Pair (W0 ()) ts).runW0 -> All Wrap0.runW0 ts
+      toHList {ts=[]} () = []
+      toHList {ts=[_]} x = [x]
+      toHList {ts=_::_::_} (x,y) = x :: toHList y
+
+      fromHList : All Wrap0.runW0 ts -> (TenSeq Pair (W0 ()) ts).runW0
+      fromHList [] = ()
+      fromHList [x] = x
+      fromHList (x :: xs@(_ :: _)) = (x, fromHList xs)
 
 public export
 Braided Typ Either (W0 Void) where

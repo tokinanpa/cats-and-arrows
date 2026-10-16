@@ -49,54 +49,55 @@ CatMonad Zero m where
 
 public export
 {ten,i : _} -> Monoidal Zero ten i where
-  assoc {a} = void a
-  assoc' {a} = void a
-  unitl {a} = void a
-  unitl' {a} = void a
-  unitr {a} = void a
-  unitr' {a} = void a
+  assoc = void i
+  assoc' = void i
+  unitl = void i
+  unitl' = void i
+  unitr = void i
+  unitr' = void i
 
 public export
 {ten,i : _} -> Braided Zero ten i where
-  braid {a} = void a
-  braid' {a} = void a
+  braid = void i
+  braid' = void i
+  permute = void i
 
 public export
 {ten,i : _} -> Cartesian Zero ten i where
-  projl {a} = void a
-  projr {a} = void a
-  prod {a} = void a
-  split {a} = void a
-  elim {a} = void a
+  projl = void i
+  projr = void i
+  prod = void i
+  split = void i
+  elim = void i
 
 public export
 {ten,i : _} -> Cocartesian Zero ten i where
-  injl {a} = void a
-  injr {a} = void a
-  coprod {a} = void a
-  merge {a} = void a
-  intro {a} = void a
+  injl = void i
+  injr = void i
+  coprod = void i
+  merge = void i
+  intro = void i
 
 public export
 {ten,hom,i : _} -> Closed Zero ten hom i where
-  curry {a} = void a
-  uncurry {a} = void a
+  curry = void i
+  uncurry = void i
 
 public export
 {ten,i : _} -> Traced Zero ten i where
-  tracel {a} = void a
-  tracer {a} = void a
+  tracel = void i
+  tracer = void i
 
 public export
 {add,mul,z,i : _} -> Bimonoidal Zero add mul z i where
-  distribl {a} = void a
-  distribl' {a} = void a
-  distribr {a} = void a
-  distribr' {a} = void a
-  absorbl {a} = void a
-  absorbl' {a} = void a
-  absorbr {a} = void a
-  absorbr' {a} = void a
+  distribl = void i
+  distribl' = void i
+  distribr = void i
+  distribr' = void i
+  absorbl = void i
+  absorbl' = void i
+  absorbr = void i
+  absorbr' = void i
 
 
 ------------------------------------------------------------

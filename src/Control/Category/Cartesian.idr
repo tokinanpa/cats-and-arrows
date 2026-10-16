@@ -120,6 +120,7 @@ namespace Braided
   public export
   [FromCartesian] {ten,i : _} -> Cartesian cat ten i => Braided cat ten i where
     braid = prod projr projl
+    permute = permuteDefault {ten} (prod projr projl)
 
 
 -- These instances should not be used unless necessary, as they have

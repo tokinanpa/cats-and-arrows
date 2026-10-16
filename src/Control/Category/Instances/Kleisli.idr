@@ -69,6 +69,7 @@ KleisliPreBraided : {m,ten,i : _} -> PreBraided cat ten i => StrongMonad cat ten
 KleisliPreBraided =
   MkBraided (MkKleisli $ unit . braid)
             (MkKleisli $ unit . braid')
+            (\p => MkKleisli $ Core.(.) unit $ permute p)
 
 public export %hint
 KleisliPreCartesian : {m,ten,i : _} -> PreCartesian cat ten i => StrongMonad cat ten m =>

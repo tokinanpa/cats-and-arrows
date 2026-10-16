@@ -5,6 +5,7 @@ import Control.Category.Functor
 import Data.Morphisms
 import Data.Tensor
 import Data.List
+import Data.List.Quantifiers
 import Data.Singleton
 
 %default total
@@ -70,6 +71,7 @@ TenSeq : (ten : obj -> obj -> obj) -> (i : obj) -> List obj -> obj
 TenSeq _ i [] = i
 TenSeq _ _ [x] = x
 TenSeq ten i (o :: os@(_ :: _)) = o `ten` TenSeq ten i os
+
 
 ||| Split a tensor product sequence into two by reassociating.
 public export
@@ -174,3 +176,17 @@ MonoidalKleisliPair = KleisliFromTensor
 public export %hint
 MonoidalKleisliEither : Monad m => Monoidal (Kleislimorphism m) Either Void
 MonoidalKleisliEither = KleisliFromTensor
+
+
+-- Useful for Type-related categories
+public export
+pairToHList : {ts : _} -> TenSeq Pair () ts -> HList ts
+pairToHList {ts=[]} () = []
+pairToHList {ts=[_]} x = [x]
+pairToHList {ts=_::_::_} (x,y) = x :: pairToHList y
+
+public export
+pairFromHList : HList ts -> TenSeq Pair () ts
+pairFromHList [] = ()
+pairFromHList [x] = x
+pairFromHList (x :: xs@(_ :: _)) = (x, pairFromHList xs)

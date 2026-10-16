@@ -49,6 +49,7 @@ public export
 {ten,i : _} -> Braided cat ten i => Braided (Op cat) ten i where
   braid = MkOp braid'
   braid' = MkOp braid
+  permute = permuteDefault (MkOp braid)
 
 public export
 {ten,i : _} -> Cocartesian cat ten i => Cartesian (Op cat) ten i where

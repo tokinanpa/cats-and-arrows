@@ -67,6 +67,7 @@ CokleisliPreBraided : {w,ten,i : _} -> PreBraided cat ten i => StrongComonad cat
 CokleisliPreBraided =
   MkBraided (MkCokleisli $ braid . counit)
             (MkCokleisli $ braid' . counit)
+            (\p => MkCokleisli $ Core.(.) (permute p) counit)
 
 public export %hint
 CokleisliPreCartesian : {w,ten,i : _} -> PreCartesian cat ten i => StrongComonad cat ten w =>

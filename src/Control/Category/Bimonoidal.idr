@@ -115,9 +115,7 @@ PreDistributive = Distributive
 ||| An expanded sum-of-products in a bimonoidal category.
 public export
 TenSOP : (add,mul : obj -> obj -> obj) -> (z,i : obj) -> List (List obj) -> obj
-TenSOP add mul z i [] = z
-TenSOP add mul z i [os] = TenSeq mul i os
-TenSOP add mul z i (os :: oss) = TenSeq mul i os `add` TenSOP add mul z i oss
+TenSOP add mul z i = TenSeq add z . map (TenSeq mul i)
 
 
 ------------------------------------------------------------

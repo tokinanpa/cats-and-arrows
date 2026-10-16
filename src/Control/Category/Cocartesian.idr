@@ -99,6 +99,7 @@ namespace Braided
   public export
   [FromCocartesian] {ten,i : _} -> Cocartesian cat ten i => Braided cat ten i where
     braid = coprod injr injl
+    permute = permuteDefault {ten} (coprod injr injl)
 
 
 -- These instances should not be used unless necessary, as they have

@@ -13,6 +13,10 @@ public export
 data One : (a,b : ()) -> Type where
   MkOne : One () ()
 
+public export %inline
+mkOne : One a b
+mkOne {a=(),b=()} = MkOne
+
 public export
 UnitOp : a -> ()
 UnitOp _ = ()
@@ -62,6 +66,7 @@ public export
 Braided One UnitOp2 () where
   braid = MkOne
   braid' = MkOne
+  permute _ = mkOne
 
 public export
 Cartesian One UnitOp2 () where
