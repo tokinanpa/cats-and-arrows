@@ -30,10 +30,12 @@ export
 stringImpl : (obj,impl : TTImp) -> TTImp -> Elab TTImp
 stringImpl obj impl t = do
   MkSDiagram inp steps out <- parseDiagram t
+  crt <- genSym "crt"
   mon <- genSym "mon"
   cat <- genSym "cat"
-  ts <- stringImpl' [<] (IVar EmptyFC mon) inp out steps
-  pure `(let Control.Category.Cartesian.MkCartesian @{~(IBindVar EmptyFC mon)} {} = ~impl
+  ts <- stringImpl' [<] (IVar EmptyFC crt) (IVar EmptyFC mon) inp out steps
+  pure `(let ~(IBindVar EmptyFC crt) = ~impl
+             Control.Category.Cartesian.MkCartesian @{~(IBindVar EmptyFC mon)} {} = ~(IVar EmptyFC crt)
              Control.Category.Monoidal.MkMonoidal @{~(IBindVar EmptyFC cat)} {} = ~(IVar EmptyFC mon)
         in ~(composeImp (IVar EmptyFC cat) ts))
   where
@@ -46,9 +48,9 @@ stringImpl obj impl t = do
     toFinList (n :: ns) =
       `(Prelude.(::) (Data.Fin.fromInteger ~(IPrimVal EmptyFC (BI n))) ~(toFinList ns))
 
-    stringImpl' : SnocList TTImp -> TTImp ->
+    stringImpl' : SnocList TTImp -> TTImp -> TTImp ->
                   List (Maybe String) -> List String -> List SDiagramStep -> Elab (SnocList TTImp)
-    stringImpl' ts mon strings out (step :: steps) = do
+    stringImpl' ts crt mon strings out (step :: steps) = do
       let (us, used) = unzip $
                         filter (\(_,name) => not (elem (Just name) step.outputs) &&
                                               usedInDiagram steps out name) $
@@ -60,21 +62,21 @@ stringImpl obj impl t = do
       let sw = toFinList (us ++ is)
       stringImpl'
         (ts :<
-        `(Control.Category.Cartesian.swizzle @{~impl}
+        `(Control.Category.Cartesian.swizzle @{~crt}
         {xs = ~(listImp $ length strings)} ~sw) :<
         `(Control.Category.Monoidal.applyAssoc @{~mon}
           {xs = ~(listImp $ length us), ys = ~(listImp $ length step.inputs),
            ys' = ~(listImp $ length step.outputs), zs = Prelude.Nil} ~(step.mor)))
-        mon
+        crt mon
         (map Just used ++ step.outputs)
         out steps
-    stringImpl' ts _ strings out [] = do
+    stringImpl' ts crt _ strings out [] = do
       let Just is = for out $ \n =>
                       finToInteger <$> findIndex (== Just n) strings
         | Nothing => fail "Unrecognized string name"
       let sw = toFinList is
       pure (ts :<
-        `(Control.Category.Cartesian.swizzle @{~impl}
+        `(Control.Category.Cartesian.swizzle @{~crt}
           {xs = ~(listImp $ length strings)} ~sw))
       
     composeImp : TTImp -> SnocList TTImp -> TTImp

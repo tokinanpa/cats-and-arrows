@@ -62,14 +62,16 @@ stringImpl : (obj,impl : TTImp) -> TTImp -> Elab TTImp
 stringImpl obj impl t = do
   diag <- checkDiagram =<< parseDiagram t
   cat <- genSym "cat"
+  mon <- genSym "mon"
   ts <- for diag $ \(MkMDStep l c c' r mor) => do
     pure `(
       Control.Category.Monoidal.applyAssoc
-      @{~impl}
+      @{~(IVar EmptyFC mon)}
       {xs = ~(listImp l), ys = ~(listImp c),
        ys' = ~(listImp c'), zs = ~(listImp r)}
        ~(mor))
-  pure `(let Control.Category.Monoidal.MkMonoidal @{~(IBindVar EmptyFC cat)} {} = ~impl
+  pure `(let ~(IBindVar EmptyFC mon) = ~impl
+             Control.Category.Monoidal.MkMonoidal @{~(IBindVar EmptyFC cat)} {} = ~(IVar EmptyFC mon)
          in ~(composeImp (IVar EmptyFC cat) ts))
   where
     listImp : Nat -> TTImp

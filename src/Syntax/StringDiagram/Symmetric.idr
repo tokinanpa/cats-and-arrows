@@ -26,11 +26,13 @@ stringImpl obj impl t = do
   MkSDiagram inp steps out <- parseDiagram t
   let Just inp' = the (Maybe _) $ sequence inp
     | Nothing => fail "Strings cannot be discarded"
+  sym <- genSym "sym"
   brd <- genSym "brd"
   mon <- genSym "mon"
   cat <- genSym "cat"
-  ts <- stringImpl' [<] (IVar EmptyFC mon) inp' out steps
-  pure `(let Control.Category.Braided.MkMonSymmetric @{~(IBindVar EmptyFC brd)} {} = ~impl
+  ts <- stringImpl' [<] (IVar EmptyFC sym) (IVar EmptyFC mon) inp' out steps
+  pure `(let ~(IBindVar EmptyFC sym) = ~impl
+             Control.Category.Braided.MkMonSymmetric @{~(IBindVar EmptyFC brd)} {} = ~(IVar EmptyFC sym)
              Control.Category.Braided.MkBraided @{~(IBindVar EmptyFC mon)} {} = ~(IVar EmptyFC brd)
              Control.Category.Monoidal.MkMonoidal @{~(IBindVar EmptyFC cat)} {} = ~(IVar EmptyFC mon)
         in ~(composeImp (IVar EmptyFC cat) ts))
@@ -52,9 +54,9 @@ stringImpl obj impl t = do
         Nothing => stringsToBack (xs :< 0) (r - 1) inp strings
 
 
-    stringImpl' : SnocList TTImp -> TTImp ->
+    stringImpl' : SnocList TTImp -> TTImp -> TTImp ->
                   List String -> List String -> List SDiagramStep -> Elab (SnocList TTImp)
-    stringImpl' ts mon strings out (step :: steps) = do
+    stringImpl' ts sym mon strings out (step :: steps) = do
       let Just o = the (Maybe _) $ sequence step.outputs
         | Nothing => fail "Strings cannot be discarded"
       let rest = filter (\n => not $ elem n step.inputs) strings
@@ -62,12 +64,12 @@ stringImpl obj impl t = do
         | True => fail "Cannot shadow string name"
       let perm = stringsToBack [<] (natToInteger $ length rest) step.inputs strings
       stringImpl' (ts :<
-        `(Control.Category.Braided.permute @{~impl} {xs = ~(listImp $ length strings)} ~perm) :<
+        `(Control.Category.Braided.permute @{~sym} {xs = ~(listImp $ length strings)} ~perm) :<
         `(Control.Category.Monoidal.applyAssoc @{~mon}
           {xs = ~(listImp $ length rest), ys = ~(listImp $ length step.inputs),
            ys' = ~(listImp $ length o), zs = Prelude.Nil} ~(step.mor)))
-        mon (rest ++ o) out steps
-    stringImpl' ts _ strings out [] = do
+        sym mon (rest ++ o) out steps
+    stringImpl' ts sym _ strings out [] = do
       perm <- do
         let Just is = for out $ \n =>
                       findIndex (== n) strings
@@ -75,7 +77,7 @@ stringImpl obj impl t = do
         let Just p = fromPermSeq =<< toVect (length strings) is
           | Nothing => fail "Return strings violate linearity"
         pure $ permutation $ natToInteger <$> toList p
-      pure $ ts :< `(Control.Category.Braided.permute @{~impl}
+      pure $ ts :< `(Control.Category.Braided.permute @{~sym}
                       {xs = ~(listImp $ length strings)} ~perm)
 
     composeImp : TTImp -> SnocList TTImp -> TTImp
