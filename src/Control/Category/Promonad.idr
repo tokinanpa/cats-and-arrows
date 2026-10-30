@@ -33,6 +33,7 @@ import Data.Wrap0
 ||| * `fromFunc f . fromFunc g = fromFunc (f . g)`
 public export
 interface Category cat => Promonad (0 cat : Hom Type) where
+  constructor MkPromonad
   ||| The unit transformation of the promonad.
   ||| Equivalently, the action of the unit functor on morphisms.
   fromFunc : (a -> b) -> cat a b
@@ -43,6 +44,7 @@ interface Category cat => Promonad (0 cat : Hom Type) where
 ||| See `Promonad` for required laws.
 public export
 interface Category cat => Promonad0 (0 cat : Hom Type0) where
+  constructor MkPromonad0
   ||| The unit transformation of the promonad.
   ||| Equivalently, the action of the unit functor on morphisms.
   fromFuncW : (a -> b) -> cat (W0 a) (W0 b)

@@ -70,9 +70,9 @@ stringImpl obj impl t = do
       {xs = ~(listImp l), ys = ~(listImp c),
        ys' = ~(listImp c'), zs = ~(listImp r)}
        ~(mor))
-  pure `(let ~(IBindVar EmptyFC mon) = ~impl
-             Control.Category.Monoidal.MkMonoidal @{~(IBindVar EmptyFC cat)} {} = ~(IVar EmptyFC mon)
-         in ~(composeImp (IVar EmptyFC cat) ts))
+  pure $ ILet EmptyFC EmptyFC MW mon (Implicit EmptyFC True) impl
+    `(let Control.Category.Monoidal.MkMonoidal @{~(IBindVar EmptyFC cat)} {} = ~(IVar EmptyFC mon)
+      in ~(composeImp (IVar EmptyFC cat) ts))
   where
     listImp : Nat -> TTImp
     listImp Z = `(Prelude.Nil)

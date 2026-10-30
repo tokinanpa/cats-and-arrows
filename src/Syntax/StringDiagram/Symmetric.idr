@@ -31,11 +31,11 @@ stringImpl obj impl t = do
   mon <- genSym "mon"
   cat <- genSym "cat"
   ts <- stringImpl' [<] (IVar EmptyFC sym) (IVar EmptyFC mon) inp' out steps
-  pure `(let ~(IBindVar EmptyFC sym) = ~impl
-             Control.Category.Braided.MkMonSymmetric @{~(IBindVar EmptyFC brd)} {} = ~(IVar EmptyFC sym)
-             Control.Category.Braided.MkBraided @{~(IBindVar EmptyFC mon)} {} = ~(IVar EmptyFC brd)
-             Control.Category.Monoidal.MkMonoidal @{~(IBindVar EmptyFC cat)} {} = ~(IVar EmptyFC mon)
-        in ~(composeImp (IVar EmptyFC cat) ts))
+  pure $ ILet EmptyFC EmptyFC MW sym (Implicit EmptyFC True) impl
+    `(let Control.Category.Braided.MkMonSymmetric @{~(IBindVar EmptyFC brd)} {} = ~(IVar EmptyFC sym)
+          Control.Category.Braided.MkBraided @{~(IBindVar EmptyFC mon)} {} = ~(IVar EmptyFC brd)
+          Control.Category.Monoidal.MkMonoidal @{~(IBindVar EmptyFC cat)} {} = ~(IVar EmptyFC mon)
+      in ~(composeImp (IVar EmptyFC cat) ts))
   where
     listImp : Nat -> TTImp
     listImp Z = `(Prelude.Nil)

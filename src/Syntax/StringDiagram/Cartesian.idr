@@ -34,10 +34,10 @@ stringImpl obj impl t = do
   mon <- genSym "mon"
   cat <- genSym "cat"
   ts <- stringImpl' [<] (IVar EmptyFC crt) (IVar EmptyFC mon) inp out steps
-  pure `(let ~(IBindVar EmptyFC crt) = ~impl
-             Control.Category.Cartesian.MkCartesian @{~(IBindVar EmptyFC mon)} {} = ~(IVar EmptyFC crt)
-             Control.Category.Monoidal.MkMonoidal @{~(IBindVar EmptyFC cat)} {} = ~(IVar EmptyFC mon)
-        in ~(composeImp (IVar EmptyFC cat) ts))
+  pure $ ILet EmptyFC EmptyFC MW crt (Implicit EmptyFC True) impl
+    `(let Control.Category.Cartesian.MkCartesian @{~(IBindVar EmptyFC mon)} {} = ~(IVar EmptyFC crt)
+          Control.Category.Monoidal.MkMonoidal @{~(IBindVar EmptyFC cat)} {} = ~(IVar EmptyFC mon)
+      in ~(composeImp (IVar EmptyFC cat) ts))
   where
     listImp : Nat -> TTImp
     listImp Z = `(Prelude.Nil)
